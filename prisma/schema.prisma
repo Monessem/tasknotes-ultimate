@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Todo {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @default("")
+  priority    String   @default("medium")
+  completed   Boolean  @default(false)
+  flagged     Boolean  @default(false)
+  important   Boolean  @default(false)
+  recurring   String?
+  dueDate     String?
+  folderId    String?
+  tags        String   @default("[]")
+  subtasks    String   @default("[]")
+  completedAt String?
+  deletedAt   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  folder Folder? @relation(fields: [folderId], references: [id])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @default("")
+  color     String   @default("#6366f1")
+  isPinned  Boolean  @default(false)
+  flagged   Boolean  @default(false)
+  folderId  String?
+  checklist String   @default("[]")
+  deletedAt String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  folder Folder? @relation(fields: [folderId], references: [id])
+}
+
+model Habit {
+  id           String   @id @default(cuid())
+  name         String
+  icon         String   @default("🎯")
+  color        String   @default("#6366f1")
+  frequency    String   @default("daily")
+  reminderTime String?
+  goal         Int      @default(30)
+  notes        String   @default("")
+  deletedAt    String?
+  createdAt    DateTime @default(now())
+
+  logs HabitLog[]
+}
+
+model HabitLog {
+  id        String  @id @default(cuid())
+  habitId   String
+  date      String
+  completed Boolean @default(true)
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+}
+
+model Folder {
+  id    String @id @default(cuid())
+  name  String
+  color String @default("#6366f1")
+  icon  String @default("📁")
+
+  todos Todo[]
+  notes Note[]
+}
+
+model PomodoroSession {
+  id       String @id @default(cuid())
+  date     String
+  duration Int    @default(25)
+  type     String @default("work")
+}
+
+model HistoryEntry {
+  id        String   @id @default(cuid())
+  action    String
+  itemType  String
+  itemId    String
+  itemTitle String
+  createdAt DateTime @default(now())
+}
+
+model Settings {
+  id                 String @id @default("app-settings")
+  weatherEnabled     Boolean @default(true)
+  weatherCity        String @default("cairo")
+  pomodoroWork       Int @default(25)
+  pomodoroShortBreak Int @default(5)
+  pomodoroLongBreak  Int @default(15)
+  taskReminders      Boolean @default(true)
+  soundEnabled       Boolean @default(true)
+  darkMode           Boolean @default(false)
+  language           String @default("en")
+  autoSync           Boolean @default(false)
+  gitHubToken        String @default("")
+  gistId             String @default("")
+}
