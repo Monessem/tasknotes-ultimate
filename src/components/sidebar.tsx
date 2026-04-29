@@ -27,6 +27,8 @@ import {
   Timer,
   ClipboardList,
   Trophy,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAppStore, type ViewType } from "@/store/app-store"
@@ -168,167 +170,6 @@ function WeatherWidget() {
   )
 }
 
-function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
-  const { currentView, setCurrentView, todos, habits, habitLogs, pomodoroSessions, settings } = useAppStore()
-  const lang = settings.language
-
-  // Calculate counts
-  const activeTodos = todos.filter((t) => !t.completed && !t.deletedAt)
-  const importantCount = activeTodos.filter((t) => t.important).length
-  const todayStr = new Date().toISOString().split("T")[0]
-  const todayCount = activeTodos.filter((t) => t.dueDate === todayStr).length
-  const flaggedCount = activeTodos.filter((t) => t.flagged).length
-  const historyCount = 0 // Will be computed from history entries
-
-  const counts: Record<string, number> = {
-    todos: activeTodos.length,
-    important: importantCount,
-    today: todayCount,
-    flagged: flaggedCount,
-    history: historyCount,
-  }
-
-  // Quick stats
-  const completedTodos = todos.filter((t) => t.completed && !t.deletedAt).length
-  const todaySessions = pomodoroSessions.filter((s) => s.date === todayStr && s.type === "work").length
-  const focusMinutes = pomodoroSessions
-    .filter((s) => s.date === todayStr && s.type === "work")
-    .reduce((acc, s) => acc + s.duration, 0)
-
-  // Calculate streak
-  const streakDays = calculateStreak(habitLogs)
-
-  function handleNav(view: ViewType) {
-    setCurrentView(view)
-    onNavigate?.()
-  }
-
-  return (
-    <div className="flex h-full flex-col">
-      {/* Logo */}
-      <div className="p-5">
-        <div className="flex items-center gap-3">
-          <div className="relative flex size-12 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/30">
-            <ClipboardList className="size-6 text-white" />
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/25 via-transparent to-transparent" />
-          </div>
-          <div>
-            <h1 className="text-lg font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent dark:from-emerald-400 dark:to-teal-400">
-              TaskNotes
-            </h1>
-            <p className="text-[10px] font-medium tracking-wide text-muted-foreground">
-              {t("appSubtitle", lang)}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Weather */}
-      <WeatherWidget />
-
-      {/* Navigation */}
-      <ScrollArea className="flex-1 px-3">
-        <div className="space-y-4 pb-4">
-          {navSections.map((section) => (
-            <div key={section.titleKey}>
-              <div className="mb-2 border-b border-border/50 px-3 pb-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  {t(section.titleKey, lang)}
-                </span>
-              </div>
-              <div className="space-y-0.5">
-                {section.items.map((item) => {
-                  const isActive = currentView === item.id
-                  const Icon = item.icon
-                  const count = counts[item.id]
-
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => handleNav(item.id)}
-                      className={cn(
-                        "group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-150",
-                        isActive
-                          ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25"
-                          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-                      )}
-                    >
-                      <div
-                        className={cn(
-                          "flex size-7 items-center justify-center rounded-lg transition-colors",
-                          isActive
-                            ? "bg-white/20"
-                            : "group-hover:bg-emerald-500/10"
-                        )}
-                      >
-                        <Icon className="size-4" />
-                      </div>
-                      <span className="flex-1 text-left">{t(item.labelKey, lang)}</span>
-                      {count !== undefined && count > 0 && (
-                        <span
-                          className={cn(
-                            "min-w-[24px] rounded-full px-2 py-0.5 text-center text-[10px] font-bold",
-                            isActive
-                              ? "bg-white/25 text-white"
-                              : "bg-muted text-muted-foreground"
-                          )}
-                        >
-                          {count}
-                        </span>
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      </ScrollArea>
-
-      {/* Quick Stats Footer */}
-      <div className="border-t border-border/50 p-4">
-        <div className="flex items-center justify-around text-center">
-          <div className="flex flex-col gap-0.5">
-            <div className="flex items-center justify-center gap-1">
-              <CheckCircle2 className="size-3.5 text-emerald-500" />
-              <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                {completedTodos}
-              </span>
-            </div>
-            <span className="text-[10px] text-muted-foreground">
-              {t("completed", lang)}
-            </span>
-          </div>
-          <Separator orientation="vertical" className="h-8" />
-          <div className="flex flex-col gap-0.5">
-            <div className="flex items-center justify-center gap-1">
-              <Flame className="size-3.5 text-amber-500" />
-              <span className="text-lg font-bold text-amber-600 dark:text-amber-400">
-                {streakDays}
-              </span>
-            </div>
-            <span className="text-[10px] text-muted-foreground">
-              {t("consecutiveDays", lang)}
-            </span>
-          </div>
-          <Separator orientation="vertical" className="h-8" />
-          <div className="flex flex-col gap-0.5">
-            <div className="flex items-center justify-center gap-1">
-              <Timer className="size-3.5 text-teal-500" />
-              <span className="text-lg font-bold text-teal-600 dark:text-teal-400">
-                {todaySessions}
-              </span>
-            </div>
-            <span className="text-[10px] text-muted-foreground">
-              {t("pomodoro", lang)}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function calculateStreak(habitLogs: { date: string; completed: boolean }[]): number {
   if (habitLogs.length === 0) return 0
 
@@ -352,17 +193,207 @@ function calculateStreak(habitLogs: { date: string; completed: boolean }[]): num
   return streak
 }
 
+function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; collapsed?: boolean }) {
+  const { currentView, setCurrentView, todos, habits, habitLogs, pomodoroSessions, settings } = useAppStore()
+  const lang = settings.language
+
+  // Calculate counts
+  const activeTodos = todos.filter((t) => !t.completed && !t.deletedAt)
+  const importantCount = activeTodos.filter((t) => t.important).length
+  const todayStr = new Date().toISOString().split("T")[0]
+  const todayCount = activeTodos.filter((t) => t.dueDate === todayStr).length
+  const flaggedCount = activeTodos.filter((t) => t.flagged).length
+  const historyCount = 0
+
+  const counts: Record<string, number> = {
+    todos: activeTodos.length,
+    important: importantCount,
+    today: todayCount,
+    flagged: flaggedCount,
+    history: historyCount,
+  }
+
+  // Quick stats
+  const completedTodos = todos.filter((t) => t.completed && !t.deletedAt).length
+  const todaySessions = pomodoroSessions.filter((s) => s.date === todayStr && s.type === "work").length
+
+  // Calculate streak
+  const streakDays = calculateStreak(habitLogs)
+
+  function handleNav(view: ViewType) {
+    setCurrentView(view)
+    onNavigate?.()
+  }
+
+  return (
+    <div className="flex h-full flex-col">
+      {/* Logo */}
+      <div className={cn("p-5", collapsed && "p-3 flex justify-center")}>
+        <div className={cn("flex items-center gap-3", collapsed && "justify-center gap-0")}>
+          <div className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/30">
+            <ClipboardList className="size-6 text-white" />
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/25 via-transparent to-transparent" />
+          </div>
+          {!collapsed && (
+            <div>
+              <h1 className="text-lg font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent dark:from-emerald-400 dark:to-teal-400">
+                TaskNotes
+              </h1>
+              <p className="text-[10px] font-medium tracking-wide text-muted-foreground">
+                {t("appSubtitle", lang)}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Weather - hidden when collapsed */}
+      {!collapsed && <WeatherWidget />}
+
+      {/* Navigation */}
+      <ScrollArea className="flex-1 px-3">
+        <div className={cn("space-y-4 pb-4", collapsed && "space-y-2")}>
+          {navSections.map((section) => (
+            <div key={section.titleKey}>
+              {/* Section headers hidden when collapsed */}
+              {!collapsed && (
+                <div className="mb-2 border-b border-border/50 px-3 pb-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    {t(section.titleKey, lang)}
+                  </span>
+                </div>
+              )}
+              <div className="space-y-0.5">
+                {section.items.map((item) => {
+                  const isActive = currentView === item.id
+                  const Icon = item.icon
+                  const count = counts[item.id]
+
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleNav(item.id)}
+                      title={collapsed ? t(item.labelKey, lang) : undefined}
+                      className={cn(
+                        "group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-150",
+                        collapsed && "justify-center px-0 py-2.5",
+                        isActive
+                          ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25"
+                          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "flex size-7 items-center justify-center rounded-lg transition-colors",
+                          isActive
+                            ? "bg-white/20"
+                            : "group-hover:bg-emerald-500/10"
+                        )}
+                      >
+                        <Icon className="size-4" />
+                      </div>
+                      {!collapsed && (
+                        <>
+                          <span className="flex-1 text-left">{t(item.labelKey, lang)}</span>
+                          {count !== undefined && count > 0 && (
+                            <span
+                              className={cn(
+                                "min-w-[24px] rounded-full px-2 py-0.5 text-center text-[10px] font-bold",
+                                isActive
+                                  ? "bg-white/25 text-white"
+                                  : "bg-muted text-muted-foreground"
+                              )}
+                            >
+                              {count}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </ScrollArea>
+
+      {/* Quick Stats Footer - hidden when collapsed */}
+      {!collapsed && (
+        <div className="border-t border-border/50 p-4">
+          <div className="flex items-center justify-around text-center">
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center justify-center gap-1">
+                <CheckCircle2 className="size-3.5 text-emerald-500" />
+                <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                  {completedTodos}
+                </span>
+              </div>
+              <span className="text-[10px] text-muted-foreground">
+                {t("completed", lang)}
+              </span>
+            </div>
+            <Separator orientation="vertical" className="h-8" />
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center justify-center gap-1">
+                <Flame className="size-3.5 text-amber-500" />
+                <span className="text-lg font-bold text-amber-600 dark:text-amber-400">
+                  {streakDays}
+                </span>
+              </div>
+              <span className="text-[10px] text-muted-foreground">
+                {t("consecutiveDays", lang)}
+              </span>
+            </div>
+            <Separator orientation="vertical" className="h-8" />
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center justify-center gap-1">
+                <Timer className="size-3.5 text-teal-500" />
+                <span className="text-lg font-bold text-teal-600 dark:text-teal-400">
+                  {todaySessions}
+                </span>
+              </div>
+              <span className="text-[10px] text-muted-foreground">
+                {t("pomodoro", lang)}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function AppSidebar() {
-  const { sidebarOpen, setSidebarOpen } = useAppStore()
+  const { sidebarOpen, setSidebarOpen, sidebarCollapsed, toggleSidebarCollapsed } = useAppStore()
 
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex lg:w-[300px] lg:shrink-0 lg:flex-col border-r border-border/50 bg-card/80 backdrop-blur-xl">
-        <SidebarContent />
+      <aside
+        className={cn(
+          "hidden lg:flex lg:shrink-0 lg:flex-col border-r border-border/50 bg-card/80 backdrop-blur-xl transition-all duration-300 ease-in-out",
+          sidebarCollapsed ? "lg:w-[60px]" : "lg:w-[300px]"
+        )}
+      >
+        <SidebarContent collapsed={sidebarCollapsed} />
+        {/* Collapse/Expand toggle button */}
+        <div className="border-t border-border/50 p-2">
+          <button
+            onClick={toggleSidebarCollapsed}
+            className="flex w-full items-center justify-center rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {sidebarCollapsed ? (
+              <ChevronRight className="size-4" />
+            ) : (
+              <ChevronLeft className="size-4" />
+            )}
+          </button>
+        </div>
       </aside>
 
-      {/* Mobile sidebar as Sheet */}
+      {/* Mobile sidebar as Sheet - always expanded */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetContent side="left" className="w-[300px] p-0">
           <SheetHeader className="sr-only">

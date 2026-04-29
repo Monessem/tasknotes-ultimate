@@ -43,6 +43,9 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* ============================================
+   EMERALD THEME (Default)
+   ============================================ */
 :root {
   --radius: 0.625rem;
   --background: oklch(0.985 0.002 155);
@@ -76,6 +79,14 @@
   --sidebar-accent-foreground: oklch(0.24 0.03 155);
   --sidebar-border: oklch(0.922 0.008 155);
   --sidebar-ring: oklch(0.508 0.118 165);
+  /* Theme-specific accent colors for hardcoded class overrides */
+  --theme-primary-from: #10b981;
+  --theme-primary-to: #0d9488;
+  --theme-primary-hover-from: #059669;
+  --theme-primary-hover-to: #0f766e;
+  --theme-primary-shadow: rgba(16, 185, 129, 0.25);
+  --theme-primary-text: #059669;
+  --theme-ring-color: #10b981;
 }
 
 .dark {
@@ -110,8 +121,96 @@
   --sidebar-accent-foreground: oklch(0.965 0.005 155);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.608 0.118 165);
+  --theme-primary-from: #10b981;
+  --theme-primary-to: #0d9488;
+  --theme-primary-hover-from: #059669;
+  --theme-primary-hover-to: #0f766e;
+  --theme-primary-shadow: rgba(16, 185, 129, 0.25);
+  --theme-primary-text: #34d399;
+  --theme-ring-color: #10b981;
 }
 
+/* ============================================
+   OCEAN THEME (Blue/Cyan)
+   ============================================ */
+[data-theme="ocean"] {
+  --primary: oklch(0.546 0.145 245);
+  --primary-foreground: oklch(0.985 0.001 245);
+  --ring: oklch(0.546 0.145 245);
+  --chart-1: oklch(0.546 0.145 245);
+  --chart-2: oklch(0.623 0.145 220);
+  --chart-3: oklch(0.541 0.12 280);
+  --sidebar-primary: oklch(0.546 0.145 245);
+  --sidebar-primary-foreground: oklch(0.985 0.001 245);
+  --sidebar-ring: oklch(0.546 0.145 245);
+  --theme-primary-from: #3b82f6;
+  --theme-primary-to: #0891b2;
+  --theme-primary-hover-from: #2563eb;
+  --theme-primary-hover-to: #0e7490;
+  --theme-primary-shadow: rgba(59, 130, 246, 0.25);
+  --theme-primary-text: #2563eb;
+  --theme-ring-color: #3b82f6;
+}
+
+[data-theme="ocean"].dark {
+  --primary: oklch(0.623 0.145 245);
+  --primary-foreground: oklch(0.145 0.015 245);
+  --ring: oklch(0.623 0.145 245);
+  --chart-1: oklch(0.623 0.145 245);
+  --chart-2: oklch(0.696 0.145 220);
+  --sidebar-primary: oklch(0.623 0.145 245);
+  --sidebar-ring: oklch(0.623 0.145 245);
+  --theme-primary-from: #3b82f6;
+  --theme-primary-to: #0891b2;
+  --theme-primary-hover-from: #2563eb;
+  --theme-primary-hover-to: #0e7490;
+  --theme-primary-shadow: rgba(59, 130, 246, 0.25);
+  --theme-primary-text: #60a5fa;
+  --theme-ring-color: #3b82f6;
+}
+
+/* ============================================
+   SUNSET THEME (Orange/Rose)
+   ============================================ */
+[data-theme="sunset"] {
+  --primary: oklch(0.637 0.17 40);
+  --primary-foreground: oklch(0.985 0.001 40);
+  --ring: oklch(0.637 0.17 40);
+  --chart-1: oklch(0.637 0.17 40);
+  --chart-2: oklch(0.652 0.2 25);
+  --chart-3: oklch(0.541 0.12 15);
+  --sidebar-primary: oklch(0.637 0.17 40);
+  --sidebar-primary-foreground: oklch(0.985 0.001 40);
+  --sidebar-ring: oklch(0.637 0.17 40);
+  --theme-primary-from: #f97316;
+  --theme-primary-to: #e11d48;
+  --theme-primary-hover-from: #ea580c;
+  --theme-primary-hover-to: #be123c;
+  --theme-primary-shadow: rgba(249, 115, 22, 0.25);
+  --theme-primary-text: #ea580c;
+  --theme-ring-color: #f97316;
+}
+
+[data-theme="sunset"].dark {
+  --primary: oklch(0.705 0.17 40);
+  --primary-foreground: oklch(0.145 0.015 40);
+  --ring: oklch(0.705 0.17 40);
+  --chart-1: oklch(0.705 0.17 40);
+  --chart-2: oklch(0.72 0.2 25);
+  --sidebar-primary: oklch(0.705 0.17 40);
+  --sidebar-ring: oklch(0.705 0.17 40);
+  --theme-primary-from: #f97316;
+  --theme-primary-to: #e11d48;
+  --theme-primary-hover-from: #ea580c;
+  --theme-primary-hover-to: #be123c;
+  --theme-primary-shadow: rgba(249, 115, 22, 0.25);
+  --theme-primary-text: #fb923c;
+  --theme-ring-color: #f97316;
+}
+
+/* ============================================
+   BASE LAYER
+   ============================================ */
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -121,7 +220,9 @@
   }
 }
 
-/* Custom scrollbar */
+/* ============================================
+   CUSTOM SCROLLBAR
+   ============================================ */
 @layer base {
   ::-webkit-scrollbar {
     width: 6px;
@@ -143,4 +244,121 @@
   .dark ::-webkit-scrollbar-thumb:hover {
     background: oklch(0.45 0.03 155);
   }
+}
+
+/* ============================================
+   MICRO-ANIMATIONS & UTILITIES
+   ============================================ */
+
+/* Pulse glow for active items */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--theme-primary-shadow); }
+  50% { box-shadow: 0 0 12px 2px var(--theme-primary-shadow); }
+}
+
+/* Subtle float animation */
+@keyframes subtle-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+/* Shimmer effect for loading states */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Fade in from bottom */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scale in */
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Spin slow for loading spinners */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Shake for errors */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-subtle-float {
+  animation: subtle-float 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent 0%, oklch(0.9 0.01 155) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Glass effect utility */
+.glass {
+  background: oklch(1 0 0 / 5%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dark .glass {
+  background: oklch(1 0 0 / 5%);
+}
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, var(--theme-primary-from), var(--theme-primary-to));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Theme-aware gradient backgrounds */
+.theme-gradient-bg {
+  background: linear-gradient(135deg, oklch(0.95 0.03 165), oklch(0.95 0.03 180));
+}
+
+.dark .theme-gradient-bg {
+  background: linear-gradient(135deg, oklch(0.18 0.02 165), oklch(0.18 0.02 180));
+}
+
+[data-theme="ocean"] .theme-gradient-bg {
+  background: linear-gradient(135deg, oklch(0.95 0.03 245), oklch(0.95 0.03 220));
+}
+
+[data-theme="ocean"].dark .theme-gradient-bg {
+  background: linear-gradient(135deg, oklch(0.18 0.02 245), oklch(0.18 0.02 220));
+}
+
+[data-theme="sunset"] .theme-gradient-bg {
+  background: linear-gradient(135deg, oklch(0.95 0.03 40), oklch(0.95 0.03 25));
+}
+
+[data-theme="sunset"].dark .theme-gradient-bg {
+  background: linear-gradient(135deg, oklch(0.18 0.02 40), oklch(0.18 0.02 25));
 }

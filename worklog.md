@@ -632,3 +632,53 @@ Stage Summary:
 4. **RTL testing and fixes** for Arabic layout
 5. **Push notifications** using browser Notification API
 6. **Export to PDF** for reports and summaries
+
+Task ID: 2-3
+Agent: full-stack-developer
+Task: Add collapsible sidebar AND drag-and-drop task reordering
+
+Work Log:
+- **Part 1: Collapsible Sidebar**
+  - Updated `/src/store/app-store.ts`: Added `sidebarCollapsed: boolean` (default: false) and `toggleSidebarCollapsed: () => void` to AppState interface and Zustand implementation
+  - Updated `/src/components/sidebar.tsx`:
+    - Added `collapsed` prop to `SidebarContent` component
+    - When collapsed (60px): logo shrinks to just the icon (green ClipboardList box), no text/subtitle
+    - Navigation items show only icons centered, with `title` attribute for native tooltip on hover
+    - Section headers hidden when collapsed
+    - Count badges hidden when collapsed
+    - WeatherWidget hidden when collapsed
+    - Quick stats footer hidden when collapsed
+    - Added collapse/expand toggle button at bottom with ChevronLeft/ChevronRight icons
+    - Desktop aside uses `transition-all duration-300 ease-in-out` for smooth width change
+    - Width switches between `lg:w-[300px]` (expanded) and `lg:w-[60px]` (collapsed)
+    - Mobile sheet sidebar always shows full content (not affected by collapse)
+  - AppShell required no changes - sidebar manages its own width, main content uses `flex-1`
+
+- **Part 2: Drag-and-Drop Task Reordering**
+  - Updated `/src/components/views/todos-view.tsx` with dnd-kit integration:
+    - Added localStorage-based sortOrder: `todo-order` key → `{ [todoId]: number }` mapping
+    - `getTodoOrder()` and `saveTodoOrder()` helper functions for localStorage read/write
+    - Sort logic updated: for incomplete tasks, sortOrder from localStorage takes priority over sortBy criteria
+    - Created `SortableTodoItem` component using `useSortable` hook from `@dnd-kit/sortable`
+      - Uses `CSS.Transform.toString(transform)` for drag transform
+      - Uses `transition` property for smooth animation
+      - `isDragging` flag applies elevated shadow + opacity + ring styles
+      - GripVertical drag handle on left side (appears on hover like other action buttons)
+      - Handle uses `setActivatorNodeRef` + listeners for proper drag initiation
+    - Incomplete tasks in LIST view wrapped with `DndContext` + `SortableContext` with `verticalListSortingStrategy`
+    - PointerSensor with 8px distance activation constraint to avoid accidental drags
+    - KeyboardSensor with `sortableKeyboardCoordinates` for accessibility
+    - `onDragEnd` handler: computes new order with `arrayMove`, saves to localStorage, updates state
+    - DnD only applies to LIST view (grid view unaffected) and only to INCOMPLETE tasks (completed tasks are non-sortable)
+    - All existing functionality preserved: checkbox toggle, search filtering, flag/delete actions, grid view, empty state
+
+- ESLint passes with no issues
+- Dev server compiling successfully
+
+Stage Summary:
+- 3 existing files updated: app-store.ts, sidebar.tsx, todos-view.tsx
+- Collapsible sidebar with smooth 300ms transition, icon-only mode at 60px, mobile unaffected
+- Drag-and-drop reordering for incomplete tasks in list view using @dnd-kit/core + @dnd-kit/sortable
+- localStorage-based sort order persistence (client-side only, no DB changes)
+- Visual feedback: elevated shadow, opacity change, emerald ring on dragged item
+- GripVertical handle appears on hover for natural UX

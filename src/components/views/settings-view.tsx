@@ -388,22 +388,45 @@ export function SettingsView() {
                 {lang === "ar" ? "نظام الألوان" : "Color Theme"}
               </Label>
             </div>
-            <Select
-              value={settings.colorTheme}
-              onValueChange={(value) => updateSettings({ colorTheme: value })}
-            >
-              <SelectTrigger className="w-[160px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="emerald">
-                  <span className="flex items-center gap-2">
-                    <span className="size-2 rounded-full bg-emerald-500" />
-                    Emerald
-                  </span>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Color Theme Visual Picker */}
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { value: "emerald", label: "Emerald", from: "#10b981", to: "#0d9488", shadow: "rgba(16,185,129,0.3)" },
+                { value: "ocean", label: "Ocean", from: "#3b82f6", to: "#0891b2", shadow: "rgba(59,130,246,0.3)" },
+                { value: "sunset", label: "Sunset", from: "#f97316", to: "#e11d48", shadow: "rgba(249,115,22,0.3)" },
+              ].map((theme) => (
+                <button
+                  key={theme.value}
+                  type="button"
+                  onClick={() => updateSettings({ colorTheme: theme.value })}
+                  className={cn(
+                    "group relative flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all hover:-translate-y-0.5 hover:shadow-md",
+                    settings.colorTheme === theme.value
+                      ? "border-foreground/30 shadow-md"
+                      : "border-border/30 hover:border-foreground/15"
+                  )}
+                >
+                  {/* Gradient preview circle */}
+                  <div
+                    className="size-10 rounded-full transition-transform group-hover:scale-110"
+                    style={{
+                      background: `linear-gradient(135deg, ${theme.from}, ${theme.to})`,
+                      boxShadow: settings.colorTheme === theme.value ? `0 4px 12px ${theme.shadow}` : "none",
+                    }}
+                  />
+                  <span className="text-xs font-semibold text-foreground">{theme.label}</span>
+                  {/* Active indicator */}
+                  {settings.colorTheme === theme.value && (
+                    <div
+                      className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-white text-white shadow-sm dark:bg-card"
+                      style={{ background: `linear-gradient(135deg, ${theme.from}, ${theme.to})` }}
+                    >
+                      <CheckCircle2 className="size-3" />
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>

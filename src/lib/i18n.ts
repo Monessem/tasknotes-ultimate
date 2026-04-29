@@ -150,6 +150,8 @@ const translations: Record<Language, Record<string, string>> = {
     soundEnabled: "Sound",
     colorTheme: "Color Theme",
     emerald: "Emerald",
+    ocean: "Ocean",
+    sunset: "Sunset",
 
     // Messages
     saved: "Saved",
@@ -383,6 +385,8 @@ const translations: Record<Language, Record<string, string>> = {
     soundEnabled: "الصوت",
     colorTheme: "نظام الألوان",
     emerald: "زمردي",
+    ocean: "محيطي",
+    sunset: "غروبي",
 
     // Messages
     saved: "تم الحفظ",

@@ -4,6 +4,7 @@ import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
 import { ThemeProvider } from "@/components/theme-provider"
 import { PWARegister } from "@/components/pwa-register"
+import { ColorThemeSync } from "@/components/color-theme-sync"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -72,6 +73,7 @@ export default function RootLayout({
           {children}
           <Toaster />
           <PWARegister />
+          <ColorThemeSync />
         </ThemeProvider>
       </body>
     </html>

@@ -1,6 +1,23 @@
 "use client"
 
-import { useCallback, useState, useMemo } from "react"
+import { useCallback, useState, useMemo, useEffect } from "react"
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core"
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 import {
   CheckSquare,
   Plus,
@@ -13,6 +30,8 @@ import {
   X,
   LayoutList,
   LayoutGrid,
+  GripVertical,
+  Copy,
 } from "lucide-react"
 import { useAppStore } from "@/store/app-store"
 import { t } from "@/lib/i18n"
@@ -36,6 +55,203 @@ type PriorityFilter = "all" | "high" | "medium" | "low"
 type SortBy = "dateCreated" | "dueDate" | "priority" | "name"
 type ViewMode = "list" | "grid"
 
+// localStorage helper for todo order
+const TODO_ORDER_KEY = "todo-order"
+
+function getTodoOrder(): Record<string, number> {
+  if (typeof window === "undefined") return {}
+  try {
+    const stored = localStorage.getItem(TODO_ORDER_KEY)
+    return stored ? JSON.parse(stored) : {}
+  } catch {
+    return {}
+  }
+}
+
+function saveTodoOrder(order: Record<string, number>) {
+  try {
+    localStorage.setItem(TODO_ORDER_KEY, JSON.stringify(order))
+  } catch {
+    // Silently fail
+  }
+}
+
+// Sortable Todo Item component for list view
+function SortableTodoItem({
+  todo,
+  onToggleComplete,
+  onEdit,
+  onFlagToggle,
+  onDelete,
+  lang,
+  priorityColors,
+  priorityBorderColors,
+  formatDate,
+  getSubtaskProgress,
+}: {
+  todo: {
+    id: string
+    title: string
+    description: string
+    priority: "high" | "medium" | "low"
+    completed: boolean
+    flagged: boolean
+    important: boolean
+    dueDate: string | null
+    tags: string[]
+    subtasks: { id: string; title: string; completed: boolean }[]
+  }
+  onToggleComplete: (id: string, completed: boolean) => void
+  onEdit: (todo: typeof todo) => void
+  onFlagToggle: (id: string, flagged: boolean, title: string) => void
+  onDelete: (id: string, title: string) => void
+  lang: string
+  priorityColors: Record<string, string>
+  priorityBorderColors: Record<string, string>
+  formatDate: (dateStr: string | null) => string | null
+  getSubtaskProgress: (subtasks: { id: string; title: string; completed: boolean }[]) => { completed: number; total: number; percent: number } | null
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: todo.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
+  const subtaskProgress = getSubtaskProgress(todo.subtasks)
+
+  return (
+    <Card
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "group relative cursor-pointer rounded-xl border border-border/30 bg-card/80 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg",
+        priorityBorderColors[todo.priority],
+        isDragging && "z-50 shadow-xl opacity-80 ring-2 ring-emerald-400/30"
+      )}
+      onClick={() => onEdit(todo)}
+    >
+      <CardContent className="flex items-center gap-3 p-3">
+        {/* Drag handle */}
+        <button
+          ref={setActivatorNodeRef}
+          {...attributes}
+          {...listeners}
+          onClick={(e) => e.stopPropagation()}
+          className="shrink-0 cursor-grab rounded p-0.5 text-muted-foreground/0 transition-colors hover:text-muted-foreground/60 active:cursor-grabbing group-hover:text-muted-foreground/40"
+        >
+          <GripVertical className="size-4" />
+        </button>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onToggleComplete(todo.id, todo.completed)
+          }}
+          className="shrink-0"
+        >
+          <Circle
+            className={cn(
+              "size-5 transition-colors hover:text-emerald-500",
+              todo.priority === "high" && "text-rose-400",
+              todo.priority === "medium" && "text-amber-400",
+              todo.priority === "low" && "text-emerald-400"
+            )}
+          />
+        </button>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="truncate text-sm font-medium text-foreground">
+              {todo.title}
+            </span>
+            {todo.important && (
+              <Star className="size-3.5 shrink-0 text-amber-500" />
+            )}
+            {todo.flagged && (
+              <Flag className="size-3.5 shrink-0 text-rose-500" />
+            )}
+          </div>
+          {/* Description preview */}
+          {todo.description && (
+            <p className="mt-0.5 truncate text-xs text-muted-foreground/70">
+              {todo.description.length > 100
+                ? todo.description.slice(0, 100) + "..."
+                : todo.description}
+            </p>
+          )}
+          {/* Subtask progress bar */}
+          {subtaskProgress && (
+            <div className="mt-1.5 flex items-center gap-2">
+              <Progress
+                value={subtaskProgress.percent}
+                className="h-1.5 flex-1 bg-emerald-100 dark:bg-emerald-900/30 [&>[data-slot=progress-indicator]]:bg-emerald-500"
+              />
+              <span className="shrink-0 text-[10px] tabular-nums text-muted-foreground">
+                {subtaskProgress.completed}/{subtaskProgress.total}
+              </span>
+            </div>
+          )}
+          <div className="mt-0.5 flex items-center gap-2">
+            <div
+              className={cn(
+                "size-1.5 rounded-full",
+                priorityColors[todo.priority]
+              )}
+            />
+            <span className="text-[10px] capitalize text-muted-foreground">
+              {t(todo.priority, lang as "en" | "ar")}
+            </span>
+            {todo.dueDate && (
+              <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                <Calendar className="size-2.5" />
+                {formatDate(todo.dueDate)}
+              </span>
+            )}
+            {todo.tags.length > 0 && (
+              <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                <Tag className="size-2.5" />
+                {todo.tags.slice(0, 2).join(", ")}
+              </span>
+            )}
+          </div>
+        </div>
+        {/* Hover actions */}
+        <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onFlagToggle(todo.id, todo.flagged, todo.title)
+            }}
+            className={cn(
+              "rounded-md p-1 transition-colors hover:bg-muted",
+              todo.flagged ? "text-rose-500" : "text-muted-foreground/40 hover:text-rose-500"
+            )}
+          >
+            <Flag className="size-3.5" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onDelete(todo.id, todo.title)
+            }}
+            className="rounded-md p-1 text-muted-foreground/40 transition-colors hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-950/30"
+          >
+            <X className="size-3.5" />
+          </button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 export function TodosView() {
   const { todos, setEditingItem, setActiveModal, fetchTodos } = useAppStore()
   const settings = useAppStore((s) => s.settings)
@@ -45,6 +261,12 @@ export function TodosView() {
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("all")
   const [sortBy, setSortBy] = useState<SortBy>("dateCreated")
   const [viewMode, setViewMode] = useState<ViewMode>("list")
+  const [todoOrder, setTodoOrder] = useState<Record<string, number>>({})
+
+  // Load order from localStorage on mount
+  useEffect(() => {
+    setTodoOrder(getTodoOrder())
+  }, [])
 
   const priorityColors: Record<string, string> = {
     high: "bg-rose-500",
@@ -84,11 +306,22 @@ export function TodosView() {
       ? searchFiltered
       : searchFiltered.filter((todo) => todo.priority === priorityFilter)
 
-  // Sort
+  // Sort - with localStorage sortOrder for incomplete tasks
   const sortedTodos = useMemo(() => {
     return [...priorityFiltered].sort((a, b) => {
       // Incomplete first always
       if (a.completed !== b.completed) return a.completed ? 1 : -1
+
+      // For incomplete tasks, use sortOrder if available
+      if (!a.completed && !b.completed) {
+        const orderA = todoOrder[a.id]
+        const orderB = todoOrder[b.id]
+        if (orderA !== undefined && orderB !== undefined) {
+          return orderA - orderB
+        }
+        if (orderA !== undefined) return -1
+        if (orderB !== undefined) return 1
+      }
 
       switch (sortBy) {
         case "priority": {
@@ -111,7 +344,7 @@ export function TodosView() {
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       }
     })
-  }, [priorityFiltered, sortBy, lang])
+  }, [priorityFiltered, sortBy, lang, todoOrder])
 
   const toggleComplete = useCallback(
     async (todoId: string, completed: boolean) => {
@@ -181,6 +414,41 @@ export function TodosView() {
     [fetchTodos]
   )
 
+  const handleDuplicate = useCallback(
+    async (todo: typeof todos[0]) => {
+      try {
+        const res = await fetch("/api/todos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: `${todo.title} (copy)`,
+            description: todo.description,
+            priority: todo.priority,
+            folderId: todo.folderId,
+            tags: todo.tags,
+            subtasks: todo.subtasks.map((s: { id: string; title: string; completed: boolean }) => ({
+              id: crypto.randomUUID(),
+              title: s.title,
+              completed: false,
+            })),
+            important: todo.important,
+            recurring: todo.recurring,
+          }),
+        })
+        if (res.ok) {
+          audioManager.play("click")
+          const newTodo = await res.json()
+          logHistory("create", "task", newTodo.id, `${todo.title} (copy)`)
+          toast.success(t("taskCreated", lang))
+          await fetchTodos()
+        }
+      } catch {
+        // Silently fail
+      }
+    },
+    [fetchTodos, lang]
+  )
+
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return null
     const date = new Date(dateStr)
@@ -205,7 +473,46 @@ export function TodosView() {
   const incompleteTodos = sortedTodos.filter((todo) => !todo.completed)
   const completedTodos = sortedTodos.filter((todo) => todo.completed)
 
-  // Render a single list item
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
+  // Handle drag end for reordering
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event
+      if (!over || active.id === over.id) return
+
+      const activeId = String(active.id)
+      const overId = String(over.id)
+
+      const oldIndex = incompleteTodos.findIndex((t) => t.id === activeId)
+      const newIndex = incompleteTodos.findIndex((t) => t.id === overId)
+
+      if (oldIndex === -1 || newIndex === -1) return
+
+      // Create the new order
+      const reordered = arrayMove(incompleteTodos, oldIndex, newIndex)
+      const newOrder: Record<string, number> = {}
+      reordered.forEach((todo, index) => {
+        newOrder[todo.id] = index
+      })
+
+      saveTodoOrder(newOrder)
+      setTodoOrder(newOrder)
+    },
+    [incompleteTodos]
+  )
+
+  // Render a single list item (non-sortable, for completed tasks)
   const renderListItem = (todo: typeof todos[0]) => {
     const subtaskProgress = getSubtaskProgress(todo.subtasks)
 
@@ -299,6 +606,16 @@ export function TodosView() {
             <button
               onClick={(e) => {
                 e.stopPropagation()
+                handleDuplicate(todo)
+              }}
+              className="rounded-md p-1 text-muted-foreground/40 transition-colors hover:bg-muted hover:text-foreground"
+              title={t("duplicate", lang)}
+            >
+              <Copy className="size-3.5" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
                 handleFlagToggle(todo.id, todo.flagged, todo.title)
               }}
               className={cn(
@@ -365,6 +682,16 @@ export function TodosView() {
                   {todo.title}
                 </span>
                 <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDuplicate(todo)
+                    }}
+                    className="rounded-md p-0.5 text-muted-foreground/40 transition-colors hover:bg-muted hover:text-foreground"
+                    title={t("duplicate", lang)}
+                  >
+                    <Copy className="size-3" />
+                  </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
@@ -554,9 +881,37 @@ export function TodosView() {
       {/* Incomplete tasks */}
       {incompleteTodos.length > 0 && (
         viewMode === "list" ? (
-          <div className="space-y-1.5">
-            {incompleteTodos.map((todo) => renderListItem(todo))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={incompleteTodos.map((t) => t.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-1.5">
+                {incompleteTodos.map((todo) => (
+                  <SortableTodoItem
+                    key={todo.id}
+                    todo={todo}
+                    onToggleComplete={toggleComplete}
+                    onEdit={(t) => {
+                      setEditingItem(t as typeof todo)
+                      setActiveModal("editTodo")
+                    }}
+                    onFlagToggle={handleFlagToggle}
+                    onDelete={handleDelete}
+                    lang={lang}
+                    priorityColors={priorityColors}
+                    priorityBorderColors={priorityBorderColors}
+                    formatDate={formatDate}
+                    getSubtaskProgress={getSubtaskProgress}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {incompleteTodos.map((todo) => renderGridCard(todo))}

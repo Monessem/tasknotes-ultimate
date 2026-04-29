@@ -177,6 +177,8 @@ interface AppState {
   // Sidebar
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
+  sidebarCollapsed: boolean;
+  toggleSidebarCollapsed: () => void;
 
   // Quick Add
   quickAddOpen: boolean;
@@ -299,6 +301,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   // Sidebar
   sidebarOpen: false,
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
+  sidebarCollapsed: false,
+  toggleSidebarCollapsed: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
 
   // Quick Add
   quickAddOpen: false,
