@@ -24,10 +24,14 @@ import {
   Settings,
   Trophy,
   Plus,
+  Keyboard,
+  Moon,
+  Sun,
 } from "lucide-react"
 import { useAppStore, type ViewType } from "@/store/app-store"
 import { t } from "@/lib/i18n"
 import type { LucideIcon } from "lucide-react"
+import { useTheme } from "next-themes"
 
 const navItems: { id: ViewType; labelKey: string; icon: LucideIcon; group: string }[] = [
   { id: "dashboard", labelKey: "dashboard", icon: LayoutDashboard, group: "navigation" },
@@ -44,16 +48,22 @@ const navItems: { id: ViewType; labelKey: string; icon: LucideIcon; group: strin
   { id: "settings", labelKey: "settings", icon: Settings, group: "other" },
 ]
 
-const actionItems: { id: string; labelKey: string; icon: LucideIcon; action: string }[] = [
-  { id: "addTodo", labelKey: "newTask", icon: Plus, action: "addTodo" },
-  { id: "addNote", labelKey: "newNote", icon: Plus, action: "addNote" },
-  { id: "addHabit", labelKey: "newHabit", icon: Plus, action: "addHabit" },
+const actionItems: { id: string; labelKey: string; icon: LucideIcon; action: string; shortcut?: string }[] = [
+  { id: "addTodo", labelKey: "newTask", icon: Plus, action: "addTodo", shortcut: "T" },
+  { id: "addNote", labelKey: "newNote", icon: Plus, action: "addNote", shortcut: "N" },
+  { id: "addHabit", labelKey: "newHabit", icon: Plus, action: "addHabit", shortcut: "H" },
+]
+
+const shortcutItems: { label: string; shortcut: string; icon: LucideIcon }[] = [
+  { label: "Toggle Theme", shortcut: "⇧⌘D", icon: Moon },
+  { label: "Command Palette", shortcut: "⌘K", icon: Keyboard },
 ]
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false)
   const { setCurrentView, setActiveModal, settings } = useAppStore()
   const lang = settings.language
+  const { theme, setTheme } = useTheme()
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -61,10 +71,24 @@ export function CommandPalette() {
         e.preventDefault()
         setOpen((o) => !o)
       }
+      // Quick shortcuts when not in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      if (e.key === "t" && (e.metaKey || e.ctrlKey) && e.shiftKey) {
+        e.preventDefault()
+        setActiveModal("addTodo")
+      }
+      if (e.key === "n" && (e.metaKey || e.ctrlKey) && e.shiftKey) {
+        e.preventDefault()
+        setActiveModal("addNote")
+      }
+      if (e.key === "d" && (e.metaKey || e.ctrlKey) && e.shiftKey) {
+        e.preventDefault()
+        setTheme(theme === "dark" ? "light" : "dark")
+      }
     }
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
-  }, [])
+  }, [setActiveModal, setTheme, theme])
 
   const runAction = useCallback(
     (action: string) => {
@@ -73,9 +97,11 @@ export function CommandPalette() {
         setCurrentView(action.replace("nav:", "") as ViewType)
       } else if (action.startsWith("modal:")) {
         setActiveModal(action.replace("modal:", "") as "addTodo" | "addNote" | "addHabit")
+      } else if (action === "toggleTheme") {
+        setTheme(theme === "dark" ? "light" : "dark")
       }
     },
-    [setCurrentView, setActiveModal]
+    [setCurrentView, setActiveModal, setTheme, theme]
   )
 
   const groupLabels: Record<string, string> = {
@@ -83,6 +109,7 @@ export function CommandPalette() {
     filters: lang === "ar" ? "الفلاتر" : "Filters",
     other: lang === "ar" ? "أخرى" : "Other",
     actions: lang === "ar" ? "إجراءات سريعة" : "Quick Actions",
+    shortcuts: lang === "ar" ? "اختصارات لوحة المفاتيح" : "Keyboard Shortcuts",
   }
 
   return (
@@ -97,8 +124,23 @@ export function CommandPalette() {
             <CommandItem key={item.id} onSelect={() => runAction(`modal:${item.action}`)}>
               <item.icon className="mr-2 size-4" />
               <span>{t(item.labelKey, lang)}</span>
+              {item.shortcut && (
+                <span className="ml-auto text-[10px] font-medium text-muted-foreground">
+                  ⇧⌘{item.shortcut}
+                </span>
+              )}
             </CommandItem>
           ))}
+          {/* Toggle theme action */}
+          <CommandItem onSelect={() => runAction("toggleTheme")}>
+            {theme === "dark" ? (
+              <Sun className="mr-2 size-4" />
+            ) : (
+              <Moon className="mr-2 size-4" />
+            )}
+            <span>{lang === "ar" ? "تبديل المظهر" : "Toggle Theme"}</span>
+            <span className="ml-auto text-[10px] font-medium text-muted-foreground">⇧⌘D</span>
+          </CommandItem>
         </CommandGroup>
 
         <CommandSeparator />
@@ -116,6 +158,21 @@ export function CommandPalette() {
               ))}
           </CommandGroup>
         ))}
+
+        <CommandSeparator />
+
+        {/* Keyboard Shortcuts */}
+        <CommandGroup heading={groupLabels.shortcuts}>
+          {shortcutItems.map((item) => (
+            <CommandItem key={item.shortcut} onSelect={() => {}} disabled>
+              <item.icon className="mr-2 size-4 text-muted-foreground" />
+              <span className="text-muted-foreground">{item.label}</span>
+              <kbd className="ml-auto rounded border border-border/50 bg-muted/60 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                {item.shortcut}
+              </kbd>
+            </CommandItem>
+          ))}
+        </CommandGroup>
       </CommandList>
     </CommandDialog>
   )

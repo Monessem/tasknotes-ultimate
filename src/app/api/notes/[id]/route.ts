@@ -83,17 +83,26 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
+    const url = new URL(request.url);
+    const permanent = url.searchParams.get('permanent') === 'true';
 
     const existing = await db.note.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json({ error: 'Note not found' }, { status: 404 });
     }
 
+    if (permanent) {
+      // Hard delete - permanently remove from database
+      await db.note.delete({ where: { id } });
+      return NextResponse.json({ success: true, id });
+    }
+
+    // Soft delete - mark as deleted
     const note = await db.note.update({
       where: { id },
       data: { deletedAt: new Date().toISOString() },

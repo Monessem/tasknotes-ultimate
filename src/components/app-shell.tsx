@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { motion } from "framer-motion"
 import { useAppStore, type ViewType } from "@/store/app-store"
 import { AppSidebar } from "@/components/sidebar"
@@ -27,13 +27,15 @@ import { InstallPrompt } from "@/components/install-prompt"
 import { PageTransition } from "@/components/page-transition"
 import { CommandPalette } from "@/components/command-palette"
 import { AnimatedEmptyState } from "@/components/animated-empty-state"
-import { CheckSquare, Star, Flag, ListTodo, CircleCheckBig, Target, TrendingUp } from "lucide-react"
+import { CheckSquare, Star, Flag, ListTodo, CircleCheckBig, Target, TrendingUp, Plus, Clock, AlertTriangle, Flame, CalendarCheck } from "lucide-react"
 import { WeeklyTaskChart } from "@/components/weekly-task-chart"
 import { HabitCompletionChart } from "@/components/habit-completion-chart"
 import { t } from "@/lib/i18n"
 import { audioManager } from "@/lib/audio"
+import { logHistory } from "@/lib/history-log"
 import { staggerContainer, staggerItem } from "@/lib/animations"
 import type { Language } from "@/lib/i18n"
+import { toast } from "sonner"
 
 function getGreeting(lang: Language): string {
   const hour = new Date().getHours()
@@ -47,10 +49,23 @@ function getGreeting(lang: Language): string {
   return "Good evening"
 }
 
+// Motivational quotes - one for each day of the week (Sunday=0 to Saturday=6)
+const MOTIVATIONAL_QUOTES = [
+  "The secret of getting ahead is getting started.",
+  "Small daily improvements are the key to staggering long-term results.",
+  "Focus on being productive instead of busy.",
+  "The only way to do great work is to love what you do.",
+  "It always seems impossible until it's done.",
+  "Don't watch the clock; do what it does. Keep going.",
+  "Your future is created by what you do today, not tomorrow.",
+]
+
 // Dashboard view
 function DashboardView() {
-  const { todos, notes, habits, pomodoroSessions, settings } = useAppStore()
+  const { todos, notes, habits, habitLogs, pomodoroSessions, settings, fetchTodos } = useAppStore()
   const lang = settings.language
+  const quickAddRef = useRef<HTMLInputElement>(null)
+  const [quickAddValue, setQuickAddValue] = useState("")
 
   const activeTodos = todos.filter((t) => !t.completed && !t.deletedAt)
   const completedTodos = todos.filter((t) => t.completed && !t.deletedAt)
@@ -60,6 +75,50 @@ function DashboardView() {
   const focusMinutes = pomodoroSessions
     .filter((s) => s.date === todayStr && s.type === "work")
     .reduce((acc, s) => acc + s.duration, 0)
+
+  // Today's focus calculations
+  const todosDueToday = todos.filter((t) => !t.deletedAt && t.dueDate === todayStr)
+  const overdueTodos = todos.filter(
+    (t) => !t.completed && !t.deletedAt && t.dueDate && t.dueDate < todayStr
+  )
+  const activeHabits = habits.filter((h) => !h.deletedAt)
+  const habitsCompletedToday = activeHabits.filter((h) =>
+    habitLogs.some((log) => log.habitId === h.id && log.date === todayStr && log.completed)
+  ).length
+  const habitsRemainingToday = activeHabits.length - habitsCompletedToday
+
+  // Productivity score: weighted combination of task completion, habits, and focus time
+  const taskScore = completionRate * 0.4
+  const habitScore = activeHabits.length > 0 ? (habitsCompletedToday / activeHabits.length) * 100 * 0.35 : 0
+  const focusScore = Math.min(focusMinutes / 120, 1) * 100 * 0.25
+  const productivityScore = Math.round(taskScore + habitScore + focusScore)
+
+  // Motivational quote based on day of week
+  const dayOfWeek = new Date().getDay()
+  const todayQuote = MOTIVATIONAL_QUOTES[dayOfWeek]
+
+  // Quick add task handler
+  const handleQuickAdd = useCallback(async () => {
+    const title = quickAddValue.trim()
+    if (!title) return
+    try {
+      const res = await fetch("/api/todos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, priority: "medium" }),
+      })
+      if (res.ok) {
+        const newTodo = await res.json()
+        logHistory("create", "task", newTodo.id, title)
+        toast.success(t("taskAdded", lang))
+        setQuickAddValue("")
+        fetchTodos()
+        audioManager.play("click")
+      }
+    } catch {
+      // Silently fail
+    }
+  }, [quickAddValue, lang, fetchTodos])
 
   return (
     <div className="space-y-6">
@@ -76,6 +135,200 @@ function DashboardView() {
           })}
         </p>
       </div>
+
+      {/* Quick-Add Task Bar */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="relative"
+      >
+        <div className="group flex items-center gap-3 rounded-2xl border border-border/50 bg-card/80 px-4 py-3 backdrop-blur-sm transition-all focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-400/20 focus-within:bg-card">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-sm">
+            <Plus className="size-4" />
+          </div>
+          <input
+            ref={quickAddRef}
+            type="text"
+            value={quickAddValue}
+            onChange={(e) => setQuickAddValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleQuickAdd()
+            }}
+            placeholder={t("quickAddPlaceholder", lang)}
+            className="flex-1 bg-transparent text-sm font-medium text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+          />
+        </div>
+      </motion.div>
+
+      {/* Productivity Score + Motivational Quote */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Productivity Score Card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/80 p-6 backdrop-blur-sm lg:col-span-2"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5" />
+          <div className="relative flex items-center gap-6">
+            {/* SVG Circular Gauge */}
+            <div className="relative shrink-0">
+              <svg width="140" height="140" viewBox="0 0 140 140" className="drop-shadow-sm">
+                {/* Background ring */}
+                <circle
+                  cx="70"
+                  cy="70"
+                  r="58"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="10"
+                  className="text-muted/30"
+                />
+                {/* Gradient ring */}
+                <defs>
+                  <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#10b981" />
+                    <stop offset="50%" stopColor="#14b8a6" />
+                    <stop offset="100%" stopColor="#06b6d4" />
+                  </linearGradient>
+                </defs>
+                <circle
+                  cx="70"
+                  cy="70"
+                  r="58"
+                  fill="none"
+                  stroke="url(#scoreGradient)"
+                  strokeWidth="10"
+                  strokeLinecap="round"
+                  strokeDasharray={`${2 * Math.PI * 58}`}
+                  strokeDashoffset={`${2 * Math.PI * 58 * (1 - productivityScore / 100)}`}
+                  transform="rotate(-90 70 70)"
+                  className="transition-all duration-1000 ease-out"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-3xl font-extrabold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
+                  {productivityScore}
+                </span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  / 100
+                </span>
+              </div>
+            </div>
+            {/* Score details */}
+            <div className="flex-1 space-y-2">
+              <h3 className="text-lg font-bold text-foreground">
+                {t("productivityScore", lang)}
+              </h3>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Task Completion</span>
+                  <span className="font-semibold text-foreground">{completionRate}%</span>
+                </div>
+                <div className="h-1.5 rounded-full bg-muted/50">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-700"
+                    style={{ width: `${completionRate}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Habits Today</span>
+                  <span className="font-semibold text-foreground">
+                    {activeHabits.length > 0 ? Math.round((habitsCompletedToday / activeHabits.length) * 100) : 0}%
+                  </span>
+                </div>
+                <div className="h-1.5 rounded-full bg-muted/50">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-700"
+                    style={{
+                      width: `${activeHabits.length > 0 ? (habitsCompletedToday / activeHabits.length) * 100 : 0}%`,
+                    }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Focus Time</span>
+                  <span className="font-semibold text-foreground">{focusMinutes}m</span>
+                </div>
+                <div className="h-1.5 rounded-full bg-muted/50">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-teal-500 transition-all duration-700"
+                    style={{ width: `${Math.min((focusMinutes / 120) * 100, 100)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Motivational Quote */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="relative flex items-center overflow-hidden rounded-2xl border border-border/50 bg-card/80 p-6 backdrop-blur-sm"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5" />
+          <div className="relative flex flex-col items-center justify-center text-center">
+            <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40">
+              <Flame className="size-5 text-amber-500" />
+            </div>
+            <p className="italic leading-relaxed bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 bg-clip-text text-transparent dark:from-emerald-400 dark:via-teal-400 dark:to-cyan-400">
+              &ldquo;{todayQuote}&rdquo;
+            </p>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Today's Focus Summary */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.25 }}
+        className="rounded-2xl border border-border/50 bg-card/80 p-4 backdrop-blur-sm"
+      >
+        <h3 className="mb-3 text-sm font-bold text-foreground">
+          {t("todayFocus", lang)}
+        </h3>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="flex items-center gap-3 rounded-xl bg-emerald-500/10 px-3 py-2.5">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/20">
+              <CalendarCheck className="size-4 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-lg font-extrabold text-foreground">{todosDueToday.length}</p>
+              <p className="text-[10px] font-medium text-muted-foreground">{t("dueDate", lang)}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 rounded-xl bg-rose-500/10 px-3 py-2.5">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-rose-500/20">
+              <AlertTriangle className="size-4 text-rose-600 dark:text-rose-400" />
+            </div>
+            <div>
+              <p className="text-lg font-extrabold text-rose-600 dark:text-rose-400">{overdueTodos.length}</p>
+              <p className="text-[10px] font-medium text-muted-foreground">{t("overdue", lang)}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 rounded-xl bg-amber-500/10 px-3 py-2.5">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/20">
+              <Target className="size-4 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div>
+              <p className="text-lg font-extrabold text-foreground">{habitsRemainingToday}</p>
+              <p className="text-[10px] font-medium text-muted-foreground">{t("habitsRemaining", lang)}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 rounded-xl bg-cyan-500/10 px-3 py-2.5">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-cyan-500/20">
+              <Clock className="size-4 text-cyan-600 dark:text-cyan-400" />
+            </div>
+            <div>
+              <p className="text-lg font-extrabold text-foreground">{focusMinutes}m</p>
+              <p className="text-[10px] font-medium text-muted-foreground">{t("focusTimeToday", lang)}</p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Stats row */}
       <motion.div
@@ -198,15 +451,19 @@ function StatCard({
   icon: React.ElementType
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/80 p-5 backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:shadow-lg">
+    <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/80 p-5 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/5">
+      {/* Gradient background on hover */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${bgGradient} opacity-0 transition-opacity duration-300 group-hover:opacity-100`} />
       <div className={cn_absolute_bar(gradient)} />
-      <div
-        className={`mb-3 flex size-10 items-center justify-center rounded-xl bg-gradient-to-br ${bgGradient}`}
-      >
-        <Icon className="size-5 text-foreground/70" />
+      <div className="relative">
+        <div
+          className={`mb-3 flex size-10 items-center justify-center rounded-xl bg-gradient-to-br ${bgGradient}`}
+        >
+          <Icon className="size-5 text-foreground/70 animate-[pulse_2s_ease-in-out_infinite] group-hover:animate-[pulse_1s_ease-in-out_infinite]" />
+        </div>
+        <p className="text-2xl font-extrabold text-foreground">{value}</p>
+        <p className="mt-0.5 text-xs font-medium text-muted-foreground">{label}</p>
       </div>
-      <p className="text-2xl font-extrabold text-foreground">{value}</p>
-      <p className="mt-0.5 text-xs font-medium text-muted-foreground">{label}</p>
     </div>
   )
 }

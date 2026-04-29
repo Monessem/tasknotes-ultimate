@@ -1,53 +1,26 @@
----
-Task ID: 6
-Agent: full-stack-developer
-Task: Build main layout and sidebar
+# Task 6 - Improve Notes View
 
-Work Log:
-- Read project context files: worklog.md, app-store.ts, i18n.ts, globals.css, layout.tsx, index.html reference
-- Created `/src/components/theme-provider.tsx` - Simple theme provider wrapper using next-themes with attribute="class", defaultTheme="system", enableSystem=true
-- Created `/src/app/api/weather/route.ts` - Weather API route using Open-Meteo API with city coordinates lookup, fallback data, and 30-minute cache
-- Created `/src/components/sidebar.tsx` - Full sidebar component with:
-  - Logo section (ClipboardList icon + "TaskNotes" gradient text + subtitle)
-  - Weather widget (fetches from /api/weather, shows temp/description/city with appropriate weather icons)
-  - Navigation sections: Main (Dashboard, Tasks, Notes, Habits), Filters (Important, Today, Flagged, History), Other (Folders, Recycle Bin, Settings)
-  - Active nav item has emerald-to-teal gradient background with white text
-  - Count badges for items (active todos, important, today, flagged)
-  - Quick stats footer (completed, streak, pomodoro sessions)
-  - Responsive: uses Sheet component for mobile, fixed sidebar for desktop (hidden on lg, visible at lg:w-[300px])
-  - All Lucide icons (no emojis)
-- Created `/src/components/app-header.tsx` - Header component with:
-  - Mobile menu button (triggers sidebar sheet)
-  - View title + icon (dynamic based on currentView)
-  - Search input (hidden on mobile)
-  - Add button (gradient emerald-to-teal, responsive icon-only on mobile)
-  - Theme toggle (sun/moon icon with rotation animation)
-- Created `/src/components/app-shell.tsx` - Main layout wrapper with:
-  - Sidebar on left + main content area
-  - Sticky header
-  - Dashboard view with stats cards, pomodoro timer, recent tasks list
-  - Placeholder views for other sections
-  - Loading spinner during data fetch
-  - Uses fetchAllData() from Zustand store on mount
-- Created `/src/components/pomodoro-timer.tsx` - Pomodoro timer with:
-  - SVG circular progress ring with gradient stroke
-  - Time display (MM:SS format with tabular-nums)
-  - Play/pause/reset buttons
-  - Mode selector (work, short break, long break) with gradient active states
-  - Stats section (today sessions, focus minutes, streak)
-  - Background timer support via endTime calculation and visibilitychange event
-  - Proper cleanup of setInterval
-- Updated `/src/app/layout.tsx` - Added ThemeProvider wrapper, updated metadata to TaskNotes branding
-- Updated `/src/app/page.tsx` - Renders AppShell component
-- Updated `/src/app/globals.css` - Custom emerald/teal color scheme for both light and dark modes, custom scrollbar styling
-- Fixed ESLint error: removed setState-in-effect pattern for endTime, moved to handlePlayPause callback instead
-- Verified: lint passes, dev server runs, page renders correctly
+## Work Summary
+Enhanced the Notes view with better card styling, masonry layout, hover actions, time ago display, and progress bars.
 
-Stage Summary:
-- Complete sidebar + header + shell layout system is working
-- Responsive design: sidebar is sheet on mobile, fixed on desktop
-- Dark mode support via next-themes with emerald/teal color scheme
-- Weather API working with Open-Meteo integration
-- Pomodoro timer fully functional with circular SVG display
-- Dashboard view shows stats cards and recent tasks
-- All navigation works through Zustand store (currentView switching)
+## Changes Made
+
+### `/src/components/views/notes-view.tsx` (Complete Rewrite)
+- **Masonry Layout**: CSS columns (`columns-1 sm:columns-2 lg:columns-3`) with `break-inside-avoid` for Pinterest-like effect
+- **Enhanced Note Cards**: 
+  - Subtle gradient overlay based on note color
+  - Full-height left border (4px) instead of tiny 8px color bar
+  - Content preview with `line-clamp-4`
+  - Thin progress bar for checklist with percentage display
+  - Time ago display (Just now, 5min ago, 2h ago, 3d ago)
+  - Hover-reveal action buttons (edit, pin/unpin, delete)
+- **Pinned vs Regular Variants**: Pinned notes get amber glow, stronger shadow, larger title
+- **Functional Actions**: Pin toggle, soft delete, edit - all with API calls, toast feedback, audio, history logging
+- **Helper Functions**: `formatTimeAgo()` and `getGradientStyle()`
+
+### `/src/lib/i18n.ts` (Updated)
+- Added 6 new i18n keys for both en and ar: justNow, minutesAgo, hoursAgo, daysAgo, notePinned, noteUnpinned
+
+## Verification
+- ESLint: passes with no issues
+- Dev server: compiling successfully on port 3000

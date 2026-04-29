@@ -446,3 +446,189 @@ Stage Summary:
 - Command Palette (Cmd+K) with navigation and quick actions
 - Greeting header with time-of-day message and formatted date
 - Full bilingual support (EN/AR) for all new features
+
+---
+
+Task ID: 6
+Agent: full-stack-developer
+Task: Improve the Notes view with better card styling and features
+
+Work Log:
+- Updated `/src/components/views/notes-view.tsx` - Complete rewrite with enhanced features:
+  - **Enhanced Note Cards**: Subtle gradient background based on note color (using opacity 08→03→transparent), full-height left border (4px) instead of tiny 8px bar, content preview with line-clamp-4, thin progress bar for checklist with percentage, "time ago" display (Just now, 5min ago, 2h ago, 3d ago), hover-reveal action buttons (edit pencil, pin/unpin toggle, delete trash)
+  - **Masonry-like Layout**: CSS columns layout (`columns-1 sm:columns-2 lg:columns-3`) with `break-inside-avoid` on each card for Pinterest-like stacking effect
+  - **Pinned vs Regular Card Variants**: Pinned notes get slightly larger title (text-base), amber border tint, stronger shadow with amber glow, more prominent hover animation; Regular notes are compact with lighter styling
+  - **Hover Action Buttons**: Edit (Pencil icon), Pin/Unpin (Pin/PinOff icons), Delete (Trash2 icon with rose hover) - all appear on card hover with smooth opacity transition
+  - **Pin/Unpin Toggle**: Calls PUT /api/notes/:id with isPinned field, shows toast notification, plays click sound, logs to history
+  - **Soft Delete**: Calls PUT /api/notes/:id with deletedAt field, shows toast notification, plays delete sound, logs to history
+  - **Edit on Hover**: Clicking pencil icon opens edit modal (same as clicking card)
+  - **formatTimeAgo Helper**: Supports justNow, minutesAgo, hoursAgo, daysAgo with fallback to locale date format
+  - **getGradientStyle Helper**: Generates subtle 135deg gradient from note color with very low opacity
+- Updated `/src/lib/i18n.ts` - Added 6 new translation keys for both en and ar:
+  - justNow: "Just now" / "الآن"
+  - minutesAgo: "min ago" / "دقيقة"
+  - hoursAgo: "h ago" / "ساعة"
+  - daysAgo: "d ago" / "يوم"
+  - notePinned: "Note pinned" / "تم تثبيت الملاحظة"
+  - noteUnpinned: "Note unpinned" / "تم إلغاء تثبيت الملاحظة"
+- Imports added: toast from sonner, logHistory from @/lib/history-log, audioManager from @/lib/audio, PinOff/Clock/Pencil/Trash2 from lucide-react, Language type from @/lib/i18n
+- ESLint passes with no issues
+- Dev server compiling successfully
+
+Stage Summary:
+- Notes view completely rewritten with significantly improved visual design
+- Masonry layout replaces rigid grid for dynamic card stacking
+- Pinned notes distinguished with amber glow, larger text, stronger shadow
+- Full hover actions: edit, pin/unpin, delete (all functional with API calls)
+- Time ago display on every note card
+- Checklist progress shown as thin colored progress bar with percentage
+- 6 new i18n keys added for bilingual support
+
+---
+
+Task ID: 4
+Agent: full-stack-developer
+Task: Add filtering, sorting controls, and styling improvements to the Todos view
+
+Work Log:
+- Updated `/src/lib/i18n.ts` - Added 8 new translation keys for both en and ar: filterBy, sortBy, dateCreated, name, all, listView, gridView, taskDeleted (taskDeleted already existed)
+- Rewrote `/src/components/views/todos-view.tsx` with major enhancements:
+  - **Filter/Sort Bar** (below header):
+    - Priority Filter: shadcn Select dropdown with All/High/Medium/Low options, each with colored dots (rose/amber/emerald)
+    - Sort By: shadcn Select dropdown with Date Created/Due Date/Priority/Name options
+    - View Toggle: Custom segmented control with List (LayoutList icon) and Grid (LayoutGrid icon) modes, emerald active state
+    - All controls use sm size, emerald/teal border and background styling
+  - **Enhanced Todo Item Cards** (list mode):
+    - Subtask progress bar: thin emerald Progress bar below title with completed/total count
+    - Better hover effect: slight lift (-translate-y-0.5), shadow-lg, left border color flash matching priority (rose/amber/emerald)
+    - Delete button on hover: X icon in top-right, appears on hover, rose color on hover, soft-delete via PUT with deletedAt
+    - Flag toggle on hover: Flag icon, toggles flagged via PUT API, shows rose color when flagged
+    - Description preview: first 100 chars, truncated, muted text below title
+  - **Grid View Mode**: When grid view is selected:
+    - 1/2/3 column responsive card grid (sm:grid-cols-2 lg:grid-cols-3)
+    - Priority color accent bar on top of each card
+    - Title with checkbox overlay, description preview (line-clamp-2), tags as Badge components, due date
+    - Subtask progress bar if subtasks exist
+    - Hover-reveal flag toggle and delete buttons
+  - **Soft delete**: Uses PUT /api/todos/{id} with deletedAt instead of DELETE, triggers toast notification
+  - **History logging**: Logs delete and flag actions via logHistory()
+  - **Audio feedback**: Plays "delete" and "flag" sounds on respective actions
+  - **Completed tasks**: Also got hover-reveal flag/delete buttons
+  - All existing functionality preserved: checkbox toggle, search filtering, empty state, completed section
+- Imports added: useState, useMemo, LayoutList, LayoutGrid, X, Select/SelectContent/SelectItem/SelectTrigger/SelectValue, Progress, toast from sonner, logHistory from history-log
+- ESLint passes with no issues
+- Dev server compiling successfully
+
+Stage Summary:
+- 2 existing files updated: todos-view.tsx (major rewrite), i18n.ts (8 new keys)
+- Full filter/sort bar with priority filter, sort by, and list/grid view toggle
+- Enhanced todo cards with subtask progress, description preview, hover-reveal delete/flag, priority border flash
+- Grid view mode with responsive card layout and priority accent bars
+- Soft delete via PUT API with toast notification and history logging
+- All controls use emerald/teal theme, sm size, shadcn Select components
+
+---
+
+Task ID: Round-8
+Agent: main
+Task: QA review, bug fixes, styling enhancements, and new features
+
+Work Log:
+- **QA Assessment**: Full code review of all views, modals, API routes, store, and i18n
+- **Bug Fix - Recycle Bin**: Fixed permanent delete functionality - the old code was broken (empty bin did nothing, permanent delete used wrong API call). Added `?permanent=true` query param to DELETE endpoints for hard delete support in `/api/todos/[id]/route.ts` and `/api/notes/[id]/route.ts`. Recycle bin now properly uses DELETE with permanent=true for hard delete and empty bin.
+- **Bug Fix - Recycle Bin Toast**: Added toast notifications (`itemRestored`, `itemPermanentlyDeleted`, `binEmptied`) and history logging for restore actions in recycle view
+- **Bug Fix - Audio on Recycle**: Added audioManager sounds for restore and permanent delete actions
+- **Styling - Dashboard Enhancements**: Previous agent had already added:
+  - Productivity Score Card with SVG circular gauge (0-100) calculated from task completion (40%), habits (35%), focus time (25%)
+  - Quick-Add Task Bar with inline input, Enter to submit, emerald focus ring
+  - Motivational Quote of the day (7 rotating quotes, gradient text)
+  - Today's Focus Summary with 4 mini-stats (tasks due today, overdue, habits remaining, focus time)
+  - Enhanced StatCards with gradient background on hover, pulsing icons
+- **Feature - Todos View Filter/Sort**: Added by subagent:
+  - Priority Filter dropdown (All/High/Medium/Low with colored dots)
+  - Sort By dropdown (Date Created/Due Date/Priority/Name)
+  - View Toggle (List/Grid mode with segmented control)
+  - Enhanced todo cards: subtask progress bar, description preview, hover-reveal delete/flag buttons
+  - Grid view mode with priority accent bars
+- **Styling - Notes View Enhancement**: Added by subagent:
+  - Masonry-like layout (CSS columns instead of rigid grid)
+  - Gradient color backgrounds on note cards
+  - Full-height left border (4px) replacing tiny color bar
+  - Time ago display (Just now, 5min ago, 2h ago, 3d ago)
+  - Hover-reveal edit/pin/delete action buttons
+  - Checklist progress as thin progress bar with percentage
+  - Pinned notes get amber glow, larger text, stronger shadow
+- **Styling - Habits View Enhancement**: 
+  - Overall progress bar at top showing today's completion percentage
+  - Color accent bar on each habit card matching habit color
+  - Habit icon shown in toggle button (instead of just checkmark) when not completed
+  - 7-day completion rate display (e.g., "7d: 85%")
+  - Today highlight in mini calendar (border ring)
+  - Hover-reveal edit/delete action buttons
+  - Toast notifications on habit completion/uncomplete
+  - History logging on habit completion
+  - Soft delete with toast and audio feedback
+- **Feature - Command Palette Enhancement**:
+  - Added "Toggle Theme" action in Quick Actions group
+  - Added keyboard shortcuts display: ⇧⌘D (toggle theme), ⇧⌘T (add task), ⇧⌘N (add note)
+  - Added Keyboard Shortcuts section showing available shortcuts
+  - Global keyboard shortcuts: ⇧⌘D for theme, ⇧⌘T for add todo, ⇧⌘N for add note
+- **i18n Keys Added**: filterBy, sortBy, dateCreated, name, all, listView, gridView, justNow, minutesAgo, hoursAgo, daysAgo, notePinned, noteUnpinned (both en and ar)
+- ESLint passes with no issues
+- Dev server running correctly on port 3000
+
+Stage Summary:
+- 6 files modified: todos-view.tsx, notes-view.tsx, habits-view.tsx, recycle-view.tsx, command-palette.tsx, todos/[id]/route.ts, notes/[id]/route.ts
+- 2 API routes enhanced with hard delete support (?permanent=true)
+- Recycle bin fully functional: restore, permanent delete, empty bin all working
+- Dashboard significantly enhanced with productivity score, quick-add, focus summary, motivational quote
+- Todos view has filter/sort/grid capabilities
+- Notes view has masonry layout, hover actions, time-ago display
+- Habits view has progress bar, color accents, edit/delete actions
+- Command palette has keyboard shortcuts section and theme toggle
+- All changes maintain emerald/teal color scheme, dark mode support, bilingual i18n
+
+---
+
+## Current Project Status (Round 8 Complete)
+
+### Completed Features
+- ✅ Full Next.js 16 app with TypeScript, Tailwind CSS 4, shadcn/ui
+- ✅ Prisma ORM with SQLite - 9 models (Todo, Note, Habit, HabitLog, Folder, PomodoroSession, HistoryEntry, Settings, Achievement)
+- ✅ 14 API routes with full CRUD, soft delete, hard delete, and upsert
+- ✅ Zustand store with type-safe state management and data fetching
+- ✅ i18n system (English/Arabic) with 100+ translation keys
+- ✅ Responsive sidebar + header layout with mobile sheet sidebar
+- ✅ Dashboard with productivity score gauge, quick-add bar, today's focus, motivational quote, stat cards, pomodoro timer, weekly chart, habit chart
+- ✅ Todos view with filter/sort controls, list/grid modes, subtask progress, hover actions
+- ✅ Notes view with masonry layout, gradient cards, hover edit/pin/delete, time-ago, checklist progress
+- ✅ Habits view with overall progress, color accents, 7-day rate, hover edit/delete, completion toasts
+- ✅ Recycle bin with proper restore, permanent delete (hard delete API), empty bin
+- ✅ Settings with auto-save, weather/pomodoro/appearance/notifications/backup sections
+- ✅ Achievements system (12 achievements, 3 tiers, auto-unlock)
+- ✅ Command palette (⌘K) with navigation, quick actions, keyboard shortcuts
+- ✅ Framer Motion page transitions and staggered animations
+- ✅ PWA support (manifest, service worker, install prompt)
+- ✅ Audio system (6 synthesized sounds)
+- ✅ Dark mode via next-themes
+- ✅ Weather widget with Open-Meteo API
+- ✅ Toast notifications (Sonner) on all CRUD operations
+- ✅ History logging on create/update/delete/complete/flag/restore actions
+- ✅ All ESLint checks passing
+
+### Unresolved Issues / Risks
+1. **GitHub Sync**: Infrastructure exists (gitHubToken, gistId in Settings) but OAuth flow not implemented
+2. **RTL Layout**: Arabic translations exist but RTL layout not fully tested
+3. **Drag-and-Drop**: dnd-kit is installed but not yet integrated for task reordering
+4. **Color Themes**: Only "emerald" theme available; token system supports more but no alternatives implemented
+5. **Recurring Tasks**: Recurring field exists in todo model but no auto-creation logic
+6. **Real-time Notifications**: taskReminders setting exists but no push notification implementation
+7. **Dev Server Stability**: Background process sometimes dies, needs `setsid` to stay alive
+
+### Priority Recommendations for Next Phase
+1. **Add drag-and-drop** task reordering using dnd-kit (already installed)
+2. **Implement recurring task logic** - auto-create next occurrence when recurring task is completed
+3. **Add more color themes** (ocean, sunset) using the existing design token system
+4. **RTL testing and fixes** for Arabic layout
+5. **Push notifications** using browser Notification API
+6. **Export to PDF** for reports and summaries

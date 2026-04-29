@@ -92,17 +92,26 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
+    const url = new URL(request.url);
+    const permanent = url.searchParams.get('permanent') === 'true';
 
     const existing = await db.todo.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json({ error: 'Todo not found' }, { status: 404 });
     }
 
+    if (permanent) {
+      // Hard delete - permanently remove from database
+      await db.todo.delete({ where: { id } });
+      return NextResponse.json({ success: true, id });
+    }
+
+    // Soft delete - mark as deleted
     const todo = await db.todo.update({
       where: { id },
       data: { deletedAt: new Date().toISOString() },

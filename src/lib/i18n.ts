@@ -210,6 +210,29 @@ const translations: Record<Language, Record<string, string>> = {
     recentTasks: "Recent Tasks",
     todayProgress: "Today's Progress",
     quickAddPlaceholder: "Quick add task... press Enter",
+    productivityScore: "Productivity Score",
+    todayFocus: "Today's Focus",
+    overdue: "Overdue",
+    habitsRemaining: "Habits Remaining",
+    focusTimeToday: "Focus Time Today",
+    taskAdded: "Task added!",
+
+    // Time ago
+    justNow: "Just now",
+    minutesAgo: "min ago",
+    hoursAgo: "h ago",
+    daysAgo: "d ago",
+    notePinned: "Note pinned",
+    noteUnpinned: "Note unpinned",
+
+    // Filters & Sorting
+    filterBy: "Filter by",
+    sortBy: "Sort by",
+    dateCreated: "Date Created",
+    name: "Name",
+    all: "All",
+    listView: "List",
+    gridView: "Grid",
   },
 
   ar: {
@@ -420,6 +443,29 @@ const translations: Record<Language, Record<string, string>> = {
     recentTasks: "المهام الأخيرة",
     todayProgress: "تقدم اليوم",
     quickAddPlaceholder: "إضافة سريعة... اضغط Enter",
+    productivityScore: "معدل الإنتاجية",
+    todayFocus: "تركيز اليوم",
+    overdue: "متأخر",
+    habitsRemaining: "عادات متبقية",
+    focusTimeToday: "وقت التركيز اليوم",
+    taskAdded: "تمت إضافة المهمة!",
+
+    // Time ago
+    justNow: "الآن",
+    minutesAgo: "دقيقة",
+    hoursAgo: "ساعة",
+    daysAgo: "يوم",
+    notePinned: "تم تثبيت الملاحظة",
+    noteUnpinned: "تم إلغاء تثبيت الملاحظة",
+
+    // Filters & Sorting
+    filterBy: "تصفية حسب",
+    sortBy: "ترتيب حسب",
+    dateCreated: "تاريخ الإنشاء",
+    name: "الاسم",
+    all: "الكل",
+    listView: "قائمة",
+    gridView: "شبكة",
   },
 };
 
