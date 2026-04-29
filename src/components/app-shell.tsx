@@ -29,9 +29,12 @@ import { InstallPrompt } from "@/components/install-prompt"
 import { PageTransition } from "@/components/page-transition"
 import { CommandPalette } from "@/components/command-palette"
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog"
+import { NotificationManager } from "@/components/notification-manager"
 import { AnimatedEmptyState } from "@/components/animated-empty-state"
 import { CheckSquare, Star, Flag, ListTodo, CircleCheckBig, Target, TrendingUp, Plus, Clock, AlertTriangle, Flame, CalendarCheck, CheckCircle2, Timer, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react"
 import { WeeklyTaskChart } from "@/components/weekly-task-chart"
+import { PriorityPieChart } from "@/components/priority-pie-chart"
+import { HabitHeatmap } from "@/components/habit-heatmap"
 import { HabitCompletionChart } from "@/components/habit-completion-chart"
 import { t } from "@/lib/i18n"
 import { audioManager } from "@/lib/audio"
@@ -635,6 +638,12 @@ function DashboardView() {
       <div className="mt-6">
         <HabitCompletionChart />
       </div>
+
+      {/* Data Visualizations */}
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <PriorityPieChart />
+        <HabitHeatmap />
+      </div>
     </div>
   )
 }
@@ -782,6 +791,7 @@ export function AppShell() {
       <InstallPrompt />
       <CommandPalette />
       <KeyboardShortcutsDialog />
+      <NotificationManager />
     </div>
   )
 }

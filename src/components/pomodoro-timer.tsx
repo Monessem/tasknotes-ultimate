@@ -162,7 +162,20 @@ export function PomodoroTimer() {
   }
 
   return (
-    <div className="rounded-2xl border border-border/50 bg-card/80 p-5 backdrop-blur-sm">
+    <div className={cn(
+      "relative overflow-hidden rounded-2xl border border-border/50 bg-card/80 p-5 backdrop-blur-sm transition-shadow duration-500",
+      isRunning && "shadow-lg",
+      isRunning && mode === "work" && "shadow-emerald-500/10",
+      isRunning && mode === "shortBreak" && "shadow-cyan-500/10",
+      isRunning && mode === "longBreak" && "shadow-amber-500/10"
+    )}>
+      {/* Animated gradient border when running */}
+      {isRunning && (
+        <div className={cn(
+          "absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r transition-all duration-500",
+          gradientColors[mode]
+        )} />
+      )}
       <h3 className="mb-4 text-base font-bold text-foreground">
         {t("pomodoroTimer", lang)}
       </h3>
@@ -171,6 +184,21 @@ export function PomodoroTimer() {
         {/* Circular timer */}
         <div className="relative mb-5">
           <svg className="size-40 -rotate-90" viewBox="0 0 160 160">
+            {/* Gradient definitions */}
+            <defs>
+              <linearGradient id="timerGradientWork" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#10b981" />
+                <stop offset="100%" stopColor="#0d9488" />
+              </linearGradient>
+              <linearGradient id="timerGradientShort" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#22d3ee" />
+                <stop offset="100%" stopColor="#14b8a6" />
+              </linearGradient>
+              <linearGradient id="timerGradientLong" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#f59e0b" />
+                <stop offset="100%" stopColor="#f97316" />
+              </linearGradient>
+            </defs>
             {/* Background circle */}
             <circle
               cx="80"
@@ -187,16 +215,36 @@ export function PomodoroTimer() {
               cy="80"
               r="70"
               fill="none"
-              stroke={ringGradient[mode]}
+              stroke={mode === "work" ? "url(#timerGradientWork)" : mode === "shortBreak" ? "url(#timerGradientShort)" : "url(#timerGradientLong)"}
               strokeWidth="8"
               strokeLinecap="round"
               strokeDasharray={`${2 * Math.PI * 70}`}
               strokeDashoffset={`${2 * Math.PI * 70 * (1 - progress / 100)}`}
               className="transition-all duration-1000 ease-linear"
             />
+            {/* Glow effect when running */}
+            {isRunning && (
+              <circle
+                cx="80"
+                cy="80"
+                r="70"
+                fill="none"
+                stroke={ringGradient[mode]}
+                strokeWidth="12"
+                strokeLinecap="round"
+                strokeDasharray={`${2 * Math.PI * 70}`}
+                strokeDashoffset={`${2 * Math.PI * 70 * (1 - progress / 100)}`}
+                opacity="0.15"
+                className="transition-all duration-1000 ease-linear"
+                style={{ filter: "blur(4px)" }}
+              />
+            )}
           </svg>
           {/* Inner circle background */}
-          <div className="absolute inset-[10px] flex flex-col items-center justify-center rounded-full bg-card shadow-inner">
+          <div className={cn(
+            "absolute inset-[10px] flex flex-col items-center justify-center rounded-full shadow-inner transition-all duration-300",
+            isRunning ? "bg-card" : "bg-card"
+          )}>
             <span
               className={cn(
                 "font-mono text-3xl font-extrabold tabular-nums bg-gradient-to-br bg-clip-text text-transparent",

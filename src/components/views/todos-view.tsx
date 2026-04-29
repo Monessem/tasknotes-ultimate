@@ -358,9 +358,16 @@ export function TodosView() {
           }),
         })
         if (res.ok) {
+          const data = await res.json()
           if (!completed) {
             audioManager.play("complete")
             logHistory("complete", "task", todoId, todos.find((t) => t.id === todoId)?.title || "")
+            // Check for recurring task next occurrence
+            if (data.nextOccurrence) {
+              toast.success(t("taskCompleted", lang), {
+                description: t("nextOccurrenceCreated", lang),
+              })
+            }
           } else {
             audioManager.play("click")
           }
@@ -370,7 +377,7 @@ export function TodosView() {
         // Silently fail
       }
     },
-    [fetchTodos, todos]
+    [fetchTodos, todos, lang]
   )
 
   const handleDelete = useCallback(

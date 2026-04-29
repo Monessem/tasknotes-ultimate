@@ -1,11 +1,12 @@
 "use client"
 
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import {
   Target,
   Plus,
   Flame,
   Check,
+  CheckCircle2,
   Pencil,
   Trash2,
 } from "lucide-react"
@@ -17,13 +18,16 @@ import { logHistory } from "@/lib/history-log"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import { toast } from "sonner"
+import { AnimatedEmptyState } from "@/components/animated-empty-state"
 
 export function HabitsView() {
   const { habits, habitLogs, setEditingItem, setActiveModal, fetchHabitLogs, fetchHabits } = useAppStore()
   const settings = useAppStore((s) => s.settings)
   const lang = settings.language
+
+  // Track which habit just completed for bounce animation
+  const [justCompleted, setJustCompleted] = useState<string | null>(null)
 
   const activeHabits = habits.filter((h) => !h.deletedAt)
   const todayStr = new Date().toISOString().split("T")[0]
@@ -32,6 +36,12 @@ export function HabitsView() {
     habitLogs.some((log) => log.habitId === h.id && log.date === todayStr && log.completed)
   ).length
   const overallProgress = activeHabits.length > 0 ? Math.round((completedCount / activeHabits.length) * 100) : 0
+
+  // Best streak across all habits
+  const bestStreak = activeHabits.reduce((max, habit) => {
+    const streak = getStreak(habit.id)
+    return streak > max ? streak : max
+  }, 0)
 
   const isHabitCompletedToday = (habitId: string) => {
     return habitLogs.some(
@@ -58,6 +68,9 @@ export function HabitsView() {
               logHistory("complete", "habit", habitId, habit.name)
               toast.success(t("habitCompleted", lang), { description: t("keepItUp", lang) })
             }
+            // Trigger bounce animation
+            setJustCompleted(habitId)
+            setTimeout(() => setJustCompleted(null), 600)
           }
           await fetchHabitLogs()
         }
@@ -90,7 +103,7 @@ export function HabitsView() {
   )
 
   // Calculate streak for each habit
-  const getStreak = (habitId: string) => {
+  function getStreak(habitId: string) {
     const habitLogsForHabit = habitLogs.filter(
       (l) => l.habitId === habitId && l.completed
     )
@@ -112,7 +125,7 @@ export function HabitsView() {
   }
 
   // Get completion rate for last 7 days
-  const get7DayRate = (habitId: string) => {
+  function get7DayRate(habitId: string) {
     let completed = 0
     for (let i = 0; i < 7; i++) {
       const date = new Date()
@@ -126,21 +139,29 @@ export function HabitsView() {
   }
 
   // Get last 7 days for mini calendar
-  const getLast7Days = () => {
-    const days = []
+  function getLast7Days() {
+    const days: { dateStr: string; dayInitial: string }[] = []
+    const dayInitials = ["S", "M", "T", "W", "T", "F", "S"]
     for (let i = 6; i >= 0; i--) {
       const date = new Date()
       date.setDate(date.getDate() - i)
-      days.push(date.toISOString().split("T")[0])
+      const dateStr = date.toISOString().split("T")[0]
+      const dayIdx = date.getDay()
+      days.push({ dateStr, dayInitial: dayInitials[dayIdx] })
     }
     return days
   }
 
   const last7Days = getLast7Days()
 
+  // SVG progress ring calculations
+  const radius = 32
+  const circumference = 2 * Math.PI * radius
+  const strokeDashoffset = circumference - (overallProgress / 100) * circumference
+
   return (
     <div className="space-y-4">
-      {/* Header with progress */}
+      {/* Header with add button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Badge
@@ -149,11 +170,6 @@ export function HabitsView() {
           >
             {completedCount}/{activeHabits.length} {t("done", lang)}
           </Badge>
-          {activeHabits.length > 0 && (
-            <span className="text-xs font-medium text-muted-foreground">
-              {overallProgress}% {t("completionRate", lang).toLowerCase()}
-            </span>
-          )}
         </div>
         <Button
           size="sm"
@@ -165,53 +181,128 @@ export function HabitsView() {
         </Button>
       </div>
 
-      {/* Overall progress bar */}
+      {/* Summary Header Card with SVG Progress Ring */}
       {activeHabits.length > 0 && (
-        <div className="rounded-xl border border-border/30 bg-card/60 p-3 backdrop-blur-sm">
-          <div className="mb-1.5 flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground">
-              {t("todayProgress", lang)}
-            </span>
-            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-              {completedCount}/{activeHabits.length}
-            </span>
+        <div className={cn(
+          "rounded-2xl border border-border/30 p-5 backdrop-blur-sm",
+          "bg-gradient-to-br from-rose-50 to-emerald-50 dark:from-rose-950/20 dark:to-emerald-950/20"
+        )}>
+          <div className="flex items-center gap-5">
+            {/* SVG Progress Ring */}
+            <div className="shrink-0">
+              <svg width="80" height="80" viewBox="0 0 80 80" className="-rotate-90">
+                <defs>
+                  <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#34d399" />
+                    <stop offset="100%" stopColor="#14b8a6" />
+                  </linearGradient>
+                </defs>
+                {/* Background circle */}
+                <circle
+                  cx="40"
+                  cy="40"
+                  r={radius}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="6"
+                  className="text-emerald-100 dark:text-emerald-900/40"
+                />
+                {/* Progress circle */}
+                <circle
+                  cx="40"
+                  cy="40"
+                  r={radius}
+                  fill="none"
+                  stroke="url(#progressGradient)"
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={strokeDashoffset}
+                  className="transition-all duration-700 ease-out"
+                />
+              </svg>
+              {/* Center text overlay */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ width: 80, height: 80, position: "relative", marginTop: -80 }}>
+                <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                  {overallProgress}%
+                </span>
+                <span className="text-[8px] font-medium text-muted-foreground">
+                  {t("completed", lang).toLowerCase()}
+                </span>
+              </div>
+            </div>
+
+            {/* Stats section */}
+            <div className="flex-1">
+              <h3 className="mb-3 text-sm font-semibold text-foreground">
+                {t("habitSummary", lang)}
+              </h3>
+              <div className="grid grid-cols-3 gap-3">
+                {/* Total active */}
+                <div className="flex items-center gap-2">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
+                    <Target className="size-4 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground">{activeHabits.length}</p>
+                    <p className="text-[10px] text-muted-foreground">{t("dailyHabits", lang)}</p>
+                  </div>
+                </div>
+                {/* Completed today */}
+                <div className="flex items-center gap-2">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-teal-100 dark:bg-teal-900/40">
+                    <CheckCircle2 className="size-4 text-teal-600 dark:text-teal-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground">{completedCount}</p>
+                    <p className="text-[10px] text-muted-foreground">{t("completed", lang)}</p>
+                  </div>
+                </div>
+                {/* Best streak */}
+                <div className="flex items-center gap-2">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/40">
+                    <Flame className="size-4 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground">{bestStreak}</p>
+                    <p className="text-[10px] text-muted-foreground">{t("daysStreak", lang)}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <Progress
-            value={overallProgress}
-            className="h-2 bg-emerald-100 dark:bg-emerald-900/30 [&>[data-slot=progress-indicator]]:bg-gradient-to-r [&>[data-slot=progress-indicator]]:from-emerald-400 [&>[data-slot=progress-indicator]]:to-teal-500"
-          />
         </div>
       )}
 
       {/* Habits list */}
       {activeHabits.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-rose-100 dark:bg-rose-900/30">
-            <Target className="size-7 text-rose-500" />
-          </div>
-          <p className="text-lg font-semibold text-foreground">
-            {t("noHabits", lang)}
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("noHabitsDesc", lang)}
-          </p>
-        </div>
+        <AnimatedEmptyState
+          icon={Target}
+          title={t("noHabits", lang)}
+          description={t("noHabitsDesc", lang)}
+        />
       ) : (
         <div className="space-y-3">
           {activeHabits.map((habit) => {
             const completed = isHabitCompletedToday(habit.id)
             const streak = getStreak(habit.id)
             const rate7d = get7DayRate(habit.id)
+            const habitColor = habit.color || "#10b981"
 
             return (
               <Card
                 key={habit.id}
                 className={cn(
-                  "group relative cursor-pointer overflow-hidden rounded-xl border bg-card/80 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg",
+                  "group relative cursor-pointer overflow-hidden rounded-xl border bg-card/80 backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl",
                   completed
-                    ? "border-emerald-200/50 dark:border-emerald-800/30"
+                    ? "border-emerald-200/50 shadow-[0_0_20px_rgba(16,185,129,0.12)] dark:border-emerald-800/30"
                     : "border-border/30"
                 )}
+                style={{
+                  background: completed
+                    ? `radial-gradient(ellipse at top left, ${habitColor}08 0%, transparent 60%), rgba(var(--card), 0.8)`
+                    : `radial-gradient(ellipse at top left, ${habitColor}05 0%, transparent 60%), rgba(var(--card), 0.8)`,
+                }}
                 onClick={() => {
                   setEditingItem(habit)
                   setActiveModal("editHabit")
@@ -220,7 +311,7 @@ export function HabitsView() {
                 {/* Color accent bar */}
                 <div
                   className="h-1 w-full"
-                  style={{ backgroundColor: habit.color || "#10b981" }}
+                  style={{ backgroundColor: habitColor }}
                 />
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
@@ -234,9 +325,10 @@ export function HabitsView() {
                         "flex size-11 shrink-0 items-center justify-center rounded-xl text-lg transition-all",
                         completed
                           ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/30"
-                          : "border-2 border-dashed border-muted-foreground/30 hover:border-emerald-500/50"
+                          : "border-2 border-dashed border-muted-foreground/30 hover:border-emerald-500/50",
+                        justCompleted === habit.id && "animate-bounce"
                       )}
-                      style={!completed ? { borderColor: `${habit.color}80` } : undefined}
+                      style={!completed ? { borderColor: `${habitColor}80` } : undefined}
                     >
                       {completed ? (
                         <Check className="size-5" />
@@ -270,9 +362,22 @@ export function HabitsView() {
                             {t("weekly", lang)}
                           </Badge>
                         )}
+                        {/* Weekly Rate mini badge */}
+                        <Badge
+                          className={cn(
+                            "h-4 border-0 px-1.5 text-[9px] font-semibold",
+                            rate7d >= 80
+                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                              : rate7d >= 50
+                                ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
+                                : "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400"
+                          )}
+                        >
+                          {t("weeklyRate", lang)} {rate7d}%
+                        </Badge>
                       </div>
 
-                      {/* Streak + 7-day rate */}
+                      {/* Streak */}
                       <div className="mt-1 flex items-center gap-3">
                         {streak > 0 && (
                           <div className="flex items-center gap-1 text-xs">
@@ -282,34 +387,35 @@ export function HabitsView() {
                             </span>
                           </div>
                         )}
-                        <div className="text-[10px] font-medium text-muted-foreground">
-                          7d: {rate7d}%
-                        </div>
                       </div>
 
-                      {/* Mini 7-day calendar */}
-                      <div className="mt-2 flex items-center gap-1.5">
-                        {last7Days.map((day) => {
+                      {/* Mini 7-day calendar with day initials */}
+                      <div className="mt-2 flex items-end gap-1.5">
+                        {last7Days.map(({ dateStr, dayInitial }) => {
                           const dayCompleted = habitLogs.some(
                             (l) =>
                               l.habitId === habit.id &&
-                              l.date === day &&
+                              l.date === dateStr &&
                               l.completed
                           )
-                          const isToday = day === todayStr
+                          const isToday = dateStr === todayStr
                           return (
-                            <div
-                              key={day}
-                              className={cn(
-                                "size-5 rounded-md transition-colors",
-                                dayCompleted
-                                  ? "bg-emerald-500"
-                                  : isToday
-                                    ? "border border-emerald-300 bg-muted/50 dark:border-emerald-700"
-                                    : "bg-muted/50"
-                              )}
-                              title={day}
-                            />
+                            <div key={dateStr} className="flex flex-col items-center gap-0.5">
+                              <div
+                                className={cn(
+                                  "size-5 rounded-full transition-colors",
+                                  dayCompleted
+                                    ? "bg-emerald-500"
+                                    : isToday
+                                      ? "border border-emerald-300 bg-muted/50 dark:border-emerald-700"
+                                      : "bg-muted/50"
+                                )}
+                                title={dateStr}
+                              />
+                              <span className="text-[8px] font-medium text-muted-foreground/60">
+                                {dayInitial}
+                              </span>
+                            </div>
                           )
                         })}
                       </div>

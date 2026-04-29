@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import {
   StickyNote,
   Plus,
@@ -10,15 +11,19 @@ import {
   Pencil,
   Trash2,
   Clock,
+  LayoutGrid,
+  LayoutList,
 } from "lucide-react"
 import { useAppStore } from "@/store/app-store"
 import { t, type Language } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { logHistory } from "@/lib/history-log"
 import { audioManager } from "@/lib/audio"
+import { AnimatedEmptyState } from "@/components/animated-empty-state"
 
 // Helper: format time ago
 function formatTimeAgo(dateStr: string, lang: Language): string {
@@ -43,11 +48,19 @@ function getGradientStyle(color: string) {
   }
 }
 
+// Helper: generate color-tinted shadow
+function getColorShadow(color: string) {
+  return { boxShadow: `0 4px 14px ${color}15, 0 1px 3px ${color}08` }
+}
+
+type ViewMode = "grid" | "list"
+
 export function NotesView() {
   const { notes, setEditingItem, setActiveModal, fetchNotes } = useAppStore()
   const settings = useAppStore((s) => s.settings)
   const lang = settings.language
   const searchQuery = useAppStore((s) => s.searchQuery)
+  const [viewMode, setViewMode] = useState<ViewMode>("grid")
 
   const activeNotes = notes.filter((note) => !note.deletedAt)
 
@@ -68,14 +81,44 @@ export function NotesView() {
 
   const pinnedNotes = sortedNotes.filter((n) => n.isPinned)
   const otherNotes = sortedNotes.filter((n) => !n.isPinned)
+  const pinnedCount = activeNotes.filter((n) => n.isPinned).length
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header with view mode toggle */}
       <div className="flex items-center justify-between">
-        <span className="text-sm text-muted-foreground">
-          {filteredNotes.length} {t("notes", lang).toLowerCase()}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">
+            {filteredNotes.length} {t("notes", lang).toLowerCase()}
+          </span>
+          {/* View mode toggle */}
+          <div className="ml-2 flex items-center rounded-lg border border-border/50 bg-muted/30 p-0.5">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={cn(
+                "flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors",
+                viewMode === "grid"
+                  ? "bg-amber-500 text-white shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <LayoutGrid className="size-3.5" />
+              {t("gridView", lang)}
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={cn(
+                "flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors",
+                viewMode === "list"
+                  ? "bg-amber-500 text-white shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <LayoutList className="size-3.5" />
+              {t("listView", lang)}
+            </button>
+          </div>
+        </div>
         <Button
           size="sm"
           onClick={() => setActiveModal("addNote")}
@@ -86,6 +129,47 @@ export function NotesView() {
         </Button>
       </div>
 
+      {/* Summary Header Card */}
+      {activeNotes.length > 0 && (
+        <div className={cn(
+          "rounded-2xl border border-border/30 p-5 backdrop-blur-sm",
+          "bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20"
+        )}>
+          <div className="flex items-center gap-5">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg shadow-amber-500/20">
+              <StickyNote className="size-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="mb-2 text-sm font-semibold text-foreground">
+                {t("notesSummary", lang)}
+              </h3>
+              <div className="flex items-center gap-4">
+                {/* Total notes */}
+                <div className="flex items-center gap-2">
+                  <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/40">
+                    <StickyNote className="size-3.5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground">{activeNotes.length}</p>
+                    <p className="text-[10px] text-muted-foreground">{t("totalNotes", lang)}</p>
+                  </div>
+                </div>
+                {/* Pinned count */}
+                <div className="flex items-center gap-2">
+                  <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/40">
+                    <Pin className="size-3.5 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground">{pinnedCount}</p>
+                    <p className="text-[10px] text-muted-foreground">{t("pinnedNotes", lang)}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Pinned notes */}
       {pinnedNotes.length > 0 && (
         <div>
@@ -94,14 +178,22 @@ export function NotesView() {
             <span className="text-xs font-semibold text-muted-foreground">
               {t("pinned", lang)}
             </span>
+            <Badge className="h-4 border-0 bg-amber-100 px-1.5 text-[9px] font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
+              {pinnedNotes.length}
+            </Badge>
           </div>
-          <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 [&>*]:mb-3">
+          <div className={cn(
+            viewMode === "grid"
+              ? "columns-1 sm:columns-2 lg:columns-3 gap-3 [&>*]:mb-3"
+              : "space-y-3"
+          )}>
             {pinnedNotes.map((note) => (
               <NoteCard
                 key={note.id}
                 note={note}
                 isPinned
                 lang={lang}
+                viewMode={viewMode}
                 onClick={() => {
                   setEditingItem(note)
                   setActiveModal("editNote")
@@ -165,13 +257,18 @@ export function NotesView() {
               </span>
             </div>
           )}
-          <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 [&>*]:mb-3">
+          <div className={cn(
+            viewMode === "grid"
+              ? "columns-1 sm:columns-2 lg:columns-3 gap-3 [&>*]:mb-3"
+              : "space-y-3"
+          )}>
             {otherNotes.map((note) => (
               <NoteCard
                 key={note.id}
                 note={note}
                 isPinned={false}
                 lang={lang}
+                viewMode={viewMode}
                 onClick={() => {
                   setEditingItem(note)
                   setActiveModal("editNote")
@@ -226,17 +323,11 @@ export function NotesView() {
 
       {/* Empty state */}
       {filteredNotes.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-amber-100 dark:bg-amber-900/30">
-            <StickyNote className="size-7 text-amber-500" />
-          </div>
-          <p className="text-lg font-semibold text-foreground">
-            {t("noNotes", lang)}
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("noNotesDesc", lang)}
-          </p>
-        </div>
+        <AnimatedEmptyState
+          icon={StickyNote}
+          title={t("noNotes", lang)}
+          description={t("noNotesDesc", lang)}
+        />
       )}
     </div>
   )
@@ -246,6 +337,7 @@ function NoteCard({
   note,
   isPinned,
   lang,
+  viewMode,
   onClick,
   onPinToggle,
   onDelete,
@@ -263,6 +355,7 @@ function NoteCard({
   }
   isPinned: boolean
   lang: Language
+  viewMode: ViewMode
   onClick: () => void
   onPinToggle: (e: React.MouseEvent) => void
   onDelete: (e: React.MouseEvent) => void
@@ -276,113 +369,122 @@ function NoteCard({
   return (
     <Card
       className={cn(
-        "group cursor-pointer break-inside-avoid overflow-hidden rounded-xl border transition-all duration-200",
+        "group cursor-pointer break-inside-avoid overflow-hidden rounded-xl border transition-all duration-200 animate-fade-in-up",
         isPinned
-          ? "border-amber-200/50 bg-card/90 shadow-md shadow-amber-500/5 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-500/10 dark:border-amber-700/30"
-          : "border-border/30 bg-card/80 hover:-translate-y-0.5 hover:shadow-lg"
+          ? "border-amber-200/50 bg-card/90 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-500/10 dark:border-amber-700/30"
+          : "border-border/30 bg-card/80 hover:-translate-y-1 hover:shadow-lg",
+        viewMode === "list" && "break-inside-auto"
       )}
+      style={{
+        ...getColorShadow(noteColor),
+        borderLeft: `3px solid ${noteColor}`,
+      }}
       onClick={onClick}
     >
       <CardContent className="relative p-0">
         {/* Subtle gradient overlay */}
         <div className="absolute inset-0 rounded-xl" style={getGradientStyle(noteColor)} />
 
-        {/* Left color border */}
-        <div className="flex">
-          <div
-            className="w-1 shrink-0 self-stretch"
-            style={{ backgroundColor: noteColor }}
-          />
-          <div className="relative flex-1 p-4">
-            {/* Header row: title + badges */}
-            <div className="flex items-start justify-between gap-2">
-              <h4 className={cn(
-                "line-clamp-1 text-sm font-semibold text-foreground",
-                isPinned && "text-base"
-              )}>
-                {note.title}
-              </h4>
+        <div className="relative flex-1 p-4">
+          {/* Pinned badge for pinned notes */}
+          {isPinned && (
+            <div className="absolute right-2 top-2">
+              <Badge className="border-0 bg-amber-100 px-1.5 py-0.5 text-[9px] font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
+                📌 {t("pinnedNotes", lang)}
+              </Badge>
+            </div>
+          )}
+
+          {/* Header row: title + badges */}
+          <div className="flex items-start justify-between gap-2">
+            <h4 className={cn(
+              "line-clamp-1 text-sm font-semibold text-foreground",
+              isPinned && "text-base"
+            )}>
+              {note.title}
+            </h4>
+            {!isPinned && (
               <div className="flex shrink-0 items-center gap-1">
                 {note.isPinned && <Pin className="size-3 text-amber-500" />}
                 {note.flagged && <Star className="size-3 text-rose-500" />}
               </div>
-            </div>
-
-            {/* Content preview */}
-            {note.content && (
-              <p className={cn(
-                "mt-2 text-xs leading-relaxed text-muted-foreground",
-                isPinned ? "line-clamp-4" : "line-clamp-4"
-              )}>
-                {note.content}
-              </p>
             )}
+          </div>
 
-            {/* Checklist progress */}
-            {totalChecklist > 0 && (
-              <div className="mt-3 space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                    <CheckSquare className="size-3" />
-                    <span>{completedChecklist}/{totalChecklist}</span>
-                  </div>
-                  <span className="text-[10px] font-medium" style={{ color: noteColor }}>
-                    {Math.round(checklistProgress)}%
-                  </span>
+          {/* Content preview */}
+          {note.content && (
+            <p className={cn(
+              "mt-2 text-xs leading-relaxed text-muted-foreground",
+              isPinned ? "line-clamp-4" : "line-clamp-3"
+            )}>
+              {note.content}
+            </p>
+          )}
+
+          {/* Checklist progress */}
+          {totalChecklist > 0 && (
+            <div className="mt-3 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                  <CheckSquare className="size-3" />
+                  <span>{completedChecklist}/{totalChecklist}</span>
                 </div>
-                {/* Thin progress bar */}
-                <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full transition-all duration-300"
-                    style={{
-                      width: `${checklistProgress}%`,
-                      backgroundColor: noteColor,
-                    }}
-                  />
-                </div>
+                <span className="text-[10px] font-medium" style={{ color: noteColor }}>
+                  {Math.round(checklistProgress)}%
+                </span>
               </div>
-            )}
-
-            {/* Footer: time ago */}
-            <div className="mt-3 flex items-center gap-1 text-[10px] text-muted-foreground/70">
-              <Clock className="size-2.5" />
-              <span>{formatTimeAgo(note.updatedAt, lang)}</span>
+              {/* Thin progress bar */}
+              <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full transition-all duration-300"
+                  style={{
+                    width: `${checklistProgress}%`,
+                    backgroundColor: noteColor,
+                  }}
+                />
+              </div>
             </div>
+          )}
 
-            {/* Hover actions */}
-            <div className="absolute right-2 top-2 flex items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
-                onClick={onEdit}
-                title={t("edit", lang)}
-              >
-                <Pencil className="size-3" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
-                onClick={onPinToggle}
-                title={note.isPinned ? t("noteUnpinned", lang) : t("notePinned", lang)}
-              >
-                {note.isPinned ? (
-                  <PinOff className="size-3" />
-                ) : (
-                  <Pin className="size-3" />
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7 rounded-lg text-muted-foreground hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-950/30"
-                onClick={onDelete}
-                title={t("delete", lang)}
-              >
-                <Trash2 className="size-3" />
-              </Button>
-            </div>
+          {/* Footer: time ago */}
+          <div className="mt-3 flex items-center gap-1 text-[10px] text-muted-foreground/70">
+            <Clock className="size-2.5" />
+            <span>{formatTimeAgo(note.updatedAt, lang)}</span>
+          </div>
+
+          {/* Hover actions */}
+          <div className="absolute right-2 top-2 flex items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+              onClick={onEdit}
+              title={t("edit", lang)}
+            >
+              <Pencil className="size-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+              onClick={onPinToggle}
+              title={note.isPinned ? t("noteUnpinned", lang) : t("notePinned", lang)}
+            >
+              {note.isPinned ? (
+                <PinOff className="size-3" />
+              ) : (
+                <Pin className="size-3" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 rounded-lg text-muted-foreground hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-950/30"
+              onClick={onDelete}
+              title={t("delete", lang)}
+            >
+              <Trash2 className="size-3" />
+            </Button>
           </div>
         </div>
       </CardContent>

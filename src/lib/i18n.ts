@@ -298,6 +298,25 @@ const translations: Record<Language, Record<string, string>> = {
     filterAction: "Filter action",
     mostActiveDay: "Most active",
     allActions: "All actions",
+
+    // Enhanced Views
+    totalNotes: "Total Notes",
+    pinnedNotes: "Pinned",
+    weeklyRate: "Weekly",
+    habitSummary: "Habits Summary",
+    notesSummary: "Notes Summary",
+
+    // Data Visualizations
+    priorityDistribution: "Priority Distribution",
+    habitHeatmap: "Habit Heatmap",
+    noDataYet: "No data yet",
+    completedHabits: "Completed habits",
+
+    // Notifications & Recurring
+    nextOccurrenceCreated: "Next occurrence scheduled",
+    notificationPermission: "Notification Permission",
+    notificationsEnabled: "Browser notifications enabled",
+    notificationsDisabled: "Browser notifications disabled",
   },
 
   ar: {
@@ -596,6 +615,25 @@ const translations: Record<Language, Record<string, string>> = {
     filterAction: "تصفية الإجراء",
     mostActiveDay: "الأكثر نشاطاً",
     allActions: "جميع الإجراءات",
+
+    // Enhanced Views
+    totalNotes: "إجمالي الملاحظات",
+    pinnedNotes: "مثبتة",
+    weeklyRate: "أسبوعي",
+    habitSummary: "ملخص العادات",
+    notesSummary: "ملخص الملاحظات",
+
+    // Data Visualizations
+    priorityDistribution: "توزيع الأولويات",
+    habitHeatmap: "خريطة العادات الحرارية",
+    noDataYet: "لا بيانات بعد",
+    completedHabits: "عادات مكتملة",
+
+    // Notifications & Recurring
+    nextOccurrenceCreated: "تم جدولة التكرار التالي",
+    notificationPermission: "إذن التنبيهات",
+    notificationsEnabled: "تم تفعيل تنبيهات المتصفح",
+    notificationsDisabled: "تم تعطيل تنبيهات المتصفح",
   },
 };
 

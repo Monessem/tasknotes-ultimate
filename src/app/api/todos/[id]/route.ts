@@ -81,7 +81,70 @@ export async function PUT(
       data,
     });
 
-    return NextResponse.json(parseTodo(todo));
+    const updatedTodo = parseTodo(todo);
+
+    // Auto-create next occurrence for recurring tasks when marked as completed
+    if (data.completed === true && existing.recurring && existing.recurring !== 'none') {
+      // Calculate next due date
+      let nextDueDate: string | null = null;
+      if (existing.dueDate) {
+        const currentDue = new Date(existing.dueDate);
+        switch (existing.recurring) {
+          case 'daily':
+            currentDue.setDate(currentDue.getDate() + 1);
+            break;
+          case 'weekly':
+            currentDue.setDate(currentDue.getDate() + 7);
+            break;
+          case 'monthly':
+            currentDue.setMonth(currentDue.getMonth() + 1);
+            break;
+        }
+        nextDueDate = currentDue.toISOString();
+      }
+
+      // Parse and reset subtasks (all completed=false)
+      let resetSubtasks = existing.subtasks;
+      try {
+        const parsed = JSON.parse(existing.subtasks);
+        if (Array.isArray(parsed)) {
+          const reset = parsed.map(
+            (s: { id?: string; title: string; completed: boolean }) => ({
+              id: crypto.randomUUID(),
+              title: s.title,
+              completed: false,
+            })
+          );
+          resetSubtasks = JSON.stringify(reset);
+        }
+      } catch {
+        // Keep original subtasks string if parsing fails
+      }
+
+      // Create next occurrence
+      const nextTodo = await db.todo.create({
+        data: {
+          title: existing.title,
+          description: existing.description,
+          priority: existing.priority,
+          folderId: existing.folderId,
+          tags: existing.tags,
+          subtasks: resetSubtasks,
+          important: existing.important,
+          flagged: existing.flagged,
+          recurring: existing.recurring,
+          dueDate: nextDueDate,
+          completed: false,
+        },
+      });
+
+      return NextResponse.json({
+        ...updatedTodo,
+        nextOccurrence: parseTodo(nextTodo),
+      });
+    }
+
+    return NextResponse.json(updatedTodo);
   } catch (error) {
     console.error('Failed to update todo:', error);
     return NextResponse.json(

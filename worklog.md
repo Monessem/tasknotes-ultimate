@@ -1,5 +1,75 @@
 # Worklog
 
+---
+Task ID: Round-12
+Agent: main
+Task: Assess project status, QA, improve styling, add features, update worklog
+
+Work Log:
+- Assessed project status: lint passes, dev server running, all views rendering correctly
+- Performed QA with agent-browser: Dashboard, sidebar, all API routes returning 200s
+- Created Priority Distribution Pie Chart component (recharts donut chart)
+- Created Habit Heatmap Calendar component (GitHub-style contribution heatmap)
+- Enhanced Habits View with SVG progress ring, summary header, better cards, weekly rate badge
+- Enhanced Notes View with summary header, view mode toggle, color-tinted shadows, pinned badge
+- Created Browser Notification system (NotificationManager component + notifications.ts library)
+- Implemented Recurring Task auto-creation (API route + toast notification in todos view)
+- Enhanced Pomodoro Timer with gradient ring strokes, glow effect when running, animated border
+- Added 12+ i18n keys in both English and Arabic
+- All changes pass ESLint with zero errors
+- Dev server compiles and runs successfully
+
+Stage Summary:
+- 4 new files created: priority-pie-chart.tsx, habit-heatmap.tsx, notifications.ts, notification-manager.tsx
+- 5 existing files modified: app-shell.tsx, todos-view.tsx, pomodoro-timer.tsx, i18n.ts, habits-view.tsx, notes-view.tsx
+- New features: Priority pie chart, habit heatmap, browser notifications, recurring task auto-creation
+- Styling improvements: SVG progress rings, gradient timer rings, glow effects, summary headers, view mode toggles
+- Verification: ESLint zero errors, dev server running, agent-browser QA passed
+
+---
+Task ID: 2-b
+Agent: main
+Task: Enhanced Habits View and Notes View styling
+
+### Summary
+Significantly enhanced the visual design of the Habits View and Notes View with richer card designs, SVG progress ring, summary headers, improved calendars, view mode toggle, and animated empty states.
+
+### Files Modified
+- `src/components/views/habits-view.tsx` — Complete rewrite with 4 major enhancements
+- `src/components/views/notes-view.tsx` — Complete rewrite with 4 major enhancements
+- `src/lib/i18n.ts` — Added 5 i18n keys in both en and ar sections
+
+### Habits View Enhancements
+1. **SVG Progress Ring** — Replaced simple Progress bar with 80x80 SVG circular progress ring showing overall completion percentage. Gradient stroke from emerald-400 to teal-500 via `linearGradient`. Center text: large percentage + "completed" label. Placed next to summary stats section.
+2. **Summary Header Card** — Gradient background (rose-50 to emerald-50 in light, rose-950/20 to emerald-950/20 in dark). Shows: Total active habits (Target icon), Completed today (CheckCircle2 icon), Best streak (Flame icon) with colored icon backgrounds in a responsive 3-column grid.
+3. **Enhanced Habit Cards** — Subtle radial gradient background based on habit.color (3-5% opacity). Completed habits: green glow effect `shadow-[0_0_20px_rgba(16,185,129,0.12)]`. Toggle button: bounce animation (`animate-bounce`) on completion via `justCompleted` state. Better 7-day mini calendar: `rounded-full` cells instead of `rounded-md`, day initials below (M, T, W, T, F, S, S). "Weekly Rate" mini badge showing 7-day completion % with color-coded thresholds (≥80% emerald, ≥50% amber, <50% rose). Hover lift: `hover:-translate-y-1 hover:shadow-xl`.
+4. **Better Empty State** — Replaced simple div with `AnimatedEmptyState` component using Target icon.
+
+### Notes View Enhancements
+1. **Summary Header** — Gradient background card (amber-50 to orange-50). Shows total notes count with StickyNote icon, pinned count with Pin icon, both with colored icon backgrounds and count badges. Amber/orange theme matching notes color scheme.
+2. **Enhanced Note Cards** — Subtle color-tinted shadow based on note.color via `getColorShadow()` helper. Content preview: `line-clamp-3` for non-pinned notes (was `line-clamp-4`). Pinned notes: small amber badge "📌 Pinned" at top-right. Subtle `border-left` of 3px using note.color. Hover lift: `hover:-translate-y-1 hover:shadow-lg`. Entrance animation: `animate-fade-in-up` CSS class.
+3. **Better Empty State** — Replaced simple div with `AnimatedEmptyState` component using StickyNote icon.
+4. **View Mode Toggle** — Added Grid/List toggle at the top with LayoutGrid and LayoutList icons. Grid mode: masonry layout with `columns-1 sm:columns-2 lg:columns-3`. List mode: simple single-column layout with `space-y-3`. Active mode highlighted with amber-500 background.
+
+### i18n Keys Added (both en and ar)
+- totalNotes: "Total Notes" / "إجمالي الملاحظات"
+- pinnedNotes: "Pinned" / "مثبتة"
+- weeklyRate: "Weekly" / "أسبوعي"
+- habitSummary: "Habits Summary" / "ملخص العادات"
+- notesSummary: "Notes Summary" / "ملخص الملاحظات"
+
+### Technical Details
+- SVG progress ring uses `strokeDasharray`/`strokeDashoffset` with `linearGradient` for emerald→teal stroke
+- Bounce animation on habit toggle uses `useState` for `justCompleted` tracking with 600ms timeout
+- Color-tinted shadow computed dynamically: `box-shadow: 0 4px 14px ${color}15, 0 1px 3px ${color}08`
+- View mode toggle uses `useState<ViewMode>` pattern matching TodosView implementation
+- All text through `t()` function for i18n support
+- All existing audio, history, and toast integrations preserved
+- `cn()` from `@/lib/utils` for conditional classnames
+
+### Lint Status
+✅ Passes with zero errors
+
 ## Round-9b: Focus Mode View
 
 ### Summary
@@ -221,7 +291,7 @@ Added between "Today's Focus Summary" and the Stats row:
 
 ---
 
-# TaskNotes Ultimate — Project Handover Document
+# TaskNotes Ultimate — Project Handover Document (Updated Round-12)
 
 ## 1. Current Project Status Assessment
 
@@ -246,7 +316,7 @@ The TaskNotes Ultimate productivity application is a fully functional, feature-r
 
 ---
 
-## 2. Completed Features & Modifications (This Session)
+## 2. Completed Features & Modifications (All Sessions)
 
 ### New Views Created
 | View | File | Description |
@@ -261,12 +331,18 @@ The TaskNotes Ultimate productivity application is a fully functional, feature-r
 | **Important** | Summary header card with gradient, amber-bordered task/note cards, description previews, hover actions (edit/delete), pin indicator |
 | **Flagged** | Summary header card with gradient, rose-bordered task/note cards, description previews, hover actions (edit/delete) |
 | **History** | Action type filter dropdown, search filter, gradient timeline, summary stats, active filter badges, empty state for filters |
-| **Dashboard** | Weekly Insights section (category breakdown, streak badges, week-over-week comparison) |
+| **Dashboard** | Weekly Insights section, Priority Pie Chart, Habit Heatmap, productivity score ring |
+| **Habits** | SVG progress ring, summary header card, enhanced habit cards with glow/bounce, weekly rate badge, day initials on mini calendar |
+| **Notes** | Summary header card, view mode toggle (Grid/List), color-tinted shadows, pinned badge, entrance animations |
 
 ### New Components Created
 | Component | File | Description |
 |-----------|------|-------------|
 | **Keyboard Shortcuts Dialog** | `keyboard-shortcuts-dialog.tsx` | Modal showing all shortcuts, opens with `?` key, Mac/Windows detection, grouped sections |
+| **Priority Pie Chart** | `priority-pie-chart.tsx` | Recharts donut chart showing task distribution by priority (high/medium/low) |
+| **Habit Heatmap** | `habit-heatmap.tsx` | GitHub-style contribution heatmap showing 12 weeks of habit completion data |
+| **Notification Manager** | `notification-manager.tsx` | Background component for browser notification permission and periodic task checking |
+| **Notifications Library** | `lib/notifications.ts` | Browser Notification API integration: request permission, show notifications, check due tasks |
 
 ### Features Added
 - Calendar view with monthly grid, day detail panel, and task dots
@@ -279,15 +355,21 @@ The TaskNotes Ultimate productivity application is a fully functional, feature-r
 - Hover-reveal delete/edit actions with audio + history logging
 - Habit streak indicators with flame icons
 - Summary header cards on Important and Flagged views
-- History view filtering by action type
-- History view search functionality
+- History view filtering by action type and search
 - Gradient timeline visual in History view
 - Weekly Insights section on Dashboard (category breakdown, streaks, week comparison)
 - Keyboard shortcuts dialog (press `?`)
 - `⇧⌘H` shortcut for adding new habits
 - Calendar and Focus Mode items in command palette
+- **Priority Distribution Pie Chart** — donut chart with high/medium/low breakdown
+- **Habit Heatmap Calendar** — GitHub-style 12-week contribution heatmap
+- **Browser Notifications** — request permission, check due/overdue tasks, periodic reminders
+- **Recurring Task Auto-Creation** — automatically creates next occurrence when recurring task is completed
+- **Enhanced Pomodoro Timer** — gradient ring strokes, glow effect when running, animated top border
+- **Habits View SVG Progress Ring** — circular progress with emerald→teal gradient
+- **Notes View Mode Toggle** — Grid (masonry) / List view switching
 
-### i18n: 55+ new translation keys added (both English and Arabic)
+### i18n: 70+ new translation keys added (both English and Arabic)
 
 ### Verification Results
 - ✅ ESLint: Zero errors
@@ -300,35 +382,92 @@ The TaskNotes Ultimate productivity application is a fully functional, feature-r
 ## 3. Unresolved Issues, Risks & Next-Phase Recommendations
 
 ### Known Issues
-1. **Dev server stability in background**: The Next.js dev server process sometimes terminates when run in the background. Using `setsid` or `nohup` helps but isn't 100% reliable. Production build works fine.
+1. **Dev server stability in background**: The Next.js dev server process sometimes terminates when run in the background. Production build works fine.
 2. **Arabic RTL layout**: Not fully tested - some views may need RTL-specific adjustments (direction: rtl, text alignment)
-3. **Ocean/Sunset color themes**: The Settings UI has color theme picker with 3 options, but only "emerald" is fully implemented. Ocean and Sunset need actual CSS variable mapping.
+3. **Ocean/Sunset color themes**: CSS variables are defined in globals.css for ocean and sunset themes, but the theme switching mechanism needs the `data-theme` attribute to be properly set on the `<html>` element by the ColorThemeSync component.
 4. **GitHub Sync**: Infrastructure exists (gitHubToken, gistId in Settings schema) but full OAuth flow and sync logic not implemented.
-5. **Notification system**: Task reminders toggle exists in Settings but no actual push/browser notification implementation.
 
 ### Priority Recommendations for Next Phase
 
 **High Priority:**
-1. **Complete Color Theme System** — Wire up "ocean" and "sunset" themes in globals.css with actual CSS variable overrides
+1. **Complete Color Theme System** — Verify the `data-theme` attribute is properly applied by `ColorThemeSync` component for ocean/sunset themes
 2. **RTL Layout Support** — Add `dir="rtl"` handling for Arabic language, test and fix all views
-3. **Browser Notifications** — Implement Web Notification API for task reminders when enabled
-4. **Drag-and-Drop for Todos** — dnd-kit is installed and SortableContext is already in todos-view.tsx; ensure reorder persists to backend
+3. **Drag-and-Drop Persistence** — dnd-kit is installed and SortableContext is in todos-view.tsx with localStorage persistence; consider backend persistence
+4. **Export to PDF** — Generate PDF reports of weekly/monthly productivity
 
 **Medium Priority:**
-5. **Data Visualization Dashboard** — Add more chart types: priority distribution pie chart, habit heatmap calendar
-6. **Recurring Tasks** — Auto-create next occurrence when a recurring task is completed
-7. **Collaboration Features** — Share tasks/notes via links
-8. **Offline Mode** — Service worker caching strategy for full offline support
-9. **Export to PDF** — Generate PDF reports of weekly/monthly productivity
+5. **Collaboration Features** — Share tasks/notes via links
+6. **Offline Mode** — Service worker caching strategy for full offline support
+7. **Custom Themes** — Allow users to create custom color themes
+8. **Mobile App** — PWA install prompt exists; enhance with native-like interactions
 
 **Low Priority:**
-10. **Custom Themes** — Allow users to create custom color themes
-11. **Keyboard Navigation** — Full keyboard-only navigation support
-12. **Mobile App** — PWA install prompt exists; enhance with native-like interactions
-13. **GitHub Gist Sync** — Complete the sync infrastructure
+9. **Keyboard Navigation** — Full keyboard-only navigation support
+10. **GitHub Gist Sync** — Complete the sync infrastructure
+11. **Task Dependencies** — Add blocking/blocked-by relationships between tasks
 
 ### Architecture Notes
 - The app uses a single-page architecture with Zustand-managed view switching (no Next.js routing for views)
 - All data flows through API routes with Prisma ORM
 - Audio, history logging, and toast notifications are properly wired across all CRUD operations
 - The emerald/teal design system is consistently applied across all views
+- Browser notifications respect the `settings.taskReminders` flag
+- Recurring task auto-creation handles daily, weekly, and monthly patterns with subtask reset
+
+
+---
+
+Task ID: 2-a
+Agent: main
+Task: Create Priority Distribution Pie Chart and Habit Heatmap Calendar components
+
+Work Log:
+- Created `/src/components/priority-pie-chart.tsx` - Donut pie chart showing task distribution by priority (high/medium/low)
+  - Uses recharts (PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend)
+  - Color scheme: high=rose-500 (#f43f5e), medium=amber-500 (#f59e0b), low=emerald-500 (#10b981)
+  - Total task count displayed in center of donut
+  - Custom legend below with color dots and labels showing count per priority
+  - Glass card wrapper with rounded-2xl border-border/50 bg-card/80 backdrop-blur-sm p-5
+  - Title uses t("priorityDistribution", lang) from i18n
+  - Responsive sizing (size-48 on mobile, size-56 on desktop)
+  - Data from useAppStore todos filtered for non-deleted items
+  - Empty state with AnimatedEmptyState when no tasks exist
+  - Wrapped in dynamic() with ssr:false to avoid recharts SSR issues
+  - Framer Motion entrance animation
+
+- Created `/src/components/habit-heatmap.tsx` - GitHub-style contribution heatmap for habit completion
+  - Shows last 12 weeks (84 days) of habit completion data
+  - 7 rows (Sun-Sat), ~13 columns (weeks)
+  - Color scale: 0=bg-muted/30, 1=emerald-200/dark:emerald-900, 2=emerald-400/dark:emerald-700, 3+=emerald-600/dark:emerald-500
+  - Month labels at top, day labels (Mon/Wed/Fri) on left
+  - Tooltip on hover showing formatted date and completion count
+  - Legend at bottom showing color scale with labels
+  - Glass card wrapper matching project style
+  - Title uses t("habitHeatmap", lang) from i18n
+  - Data from useAppStore habitLogs and habits
+  - Empty state when no active habits exist
+  - Wrapped in dynamic() with ssr:false
+  - Framer Motion entrance animation
+  - All hooks called before conditional return (no rules-of-hooks violation)
+
+- Updated `/src/lib/i18n.ts` - Added 4 new i18n keys in both en and ar sections:
+  - priorityDistribution: "Priority Distribution" / "توزيع الأولويات"
+  - habitHeatmap: "Habit Heatmap" / "خريطة العادات الحرارية"
+  - noDataYet: "No data yet" / "لا بيانات بعد"
+  - completedHabits: "Completed habits" / "عادات مكتملة"
+
+- Updated `/src/components/app-shell.tsx`:
+  - Imported PriorityPieChart from @/components/priority-pie-chart
+  - Imported HabitHeatmap from @/components/habit-heatmap
+  - Added Data Visualizations grid section after HabitCompletionChart with lg:grid-cols-2 layout
+
+### Lint Status
+✅ Passes with zero errors
+
+### Technical Notes
+- Both components use dynamic() with ssr:false to prevent recharts SSR hydration mismatch
+- HabitHeatmap moves all useMemo hooks before conditional return to satisfy React hooks rules
+- Removed unused getCellColor function that was dead code after switching to Tailwind class approach
+- Tooltip positioned relative to parent container using getBoundingClientRect
+- Heatmap cells use flex layout with fixed cellSize/cellGap for precise grid alignment
+- Month labels deduplicated to only show when month changes across week columns
