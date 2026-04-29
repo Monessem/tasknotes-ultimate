@@ -463,6 +463,51 @@ const translations: Record<Language, Record<string, string>> = {
     switchView: "Switch view",
     searchTasks: "Search tasks",
 
+    // Settings Page - Security & Privacy
+    securityPrivacy: "Security & Privacy",
+    dataEncryption: "Data Encryption",
+    dataEncryptionDesc: "Your data is stored locally in SQLite",
+    secureApiAccess: "Secure API Access",
+    secureApiAccessDesc: "Enable authentication for API endpoints",
+    clearBrowsingData: "Clear Browsing Data",
+    clearBrowsingDataDesc: "Clear all locally cached data",
+    privacyMode: "Privacy Mode",
+    privacyModeDesc: "Hide profile info from dashboard",
+    browsingDataCleared: "Browsing data cleared",
+
+    // Settings Page - API Integrations
+    apiIntegrations: "API Integrations",
+    weatherApiKeyLabel: "OpenWeatherMap API Key",
+    weatherApiKeyDesc: "Optional: Use your own weather API key",
+    githubSync: "GitHub Sync",
+    githubToken: "GitHub Token",
+    githubTokenPlaceholder: "ghp_xxxxxxxxxxxx",
+    gistId: "Gist ID",
+    gistIdPlaceholder: "Enter Gist ID for sync...",
+    webhookUrl: "Webhook URL",
+    webhookUrlDesc: "Receive notifications via webhook",
+    webhookUrlPlaceholder: "https://example.com/webhook",
+
+    // Settings Page - Feature Toggles
+    featureToggles: "Feature Toggles",
+    weatherWidgetToggle: "Weather Widget",
+    weatherWidgetToggleDesc: "Show weather information on dashboard",
+    pomodoroTimerToggle: "Pomodoro Timer",
+    pomodoroTimerToggleDesc: "Enable pomodoro timer display",
+    achievementsToggle: "Achievements System",
+    achievementsToggleDesc: "Enable achievements and milestones",
+    weeklyReportToggle: "Weekly Report",
+    weeklyReportToggleDesc: "Generate weekly productivity reports",
+
+    // Settings Page - Audit & Logs
+    auditLogs: "Audit & Logs",
+    auditLogsDesc: "Recent activity log",
+    recentActivity: "Recent Activity",
+    clearHistory: "Clear History",
+    exportActivityLog: "Export Activity Log",
+    noHistoryEntries: "No activity recorded yet",
+    activityLogExported: "Activity log exported",
+
     // Settings Page - About
     aboutApp: "About",
     techStack: "Tech Stack",
@@ -930,6 +975,51 @@ const translations: Record<Language, Record<string, string>> = {
     openShortcuts: "فتح قائمة الاختصارات الكاملة",
     switchView: "تبديل العرض",
     searchTasks: "بحث المهام",
+
+    // Settings Page - Security & Privacy
+    securityPrivacy: "الأمان والخصوصية",
+    dataEncryption: "تشفير البيانات",
+    dataEncryptionDesc: "بياناتك مخزنة محلياً في SQLite",
+    secureApiAccess: "الوصول الآمن للواجهة",
+    secureApiAccessDesc: "تفعيل المصادقة لنقاط الوصول",
+    clearBrowsingData: "مسح بيانات التصفح",
+    clearBrowsingDataDesc: "مسح جميع البيانات المخزنة مؤقتاً",
+    privacyMode: "وضع الخصوصية",
+    privacyModeDesc: "إخفاء معلومات الملف الشخصي من لوحة التحكم",
+    browsingDataCleared: "تم مسح بيانات التصفح",
+
+    // Settings Page - API Integrations
+    apiIntegrations: "تكاملات الواجهة",
+    weatherApiKeyLabel: "مفتاح OpenWeatherMap API",
+    weatherApiKeyDesc: "اختياري: استخدم مفتاح API الخاص بك للطقس",
+    githubSync: "مزامنة GitHub",
+    githubToken: "رمز GitHub",
+    githubTokenPlaceholder: "ghp_xxxxxxxxxxxx",
+    gistId: "معرف Gist",
+    gistIdPlaceholder: "أدخل معرف Gist للمزامنة...",
+    webhookUrl: "رابط Webhook",
+    webhookUrlDesc: "استقبال الإشعارات عبر webhook",
+    webhookUrlPlaceholder: "https://example.com/webhook",
+
+    // Settings Page - Feature Toggles
+    featureToggles: "تبديل الميزات",
+    weatherWidgetToggle: "ودجيت الطقس",
+    weatherWidgetToggleDesc: "عرض معلومات الطقس على لوحة التحكم",
+    pomodoroTimerToggle: "مؤقت بومودورو",
+    pomodoroTimerToggleDesc: "تفعيل عرض مؤقت بومودورو",
+    achievementsToggle: "نظام الإنجازات",
+    achievementsToggleDesc: "تفعيل الإنجازات والمعالم",
+    weeklyReportToggle: "التقرير الأسبوعي",
+    weeklyReportToggleDesc: "إنشاء تقارير إنتاجية أسبوعية",
+
+    // Settings Page - Audit & Logs
+    auditLogs: "التدقيق والسجلات",
+    auditLogsDesc: "سجل النشاط الأخير",
+    recentActivity: "النشاط الأخير",
+    clearHistory: "مسح السجل",
+    exportActivityLog: "تصدير سجل النشاط",
+    noHistoryEntries: "لا يوجد نشاط مسجل بعد",
+    activityLogExported: "تم تصدير سجل النشاط",
 
     // Settings Page - About
     aboutApp: "حول التطبيق",

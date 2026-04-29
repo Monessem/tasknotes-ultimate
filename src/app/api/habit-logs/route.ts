@@ -28,9 +28,19 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { habitId, date } = body;
 
-    if (!habitId || !date) {
+    // Validate habitId
+    if (typeof habitId !== 'string' || habitId.trim().length === 0) {
       return NextResponse.json(
-        { error: 'habitId and date are required' },
+        { error: 'habitId is required and must be a non-empty string' },
+        { status: 400 }
+      );
+    }
+
+    // Validate date format (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (typeof date !== 'string' || !dateRegex.test(date)) {
+      return NextResponse.json(
+        { error: 'Date must be in YYYY-MM-DD format' },
         { status: 400 }
       );
     }

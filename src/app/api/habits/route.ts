@@ -29,11 +29,34 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    // Validate name
+    if (typeof body.name !== 'string' || body.name.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'Name is required and must be a non-empty string' },
+        { status: 400 }
+      );
+    }
+    if (body.name.length > 100) {
+      return NextResponse.json(
+        { error: 'Name must be 100 characters or less' },
+        { status: 400 }
+      );
+    }
+
+    // Validate frequency
+    const validFrequencies = ['daily', 'weekly', 'weekdays'];
+    if (body.frequency && !validFrequencies.includes(body.frequency)) {
+      return NextResponse.json(
+        { error: 'Frequency must be one of: daily, weekly, weekdays' },
+        { status: 400 }
+      );
+    }
+
     const habit = await db.habit.create({
       data: {
         name: body.name,
         icon: body.icon ?? '🎯',
-        color: body.color ?? '#6366f1',
+        color: body.color ?? '#10b981',
         frequency: body.frequency ?? 'daily',
         reminderTime: body.reminderTime ?? null,
         goal: body.goal ?? 30,

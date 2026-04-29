@@ -123,6 +123,14 @@ export interface AppSettings {
   longBreakInterval: number;
   reminderTime: string; // "morning" | "evening" | "both"
   displayName: string;
+  privacyMode: boolean;
+  pomodoroEnabled: boolean;
+  achievementsEnabled: boolean;
+  weeklyReportEnabled: boolean;
+  weatherApiKey: string;
+  webhookUrl: string;
+  gitHubToken: string;
+  gistId: string;
 }
 
 // Modal types
@@ -244,6 +252,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     longBreakInterval: 4,
     reminderTime: "morning",
     displayName: "",
+    privacyMode: false,
+    pomodoroEnabled: true,
+    achievementsEnabled: true,
+    weeklyReportEnabled: true,
+    weatherApiKey: "",
+    webhookUrl: "",
+    gitHubToken: "",
+    gistId: "",
   },
   setSettings: (settings) => set({ settings }),
 
@@ -428,6 +444,14 @@ export const useAppStore = create<AppState>((set, get) => ({
             longBreakInterval: data.longBreakInterval ?? 4,
             reminderTime: data.reminderTime ?? "morning",
             displayName: data.displayName ?? "",
+            privacyMode: data.privacyMode ?? false,
+            pomodoroEnabled: data.pomodoroEnabled ?? true,
+            achievementsEnabled: data.achievementsEnabled ?? true,
+            weeklyReportEnabled: data.weeklyReportEnabled ?? true,
+            weatherApiKey: data.weatherApiKey ?? "",
+            webhookUrl: data.webhookUrl ?? "",
+            gitHubToken: data.gitHubToken ?? "",
+            gistId: data.gistId ?? "",
           },
         });
       }

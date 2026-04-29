@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback, useRef } from "react"
+import { useEffect, useState, useCallback, useRef, useMemo } from "react"
 import { motion } from "framer-motion"
 import { useAppStore, type ViewType } from "@/store/app-store"
 import { AppSidebar } from "@/components/sidebar"
@@ -134,8 +134,8 @@ function DashboardView() {
     (s) => s.type === "work" && isThisWeek(s.date)
   ).length
 
-  // Habit streak: longest consecutive days of habit completion
-  const getHabitStreak = () => {
+  // Habit streak: longest consecutive days of habit completion (memoized)
+  const habitStreak = useMemo(() => {
     const activeHabitList = habits.filter((h) => !h.deletedAt)
     let bestStreak = 0
     for (const habit of activeHabitList) {
@@ -159,10 +159,10 @@ function DashboardView() {
       if (streak > bestStreak) bestStreak = streak
     }
     return bestStreak
-  }
+  }, [habits, habitLogs])
 
-  // Pomodoro streak: consecutive days with at least one work session
-  const getPomodoroStreak = () => {
+  // Pomodoro streak: consecutive days with at least one work session (memoized)
+  const pomodoroStreak = useMemo(() => {
     const workDates = [
       ...new Set(
         pomodoroSessions
@@ -191,13 +191,10 @@ function DashboardView() {
       }
     }
     return streak
-  }
+  }, [pomodoroSessions])
 
-  const habitStreak = getHabitStreak()
-  const pomodoroStreak = getPomodoroStreak()
-
-  // Week vs last week comparison
-  const getWeekComparison = () => {
+  // Week vs last week comparison (memoized)
+  const weekComparison = useMemo(() => {
     if (tasksCompletedLastWeek === 0 && tasksCompletedThisWeek === 0) return { type: "same" as const }
     if (tasksCompletedLastWeek === 0) return { type: "up" as const, pct: 100 }
     const pct = Math.round(
@@ -206,14 +203,15 @@ function DashboardView() {
     if (pct > 0) return { type: "up" as const, pct }
     if (pct < 0) return { type: "down" as const, pct: Math.abs(pct) }
     return { type: "same" as const }
-  }
-  const weekComparison = getWeekComparison()
+  }, [tasksCompletedThisWeek, tasksCompletedLastWeek])
 
-  // Productivity score: weighted combination of task completion, habits, and focus time
-  const taskScore = completionRate * 0.4
-  const habitScore = activeHabits.length > 0 ? (habitsCompletedToday / activeHabits.length) * 100 * 0.35 : 0
-  const focusScore = Math.min(focusMinutes / 120, 1) * 100 * 0.25
-  const productivityScore = Math.round(taskScore + habitScore + focusScore)
+  // Productivity score: weighted combination of task completion, habits, and focus time (memoized)
+  const productivityScore = useMemo(() => {
+    const taskScore = completionRate * 0.4
+    const habitScore = activeHabits.length > 0 ? (habitsCompletedToday / activeHabits.length) * 100 * 0.35 : 0
+    const focusScore = Math.min(focusMinutes / 120, 1) * 100 * 0.25
+    return Math.round(taskScore + habitScore + focusScore)
+  }, [completionRate, activeHabits.length, habitsCompletedToday, focusMinutes])
 
   // Motivational quote based on day of week
   const dayOfWeek = new Date().getDay()

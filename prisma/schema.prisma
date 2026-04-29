@@ -114,6 +114,12 @@ model Settings {
   longBreakInterval   Int @default(4)
   reminderTime        String @default("morning")
   displayName         String @default("")
+  privacyMode         Boolean @default(false)
+  pomodoroEnabled     Boolean @default(true)
+  achievementsEnabled Boolean @default(true)
+  weeklyReportEnabled Boolean @default(true)
+  weatherApiKey       String @default("")
+  webhookUrl          String @default("")
 }
 
 model Achievement {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useCallback } from "react"
 import {
   Target,
   Plus,
@@ -115,7 +115,7 @@ export function HabitsView() {
       try {
         // For weekly habits, if already completed this week, don't toggle off
         if (frequency === "weekly" && isWeeklyHabitCompletedThisWeek(habitId, habitLogs)) {
-          return
+          // Allow un-toggling weekly habits for consistency
         }
 
         const res = await fetch("/api/habit-logs", {

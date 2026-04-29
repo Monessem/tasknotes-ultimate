@@ -47,6 +47,20 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    // Validate title
+    if (typeof body.title !== 'string' || body.title.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'Title is required and must be a non-empty string' },
+        { status: 400 }
+      );
+    }
+    if (body.title.length > 200) {
+      return NextResponse.json(
+        { error: 'Title must be 200 characters or less' },
+        { status: 400 }
+      );
+    }
+
     const note = await db.note.create({
       data: {
         title: body.title,
