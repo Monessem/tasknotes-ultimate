@@ -9,6 +9,7 @@ import {
   Target,
   Star,
   CalendarDays,
+  Zap,
   Flag,
   History,
   FolderOpen,
@@ -70,6 +71,8 @@ const navSections: NavSection[] = [
     items: [
       { id: "important", labelKey: "important", icon: Star },
       { id: "today", labelKey: "today", icon: CalendarDays },
+      { id: "calendar", labelKey: "calendar", icon: CalendarDays },
+      { id: "focus", labelKey: "focusView", icon: Zap },
       { id: "flagged", labelKey: "flagged", icon: Flag },
       { id: "history", labelKey: "history", icon: History },
     ],

@@ -9,6 +9,8 @@ export type ViewType =
   | "habits"
   | "important"
   | "today"
+  | "calendar"
+  | "focus"
   | "flagged"
   | "history"
   | "folders"

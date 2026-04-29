@@ -9,6 +9,7 @@ import { PomodoroTimer } from "@/components/pomodoro-timer"
 import { TodosView } from "@/components/views/todos-view"
 import { ImportantView } from "@/components/views/important-view"
 import { TodayView } from "@/components/views/today-view"
+import { CalendarView } from "@/components/views/calendar-view"
 import { FlaggedView } from "@/components/views/flagged-view"
 import { NotesView } from "@/components/views/notes-view"
 import { HabitsView } from "@/components/views/habits-view"
@@ -18,6 +19,7 @@ import { RecycleView } from "@/components/views/recycle-view"
 import { HistoryView } from "@/components/views/history-view"
 import { FolderDetailView } from "@/components/views/folder-detail-view"
 import { AchievementsView } from "@/components/views/achievements-view"
+import { FocusView } from "@/components/views/focus-view"
 import { TodoModal } from "@/components/modals/todo-modal"
 import { NoteModal } from "@/components/modals/note-modal"
 import { HabitModal } from "@/components/modals/habit-modal"
@@ -525,6 +527,10 @@ export function AppShell() {
         return <ImportantView />
       case "today":
         return <TodayView />
+      case "calendar":
+        return <CalendarView />
+      case "focus":
+        return <FocusView />
       case "flagged":
         return <FlaggedView />
       case "history":

@@ -19,6 +19,7 @@ import {
   Trash2,
   Settings,
   Trophy,
+  Zap,
 } from "lucide-react"
 import { useAppStore, type ViewType, type ModalType } from "@/store/app-store"
 import { t } from "@/lib/i18n"
@@ -32,6 +33,8 @@ const viewIcons: Record<ViewType, React.ElementType> = {
   habits: Target,
   important: Star,
   today: CalendarDays,
+  calendar: CalendarDays,
+  focus: Zap,
   flagged: Flag,
   history: History,
   folders: FolderOpen,
@@ -47,6 +50,8 @@ const viewTitleKeys: Record<ViewType, string> = {
   habits: "habits",
   important: "important",
   today: "today",
+  calendar: "calendar",
+  focus: "focusView",
   flagged: "flagged",
   history: "history",
   folders: "folders",
@@ -71,6 +76,8 @@ export function AppHeader() {
     habits: "addHabit",
     important: "addTodo",
     today: "addTodo",
+    calendar: "addTodo",
+    focus: null,
     flagged: "addTodo",
     history: null,
     folders: "addFolder",
