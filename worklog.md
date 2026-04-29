@@ -1,6 +1,47 @@
 # Worklog
 
 ---
+Task ID: 5
+Agent: task-templates-builder
+Task: Build Task Templates feature
+
+Work Log:
+- Read worklog.md and project context to understand existing architecture
+- Read todos-view.tsx, app-shell.tsx, i18n.ts, app-store.ts, dialog.tsx, audio.ts, history-log.ts to understand existing patterns
+- Added 26 i18n keys in both English and Arabic sections for all template-related text
+- Created `/src/components/task-templates.tsx` — Full Task Templates dialog component with:
+  - 6 pre-made templates: Morning Routine (6 tasks), Work Sprint (5 tasks), Study Session (5 tasks), Fitness Plan (4 tasks), Home Organization (5 tasks), Goal Setting (4 tasks)
+  - Each template shows: gradient icon, name, description, task count badge
+  - Click to expand preview of all tasks in the template
+  - "Apply Template" button creates all tasks via POST /api/todos with priority "medium"
+  - Custom Template section with dynamic task input fields (add/remove, Enter to add new)
+  - Framer Motion entrance animations and expand/collapse animations
+  - Glass morphism styling: bg-card/80 backdrop-blur-sm with color-tinted borders
+  - Grid layout: 2 columns on desktop, 1 on mobile
+  - Loading spinner during template application
+  - Toast notification: "X tasks created from template"
+  - Audio: audioManager.play("complete") on successful application
+  - History logging via logHistory("create", "task", ...) for each created task
+  - Full i18n support with t() function for all text
+- Updated `/src/components/views/todos-view.tsx`:
+  - Added Sparkles icon import from lucide-react
+  - Added TaskTemplates component import
+  - Added templatesOpen state
+  - Added "Use Template" button with Sparkles icon in the filter/sort bar (before view toggle)
+  - Rendered TaskTemplates dialog at the bottom of the component
+- Ran ESLint: zero errors
+- Dev server compiling and running successfully
+
+Stage Summary:
+- 1 new file created: task-templates.tsx (Task Templates dialog component)
+- 2 existing files modified: todos-view.tsx, i18n.ts
+- 26 new i18n keys added (both en and ar)
+- Task Templates accessible via "Use Template" button with Sparkles icon in Todos view filter bar
+- Templates create tasks via POST /api/todos, log history, play audio, show toast
+- Custom template feature allows users to define their own task sets
+- ESLint: zero errors, dev server running
+
+---
 Task ID: Round-12
 Agent: main
 Task: Assess project status, QA, improve styling, add features, update worklog
@@ -471,3 +512,175 @@ Work Log:
 - Tooltip positioned relative to parent container using getBoundingClientRect
 - Heatmap cells use flex layout with fixed cellSize/cellGap for precise grid alignment
 - Month labels deduplicated to only show when month changes across week columns
+
+---
+Task ID: Round-13
+Agent: main
+Task: Assess project status, QA via agent-browser, improve styling, add features, update worklog
+
+Work Log:
+- Assessed project status: lint passes, dev server running, all API routes returning 200s
+- Performed QA with agent-browser: Dashboard, Tasks, Today, Calendar, Focus Mode, Habits, Notes, Settings, Achievements views all rendering correctly
+- Used VLM (vision model) to analyze screenshots — identified visual bugs, styling inconsistencies, missing elements, and UX issues
+- Created Weekly Productivity Report component (weekly-report.tsx) with: overall score ring, key metrics grid, detailed stats, achievements section, export/copy functionality
+- Created Task Templates component (task-templates.tsx) via subagent with: 6 pre-made templates, custom template option, expand/collapse preview, apply template creates tasks
+- Enhanced sidebar styling: active state indicator line, better hover transitions with scale effects, improved badge colors, glass morphism footer, collapse button with text label
+- Enhanced dashboard styling: productivity score card with emerald border and shadow, motivational quote card with amber theme, better StatCard hover effects (translate-y-1, shadow-xl, scale-110)
+- Enhanced achievements view: progress ring replacing plain icon, gradient score text, improved card hover effects, better shadow and border styling
+- Enhanced settings view: polished color theme picker with larger circles, better border highlighting, improved section hover effects
+- Enhanced Pomodoro timer: stronger glow effect when running (shadow-xl, border color changes)
+- Enhanced app header: stronger backdrop blur (bg-card/90), cleaner icon sizing
+- Added 30+ i18n keys in both English and Arabic for weekly report, task templates, and new features
+- All changes pass ESLint with zero errors
+- Dev server compiles and runs successfully
+- Final VLM QA rating: 8/10 visual quality
+
+Stage Summary:
+- 2 new files created: weekly-report.tsx, task-templates.tsx
+- 8 existing files modified: app-shell.tsx, sidebar.tsx, app-header.tsx, settings-view.tsx, achievements-view.tsx, pomodoro-timer.tsx, i18n.ts, todos-view.tsx
+- New features: Weekly Productivity Report (modal with stats, export, copy), Task Templates (6 presets + custom)
+- Styling improvements: sidebar active indicators, card hover animations, progress rings, better shadows, glass morphism effects
+- 30+ new i18n keys added (both English and Arabic)
+- Verification: ESLint zero errors, dev server running, agent-browser + VLM QA passed with 8/10 rating
+
+# TaskNotes Ultimate — Project Handover Document (Updated Round-13)
+
+## 1. Current Project Status Assessment
+
+### Overall Status: ✅ Stable & Feature-Rich
+
+The TaskNotes Ultimate productivity application is a fully functional, feature-rich Next.js 16 web application with a comprehensive set of productivity tools. The application compiles cleanly, passes all ESLint checks, and runs without browser errors.
+
+**Tech Stack:**
+- Next.js 16 with App Router + Turbopack
+- TypeScript 5 with strict typing
+- Tailwind CSS 4 + shadcn/ui component library
+- Prisma ORM with SQLite database
+- Zustand for state management
+- Recharts for data visualization
+- Framer Motion for animations
+- Sonner for toast notifications
+- dnd-kit for drag-and-drop
+
+**Database:** 9 Prisma models (Todo, Note, Habit, HabitLog, Folder, PomodoroSession, HistoryEntry, Settings, Achievement)
+
+**API Routes:** 14+ API endpoints with full CRUD, soft delete, hard delete, and upsert
+
+**Visual Quality:** VLM-rated 8/10 for visual design
+
+---
+
+## 2. Completed Features & Modifications (All Sessions)
+
+### New Views Created
+| View | File | Description |
+|------|------|-------------|
+| **Calendar** | `views/calendar-view.tsx` | Monthly calendar with task dots, day detail panel, month navigation, summary stats, progress bar |
+| **Focus Mode** | `views/focus-view.tsx` | Distraction-free task execution with hero task display, mini timer, session stats, Up Next preview |
+
+### Views Enhanced
+| View | Enhancements |
+|------|-------------|
+| **Today** | Day progress bar, completion summary ring, priority-bordered task cards, enhanced habit cards with streak, animated empty state |
+| **Important** | Summary header card with gradient, amber-bordered task/note cards, description previews, hover actions (edit/delete), pin indicator |
+| **Flagged** | Summary header card with gradient, rose-bordered task/note cards, description previews, hover actions (edit/delete) |
+| **History** | Action type filter dropdown, search filter, gradient timeline, summary stats, active filter badges, empty state for filters |
+| **Dashboard** | Weekly Insights section, Priority Pie Chart, Habit Heatmap, productivity score ring, Weekly Report button |
+| **Habits** | SVG progress ring, summary header card, enhanced habit cards with glow/bounce, weekly rate badge, day initials on mini calendar |
+| **Notes** | Summary header card, view mode toggle (Grid/List), color-tinted shadows, pinned badge, entrance animations |
+| **Achievements** | Progress ring with gradient stroke, improved summary header with emerald border, better card hover effects |
+| **Settings** | Polished color theme picker with larger circles, improved section hover effects with shadows |
+
+### New Components Created
+| Component | File | Description |
+|-----------|------|-------------|
+| **Keyboard Shortcuts Dialog** | `keyboard-shortcuts-dialog.tsx` | Modal showing all shortcuts, opens with `?` key, Mac/Windows detection, grouped sections |
+| **Priority Pie Chart** | `priority-pie-chart.tsx` | Recharts donut chart showing task distribution by priority (high/medium/low) |
+| **Habit Heatmap** | `habit-heatmap.tsx` | GitHub-style contribution heatmap showing 12 weeks of habit completion data |
+| **Notification Manager** | `notification-manager.tsx` | Background component for browser notification permission and periodic task checking |
+| **Notifications Library** | `lib/notifications.ts` | Browser Notification API integration: request permission, show notifications, check due tasks |
+| **Weekly Report** | `weekly-report.tsx` | Modal with overall score ring, key metrics, detailed breakdown, achievements section, export/copy |
+| **Task Templates** | `task-templates.tsx` | 6 pre-made templates + custom template, expand preview, apply creates tasks via API |
+
+### Features Added
+- Calendar view with monthly grid, day detail panel, and task dots
+- Focus Mode with task queue, mini timer, and session tracking
+- Day progress bar on Today view
+- Completion summary ring with encouraging messages
+- Priority-colored left borders on task/note cards across views
+- Description previews on all task cards
+- Subtask progress indicators
+- Hover-reveal delete/edit actions with audio + history logging
+- Habit streak indicators with flame icons
+- Summary header cards on Important and Flagged views
+- History view filtering by action type and search
+- Gradient timeline visual in History view
+- Weekly Insights section on Dashboard (category breakdown, streaks, week comparison)
+- Keyboard shortcuts dialog (press `?`)
+- `⇧⌘H` shortcut for adding new habits
+- Calendar and Focus Mode items in command palette
+- **Priority Distribution Pie Chart** — donut chart with high/medium/low breakdown
+- **Habit Heatmap Calendar** — GitHub-style 12-week contribution heatmap
+- **Browser Notifications** — request permission, check due/overdue tasks, periodic reminders
+- **Recurring Task Auto-Creation** — automatically creates next occurrence when recurring task is completed
+- **Enhanced Pomodoro Timer** — gradient ring strokes, glow effect when running, animated top border
+- **Habits View SVG Progress Ring** — circular progress with emerald→teal gradient
+- **Notes View Mode Toggle** — Grid (masonry) / List view switching
+- **Weekly Productivity Report** — modal with overall score, metrics grid, detailed stats, achievements, export/copy
+- **Task Templates** — 6 pre-made templates (Morning Routine, Work Sprint, Study Session, Fitness Plan, Home Organization, Goal Setting) + custom template
+
+### i18n: 100+ translation keys added (both English and Arabic)
+
+### Styling Improvements (Round-13)
+- Sidebar: active indicator line, scale-105 hover on icons, better badge colors, collapse button with text
+- Dashboard: emerald border + shadow on productivity score, amber theme on motivational quote, stronger StatCard hover effects
+- Achievements: SVG progress ring replacing plain icon, gradient score text, improved card hover (translate-y-1, shadow-xl)
+- Settings: larger theme circles (size-12), better active border, improved section hover (shadow-lg, translate-y-0.5)
+- Pomodoro: stronger glow (shadow-xl), colored border changes when running
+- Header: stronger backdrop blur (bg-card/90)
+
+### Verification Results
+- ✅ ESLint: Zero errors
+- ✅ Build: Successful compilation
+- ✅ Browser QA: All views tested via agent-browser, no console errors
+- ✅ Server: Running on port 3000, responding with HTTP 200
+- ✅ VLM Visual Quality Rating: 8/10
+
+---
+
+## 3. Unresolved Issues, Risks & Next-Phase Recommendations
+
+### Known Issues
+1. **Dev server stability in background**: The Next.js dev server process sometimes terminates when run in the background. Production build works fine.
+2. **Arabic RTL layout**: Not fully tested - some views may need RTL-specific adjustments (direction: rtl, text alignment)
+3. **Ocean/Sunset color themes**: CSS variables are defined in globals.css for ocean and sunset themes, but the theme switching mechanism needs the `data-theme` attribute to be properly set on the `<html>` element by the ColorThemeSync component.
+4. **GitHub Sync**: Infrastructure exists (gitHubToken, gistId in Settings schema) but full OAuth flow and sync logic not implemented.
+
+### Priority Recommendations for Next Phase
+
+**High Priority:**
+1. **Complete Color Theme System** — Verify the `data-theme` attribute is properly applied by `ColorThemeSync` component for ocean/sunset themes
+2. **RTL Layout Support** — Add `dir="rtl"` handling for Arabic language, test and fix all views
+3. **Drag-and-Drop Persistence** — dnd-kit is installed and SortableContext is in todos-view.tsx with localStorage persistence; consider backend persistence
+4. **Export to PDF** — Generate PDF reports of weekly/monthly productivity
+
+**Medium Priority:**
+5. **Collaboration Features** — Share tasks/notes via links
+6. **Offline Mode** — Service worker caching strategy for full offline support
+7. **Custom Themes** — Allow users to create custom color themes
+8. **Mobile App** — PWA install prompt exists; enhance with native-like interactions
+
+**Low Priority:**
+9. **Keyboard Navigation** — Full keyboard-only navigation support
+10. **GitHub Gist Sync** — Complete the sync infrastructure
+11. **Task Dependencies** — Add blocking/blocked-by relationships between tasks
+
+### Architecture Notes
+- The app uses a single-page architecture with Zustand-managed view switching (no Next.js routing for views)
+- All data flows through API routes with Prisma ORM
+- Audio, history logging, and toast notifications are properly wired across all CRUD operations
+- The emerald/teal design system is consistently applied across all views
+- Browser notifications respect the `settings.taskReminders` flag
+- Recurring task auto-creation handles daily, weekly, and monthly patterns with subtask reset
+- Weekly Report calculates all metrics client-side from Zustand store data
+- Task Templates create tasks via batch POST /api/todos calls

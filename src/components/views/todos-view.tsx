@@ -32,6 +32,7 @@ import {
   LayoutGrid,
   GripVertical,
   Copy,
+  Sparkles,
 } from "lucide-react"
 import { useAppStore } from "@/store/app-store"
 import { t } from "@/lib/i18n"
@@ -50,6 +51,7 @@ import {
 } from "@/components/ui/select"
 import { Progress } from "@/components/ui/progress"
 import { toast } from "sonner"
+import { TaskTemplates } from "@/components/task-templates"
 
 type PriorityFilter = "all" | "high" | "medium" | "low"
 type SortBy = "dateCreated" | "dueDate" | "priority" | "name"
@@ -262,6 +264,7 @@ export function TodosView() {
   const [sortBy, setSortBy] = useState<SortBy>("dateCreated")
   const [viewMode, setViewMode] = useState<ViewMode>("list")
   const [todoOrder, setTodoOrder] = useState<Record<string, number>>({})
+  const [templatesOpen, setTemplatesOpen] = useState(false)
 
   // Load order from localStorage on mount
   useEffect(() => {
@@ -856,6 +859,17 @@ export function TodosView() {
           </SelectContent>
         </Select>
 
+        {/* Templates button */}
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setTemplatesOpen(true)}
+          className="h-8 gap-1.5 rounded-lg border-emerald-200 bg-emerald-50/50 text-xs text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400 dark:hover:bg-emerald-950/50"
+        >
+          <Sparkles className="size-3.5" />
+          {t("useTemplate", lang)}
+        </Button>
+
         {/* View Toggle */}
         <div className="ml-auto flex items-center rounded-lg border border-emerald-200 bg-emerald-50/50 p-0.5 dark:border-emerald-800 dark:bg-emerald-950/30">
           <button
@@ -988,6 +1002,9 @@ export function TodosView() {
           </div>
         </div>
       )}
+
+      {/* Task Templates Dialog */}
+      <TaskTemplates open={templatesOpen} onOpenChange={setTemplatesOpen} />
 
       {/* Empty state */}
       {sortedTodos.length === 0 && (

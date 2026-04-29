@@ -75,11 +75,38 @@ export function AchievementsView() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-border/50 bg-card/80 p-6 backdrop-blur-sm">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* Summary Header */}
+      <div className="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-card/80 p-6 backdrop-blur-sm shadow-lg shadow-emerald-500/5">
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5" />
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
-              <Trophy className="size-7 text-white" />
+            {/* Progress Ring */}
+            <div className="relative shrink-0">
+              <svg width="72" height="72" viewBox="0 0 72 72">
+                <defs>
+                  <linearGradient id="achieveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#10b981" />
+                    <stop offset="100%" stopColor="#0d9488" />
+                  </linearGradient>
+                </defs>
+                <circle cx="36" cy="36" r="28" fill="none" stroke="currentColor" strokeWidth="6" className="text-muted/30" />
+                <circle
+                  cx="36"
+                  cy="36"
+                  r="28"
+                  fill="none"
+                  stroke="url(#achieveGrad)"
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                  strokeDasharray={`${2 * Math.PI * 28}`}
+                  strokeDashoffset={`${2 * Math.PI * 28 * (1 - progressPercent / 100)}`}
+                  transform="rotate(-90 36 36)"
+                  className="transition-all duration-1000 ease-out"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Trophy className="size-6 text-emerald-500" />
+              </div>
             </div>
             <div>
               <h2 className="text-xl font-extrabold text-foreground">
@@ -91,13 +118,13 @@ export function AchievementsView() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
+            <span className="text-3xl font-extrabold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
               {progressPercent}%
             </span>
           </div>
         </div>
 
-        <div className="mt-4 h-3 overflow-hidden rounded-full bg-muted">
+        <div className="relative mt-4 h-2 overflow-hidden rounded-full bg-muted/50">
           <div
             className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-700"
             style={{ width: `${progressPercent}%` }}
@@ -174,10 +201,10 @@ function AchievementCard({
         "group relative overflow-hidden rounded-2xl border transition-all duration-300",
         isUnlocked
           ? cn(
-              "border-border/50 bg-card/80 backdrop-blur-sm hover:-translate-y-0.5 hover:shadow-lg",
+              "border-border/50 bg-card/80 backdrop-blur-sm hover:-translate-y-1 hover:shadow-xl",
               config.glow
             )
-          : "border-border/30 bg-muted/30 opacity-60 grayscale hover:opacity-80 hover:grayscale-[50%]"
+          : "border-border/30 bg-muted/30 opacity-60 grayscale hover:opacity-80 hover:grayscale-[50%] hover:-translate-y-0.5"
       )}
     >
       <div

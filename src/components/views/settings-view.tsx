@@ -199,7 +199,7 @@ export function SettingsView() {
   }, [])
 
   const sectionClass =
-    "rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm transition-all hover:shadow-md"
+    "rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/5 hover:-translate-y-0.5"
   const sectionHeaderClass = "flex items-center gap-3"
 
   return (
@@ -400,25 +400,28 @@ export function SettingsView() {
                   type="button"
                   onClick={() => updateSettings({ colorTheme: theme.value })}
                   className={cn(
-                    "group relative flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all hover:-translate-y-0.5 hover:shadow-md",
+                    "group relative flex flex-col items-center gap-2.5 rounded-xl border-2 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg",
                     settings.colorTheme === theme.value
-                      ? "border-foreground/30 shadow-md"
-                      : "border-border/30 hover:border-foreground/15"
+                      ? "border-emerald-500/40 shadow-lg"
+                      : "border-border/30 hover:border-foreground/20"
                   )}
                 >
                   {/* Gradient preview circle */}
                   <div
-                    className="size-10 rounded-full transition-transform group-hover:scale-110"
+                    className={cn(
+                      "size-12 rounded-full transition-all duration-300",
+                      settings.colorTheme === theme.value ? "scale-110" : "group-hover:scale-110"
+                    )}
                     style={{
                       background: `linear-gradient(135deg, ${theme.from}, ${theme.to})`,
-                      boxShadow: settings.colorTheme === theme.value ? `0 4px 12px ${theme.shadow}` : "none",
+                      boxShadow: settings.colorTheme === theme.value ? `0 6px 16px ${theme.shadow}` : "none",
                     }}
                   />
                   <span className="text-xs font-semibold text-foreground">{theme.label}</span>
                   {/* Active indicator */}
                   {settings.colorTheme === theme.value && (
                     <div
-                      className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-white text-white shadow-sm dark:bg-card"
+                      className="absolute -top-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full text-white shadow-md"
                       style={{ background: `linear-gradient(135deg, ${theme.from}, ${theme.to})` }}
                     >
                       <CheckCircle2 className="size-3" />

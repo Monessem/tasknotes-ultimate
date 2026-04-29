@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useTheme } from "next-themes"
 import {
   LayoutDashboard,
   CheckSquare,
@@ -34,7 +33,6 @@ import {
 import { cn } from "@/lib/utils"
 import { useAppStore, type ViewType } from "@/store/app-store"
 import { t } from "@/lib/i18n"
-import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -49,6 +47,7 @@ interface NavItem {
   labelKey: string
   icon: React.ElementType
   count?: number
+  accentColor?: string
 }
 
 interface NavSection {
@@ -60,30 +59,30 @@ const navSections: NavSection[] = [
   {
     titleKey: "navMain",
     items: [
-      { id: "dashboard", labelKey: "dashboard", icon: LayoutDashboard },
-      { id: "todos", labelKey: "todos", icon: CheckSquare },
-      { id: "notes", labelKey: "notes", icon: StickyNote },
-      { id: "habits", labelKey: "habits", icon: Target },
+      { id: "dashboard", labelKey: "dashboard", icon: LayoutDashboard, accentColor: "emerald" },
+      { id: "todos", labelKey: "todos", icon: CheckSquare, accentColor: "emerald" },
+      { id: "notes", labelKey: "notes", icon: StickyNote, accentColor: "amber" },
+      { id: "habits", labelKey: "habits", icon: Target, accentColor: "rose" },
     ],
   },
   {
     titleKey: "navFilters",
     items: [
-      { id: "important", labelKey: "important", icon: Star },
-      { id: "today", labelKey: "today", icon: CalendarDays },
-      { id: "calendar", labelKey: "calendar", icon: CalendarDays },
-      { id: "focus", labelKey: "focusView", icon: Zap },
-      { id: "flagged", labelKey: "flagged", icon: Flag },
-      { id: "history", labelKey: "history", icon: History },
+      { id: "important", labelKey: "important", icon: Star, accentColor: "amber" },
+      { id: "today", labelKey: "today", icon: CalendarDays, accentColor: "emerald" },
+      { id: "calendar", labelKey: "calendar", icon: CalendarDays, accentColor: "emerald" },
+      { id: "focus", labelKey: "focusView", icon: Zap, accentColor: "cyan" },
+      { id: "flagged", labelKey: "flagged", icon: Flag, accentColor: "rose" },
+      { id: "history", labelKey: "history", icon: History, accentColor: "teal" },
     ],
   },
   {
     titleKey: "navOther",
     items: [
-      { id: "folders", labelKey: "folders", icon: FolderOpen },
-      { id: "achievements", labelKey: "achievements", icon: Trophy },
-      { id: "recycle", labelKey: "recycle", icon: Trash2 },
-      { id: "settings", labelKey: "settings", icon: Settings },
+      { id: "folders", labelKey: "folders", icon: FolderOpen, accentColor: "amber" },
+      { id: "achievements", labelKey: "achievements", icon: Trophy, accentColor: "amber" },
+      { id: "recycle", labelKey: "recycle", icon: Trash2, accentColor: "rose" },
+      { id: "settings", labelKey: "settings", icon: Settings, accentColor: "teal" },
     ],
   },
 ]
@@ -137,7 +136,7 @@ function WeatherWidget() {
   if (!settings.weatherEnabled) return null
 
   return (
-    <div className="mx-3 mb-4 rounded-xl border border-emerald-500/10 bg-emerald-500/5 p-3 dark:border-emerald-400/15 dark:bg-emerald-400/5">
+    <div className="mx-3 mb-4 overflow-hidden rounded-xl border border-amber-500/10 bg-gradient-to-br from-amber-500/5 via-orange-500/5 to-yellow-500/5 p-3 dark:border-amber-400/15 dark:from-amber-400/5 dark:via-orange-400/5 dark:to-yellow-400/5">
       {loading ? (
         <div className="flex items-center gap-3">
           <div className="size-8 animate-pulse rounded-lg bg-muted" />
@@ -151,7 +150,7 @@ function WeatherWidget() {
           {(() => {
             const IconComp = weatherIconMap[weather.icon] || Sun
             return (
-              <div className="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400/20 to-orange-400/20 dark:from-amber-400/15 dark:to-orange-400/15">
+              <div className="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400/20 to-orange-400/20 shadow-sm dark:from-amber-400/15 dark:to-orange-400/15">
                 <IconComp className="size-5 text-amber-600 dark:text-amber-400" />
               </div>
             )
@@ -236,6 +235,8 @@ function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; co
           <div className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/30">
             <ClipboardList className="size-6 text-white" />
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/25 via-transparent to-transparent" />
+            {/* Animated shimmer */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_3s_ease-in-out_infinite]" />
           </div>
           {!collapsed && (
             <div>
@@ -255,18 +256,18 @@ function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; co
 
       {/* Navigation */}
       <ScrollArea className="flex-1 px-3">
-        <div className={cn("space-y-4 pb-4", collapsed && "space-y-2")}>
+        <div className={cn("space-y-5 pb-4", collapsed && "space-y-2")}>
           {navSections.map((section) => (
             <div key={section.titleKey}>
               {/* Section headers hidden when collapsed */}
               {!collapsed && (
-                <div className="mb-2 border-b border-border/50 px-3 pb-1.5">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                <div className="mb-2 px-3 pb-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70">
                     {t(section.titleKey, lang)}
                   </span>
                 </div>
               )}
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 {section.items.map((item) => {
                   const isActive = currentView === item.id
                   const Icon = item.icon
@@ -278,22 +279,30 @@ function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; co
                       onClick={() => handleNav(item.id)}
                       title={collapsed ? t(item.labelKey, lang) : undefined}
                       className={cn(
-                        "group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-150",
-                        collapsed && "justify-center px-0 py-2.5",
+                        "group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200",
+                        collapsed && "justify-center px-2 py-2.5",
                         isActive
-                          ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25"
-                          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                          ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20"
+                          : "text-muted-foreground hover:bg-emerald-500/5 hover:text-foreground"
                       )}
                     >
+                      {/* Active indicator line */}
+                      {isActive && !collapsed && (
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-white/60" />
+                      )}
+
                       <div
                         className={cn(
-                          "flex size-7 items-center justify-center rounded-lg transition-colors",
+                          "flex size-7 items-center justify-center rounded-lg transition-all duration-200",
                           isActive
-                            ? "bg-white/20"
-                            : "group-hover:bg-emerald-500/10"
+                            ? "bg-white/20 shadow-sm"
+                            : "group-hover:bg-emerald-500/10 group-hover:scale-105"
                         )}
                       >
-                        <Icon className="size-4" />
+                        <Icon className={cn(
+                          "size-4 transition-transform duration-200",
+                          !isActive && "group-hover:scale-110"
+                        )} />
                       </div>
                       {!collapsed && (
                         <>
@@ -301,10 +310,10 @@ function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; co
                           {count !== undefined && count > 0 && (
                             <span
                               className={cn(
-                                "min-w-[24px] rounded-full px-2 py-0.5 text-center text-[10px] font-bold",
+                                "min-w-[24px] rounded-full px-2 py-0.5 text-center text-[10px] font-bold transition-all duration-200",
                                 isActive
                                   ? "bg-white/25 text-white"
-                                  : "bg-muted text-muted-foreground"
+                                  : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-500/15"
                               )}
                             >
                               {count}
@@ -323,7 +332,7 @@ function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; co
 
       {/* Quick Stats Footer - hidden when collapsed */}
       {!collapsed && (
-        <div className="border-t border-border/50 p-4">
+        <div className="border-t border-border/50 bg-muted/20 p-4">
           <div className="flex items-center justify-around text-center">
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center justify-center gap-1">
@@ -332,7 +341,7 @@ function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; co
                   {completedTodos}
                 </span>
               </div>
-              <span className="text-[10px] text-muted-foreground">
+              <span className="text-[10px] font-medium text-muted-foreground">
                 {t("completed", lang)}
               </span>
             </div>
@@ -344,7 +353,7 @@ function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; co
                   {streakDays}
                 </span>
               </div>
-              <span className="text-[10px] text-muted-foreground">
+              <span className="text-[10px] font-medium text-muted-foreground">
                 {t("consecutiveDays", lang)}
               </span>
             </div>
@@ -356,7 +365,7 @@ function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; co
                   {todaySessions}
                 </span>
               </div>
-              <span className="text-[10px] text-muted-foreground">
+              <span className="text-[10px] font-medium text-muted-foreground">
                 {t("pomodoro", lang)}
               </span>
             </div>
@@ -368,7 +377,8 @@ function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; co
 }
 
 export function AppSidebar() {
-  const { sidebarOpen, setSidebarOpen, sidebarCollapsed, toggleSidebarCollapsed } = useAppStore()
+  const { sidebarOpen, setSidebarOpen, sidebarCollapsed, toggleSidebarCollapsed, settings } = useAppStore()
+  const lang = settings.language
 
   return (
     <>
@@ -376,7 +386,7 @@ export function AppSidebar() {
       <aside
         className={cn(
           "hidden lg:flex lg:shrink-0 lg:flex-col border-r border-border/50 bg-card/80 backdrop-blur-xl transition-all duration-300 ease-in-out",
-          sidebarCollapsed ? "lg:w-[60px]" : "lg:w-[300px]"
+          sidebarCollapsed ? "lg:w-[68px]" : "lg:w-[280px]"
         )}
       >
         <SidebarContent collapsed={sidebarCollapsed} />
@@ -384,13 +394,16 @@ export function AppSidebar() {
         <div className="border-t border-border/50 p-2">
           <button
             onClick={toggleSidebarCollapsed}
-            className="flex w-full items-center justify-center rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+            className="flex w-full items-center justify-center gap-2 rounded-xl p-2.5 text-muted-foreground transition-all duration-200 hover:bg-emerald-500/5 hover:text-foreground"
             title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {sidebarCollapsed ? (
               <ChevronRight className="size-4" />
             ) : (
-              <ChevronLeft className="size-4" />
+              <>
+                <ChevronLeft className="size-4" />
+                <span className="text-xs font-medium">{t("collapse", lang)}</span>
+              </>
             )}
           </button>
         </div>
@@ -398,7 +411,7 @@ export function AppSidebar() {
 
       {/* Mobile sidebar as Sheet - always expanded */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="w-[300px] p-0">
+        <SheetContent side="left" className="w-[280px] p-0">
           <SheetHeader className="sr-only">
             <SheetTitle>Navigation</SheetTitle>
           </SheetHeader>

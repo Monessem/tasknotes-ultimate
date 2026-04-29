@@ -30,8 +30,9 @@ import { PageTransition } from "@/components/page-transition"
 import { CommandPalette } from "@/components/command-palette"
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog"
 import { NotificationManager } from "@/components/notification-manager"
+import { WeeklyReport } from "@/components/weekly-report"
 import { AnimatedEmptyState } from "@/components/animated-empty-state"
-import { CheckSquare, Star, Flag, ListTodo, CircleCheckBig, Target, TrendingUp, Plus, Clock, AlertTriangle, Flame, CalendarCheck, CheckCircle2, Timer, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react"
+import { CheckSquare, Star, Flag, ListTodo, CircleCheckBig, Target, TrendingUp, Plus, Clock, AlertTriangle, Flame, CalendarCheck, CheckCircle2, Timer, ArrowUpRight, ArrowDownRight, Minus, BarChart3 } from "lucide-react"
 import { WeeklyTaskChart } from "@/components/weekly-task-chart"
 import { PriorityPieChart } from "@/components/priority-pie-chart"
 import { HabitHeatmap } from "@/components/habit-heatmap"
@@ -284,7 +285,7 @@ function DashboardView() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/80 p-6 backdrop-blur-sm lg:col-span-2"
+          className="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-card/80 p-6 backdrop-blur-sm shadow-lg shadow-emerald-500/5 lg:col-span-2"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5" />
           <div className="relative flex items-center gap-6">
@@ -382,9 +383,9 @@ function DashboardView() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
-          className="relative flex items-center overflow-hidden rounded-2xl border border-border/50 bg-card/80 p-6 backdrop-blur-sm"
+          className="relative flex items-center overflow-hidden rounded-2xl border border-amber-500/20 bg-card/80 p-6 backdrop-blur-sm shadow-lg shadow-amber-500/5"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5" />
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-orange-500/5" />
           <div className="relative flex flex-col items-center justify-center text-center">
             <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40">
               <Flame className="size-5 text-amber-500" />
@@ -401,7 +402,7 @@ function DashboardView() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.25 }}
-        className="rounded-2xl border border-border/50 bg-card/80 p-4 backdrop-blur-sm"
+        className="rounded-2xl border border-border/50 bg-card/80 p-5 backdrop-blur-sm shadow-sm"
       >
         <h3 className="mb-3 text-sm font-bold text-foreground">
           {t("todayFocus", lang)}
@@ -453,9 +454,18 @@ function DashboardView() {
         transition={{ duration: 0.3, delay: 0.28 }}
         className="rounded-2xl border border-border/50 bg-card/80 p-5 backdrop-blur-sm"
       >
-        <h3 className="mb-4 text-sm font-bold text-foreground">
-          {t("weeklyInsights", lang)}
-        </h3>
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-sm font-bold text-foreground">
+            {t("weeklyInsights", lang)}
+          </h3>
+          <button
+            onClick={() => setWeeklyReportOpen(true)}
+            className="flex items-center gap-1.5 rounded-lg bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-600 transition-colors hover:bg-emerald-500/20 dark:text-emerald-400"
+          >
+            <BarChart3 className="size-3" />
+            {t("viewWeeklyReport", lang)}
+          </button>
+        </div>
 
         {/* Category Breakdown Row */}
         <div className="grid grid-cols-3 gap-3 mb-4">
@@ -662,15 +672,15 @@ function StatCard({
   icon: React.ElementType
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/80 p-5 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/5">
+    <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/80 p-5 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/5">
       {/* Gradient background on hover */}
       <div className={`absolute inset-0 bg-gradient-to-br ${bgGradient} opacity-0 transition-opacity duration-300 group-hover:opacity-100`} />
       <div className={cn_absolute_bar(gradient)} />
       <div className="relative">
         <div
-          className={`mb-3 flex size-10 items-center justify-center rounded-xl bg-gradient-to-br ${bgGradient}`}
+          className={`mb-3 flex size-10 items-center justify-center rounded-xl bg-gradient-to-br ${bgGradient} transition-transform duration-300 group-hover:scale-110`}
         >
-          <Icon className="size-5 text-foreground/70 animate-[pulse_2s_ease-in-out_infinite] group-hover:animate-[pulse_1s_ease-in-out_infinite]" />
+          <Icon className="size-5 text-foreground/70 transition-all duration-300 group-hover:text-foreground" />
         </div>
         <p className="text-2xl font-extrabold text-foreground">{value}</p>
         <p className="mt-0.5 text-xs font-medium text-muted-foreground">{label}</p>
@@ -695,6 +705,7 @@ function cn_absolute_bar(gradient: string) {
 export function AppShell() {
   const { currentView, fetchAllData, isLoading, settings } = useAppStore()
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null)
+  const [weeklyReportOpen, setWeeklyReportOpen] = useState(false)
 
   useEffect(() => {
     fetchAllData()
@@ -792,6 +803,7 @@ export function AppShell() {
       <CommandPalette />
       <KeyboardShortcutsDialog />
       <NotificationManager />
+      <WeeklyReport open={weeklyReportOpen} onOpenChange={setWeeklyReportOpen} />
     </div>
   )
 }

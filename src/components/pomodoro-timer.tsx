@@ -163,11 +163,11 @@ export function PomodoroTimer() {
 
   return (
     <div className={cn(
-      "relative overflow-hidden rounded-2xl border border-border/50 bg-card/80 p-5 backdrop-blur-sm transition-shadow duration-500",
-      isRunning && "shadow-lg",
-      isRunning && mode === "work" && "shadow-emerald-500/10",
-      isRunning && mode === "shortBreak" && "shadow-cyan-500/10",
-      isRunning && mode === "longBreak" && "shadow-amber-500/10"
+      "relative overflow-hidden rounded-2xl border border-border/50 bg-card/80 p-5 backdrop-blur-sm transition-all duration-500",
+      isRunning && "shadow-xl",
+      isRunning && mode === "work" && "shadow-emerald-500/15 border-emerald-500/20",
+      isRunning && mode === "shortBreak" && "shadow-cyan-500/15 border-cyan-500/20",
+      isRunning && mode === "longBreak" && "shadow-amber-500/15 border-amber-500/20"
     )}>
       {/* Animated gradient border when running */}
       {isRunning && (
