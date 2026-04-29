@@ -32,7 +32,7 @@ model Note {
   id        String   @id @default(cuid())
   title     String
   content   String   @default("")
-  color     String   @default("#6366f1")
+  color     String   @default("#10b981")
   isPinned  Boolean  @default(false)
   flagged   Boolean  @default(false)
   folderId  String?
@@ -48,7 +48,7 @@ model Habit {
   id           String   @id @default(cuid())
   name         String
   icon         String   @default("🎯")
-  color        String   @default("#6366f1")
+  color        String   @default("#10b981")
   frequency    String   @default("daily")
   reminderTime String?
   goal         Int      @default(30)
@@ -71,7 +71,7 @@ model HabitLog {
 model Folder {
   id    String @id @default(cuid())
   name  String
-  color String @default("#6366f1")
+  color String @default("#10b981")
   icon  String @default("📁")
 
   todos Todo[]

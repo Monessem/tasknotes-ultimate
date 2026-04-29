@@ -171,6 +171,15 @@ const translations: Record<Language, Record<string, string>> = {
     bronze: "Bronze",
     silver: "Silver",
     gold: "Gold",
+
+    // Command Palette
+    commandPalette: "Command Palette",
+    searchCommand: "Search for a command or page...",
+    quickActions: "Quick Actions",
+    noResults: "No results found",
+    goodMorning: "Good morning",
+    goodAfternoon: "Good afternoon",
+    goodEvening: "Good evening",
   },
 
   ar: {
@@ -342,6 +351,15 @@ const translations: Record<Language, Record<string, string>> = {
     bronze: "برونزي",
     silver: "فضي",
     gold: "ذهبي",
+
+    // Command Palette
+    commandPalette: "لوحة الأوامر",
+    searchCommand: "ابحث عن أمر أو صفحة...",
+    quickActions: "إجراءات سريعة",
+    noResults: "لا توجد نتائج",
+    goodMorning: "صباح الخير",
+    goodAfternoon: "مساء الخير",
+    goodEvening: "مساء الخير",
   },
 };
 

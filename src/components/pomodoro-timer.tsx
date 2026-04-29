@@ -59,6 +59,14 @@ export function PomodoroTimer() {
               type: "work" as const,
             }
             setPomodoroSessions([...pomodoroSessions, newSession])
+            // Persist to API
+            fetch("/api/pomodoro", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ date: todayStr, duration: settings.pomodoroWork, type: "work" }),
+            }).catch(() => {
+              // Silently fail - local state is still updated
+            })
           }
           return 0
         }

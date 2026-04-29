@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
+import { motion } from "framer-motion"
 import { useAppStore, type ViewType } from "@/store/app-store"
 import { AppSidebar } from "@/components/sidebar"
 import { AppHeader } from "@/components/app-header"
@@ -23,11 +24,28 @@ import { HabitModal } from "@/components/modals/habit-modal"
 import { FolderModal } from "@/components/modals/folder-modal"
 import { ConfirmModal } from "@/components/modals/confirm-modal"
 import { InstallPrompt } from "@/components/install-prompt"
+import { PageTransition } from "@/components/page-transition"
+import { CommandPalette } from "@/components/command-palette"
+import { AnimatedEmptyState } from "@/components/animated-empty-state"
 import { CheckSquare, Star, Flag } from "lucide-react"
 import { WeeklyTaskChart } from "@/components/weekly-task-chart"
 import { HabitCompletionChart } from "@/components/habit-completion-chart"
 import { t } from "@/lib/i18n"
 import { audioManager } from "@/lib/audio"
+import { staggerContainer, staggerItem } from "@/lib/animations"
+import type { Language } from "@/lib/i18n"
+
+function getGreeting(lang: Language): string {
+  const hour = new Date().getHours()
+  if (lang === "ar") {
+    if (hour < 12) return "صباح الخير ☀️"
+    if (hour < 17) return "مساء الخير 🌤️"
+    return "مساء الخير 🌙"
+  }
+  if (hour < 12) return "Good morning"
+  if (hour < 17) return "Good afternoon"
+  return "Good evening"
+}
 
 // Dashboard view
 function DashboardView() {
@@ -45,33 +63,60 @@ function DashboardView() {
 
   return (
     <div className="space-y-6">
-      {/* Stats row */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard
-          label={t("totalTasks", lang)}
-          value={activeTodos.length}
-          gradient="from-emerald-500 to-teal-600"
-          bgGradient="from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40"
-        />
-        <StatCard
-          label={t("completed", lang)}
-          value={completedTodos.length}
-          gradient="from-amber-500 to-orange-500"
-          bgGradient="from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40"
-        />
-        <StatCard
-          label={t("todayHabits", lang)}
-          value={habits.filter((h) => !h.deletedAt).length}
-          gradient="from-rose-500 to-pink-500"
-          bgGradient="from-rose-100 to-pink-100 dark:from-rose-900/40 dark:to-pink-900/40"
-        />
-        <StatCard
-          label={t("completionRate", lang)}
-          value={`${completionRate}%`}
-          gradient="from-cyan-500 to-teal-500"
-          bgGradient="from-cyan-100 to-teal-100 dark:from-cyan-900/40 dark:to-teal-900/40"
-        />
+      {/* Greeting */}
+      <div className="mb-2">
+        <h2 className="text-2xl font-extrabold text-foreground">
+          {getGreeting(lang)}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {new Date().toLocaleDateString(lang === "ar" ? "ar-SA" : "en-US", {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+          })}
+        </p>
       </div>
+
+      {/* Stats row */}
+      <motion.div
+        className="grid grid-cols-2 gap-4 lg:grid-cols-4"
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
+      >
+        <motion.div variants={staggerItem}>
+          <StatCard
+            label={t("totalTasks", lang)}
+            value={activeTodos.length}
+            gradient="from-emerald-500 to-teal-600"
+            bgGradient="from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40"
+          />
+        </motion.div>
+        <motion.div variants={staggerItem}>
+          <StatCard
+            label={t("completed", lang)}
+            value={completedTodos.length}
+            gradient="from-amber-500 to-orange-500"
+            bgGradient="from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40"
+          />
+        </motion.div>
+        <motion.div variants={staggerItem}>
+          <StatCard
+            label={t("todayHabits", lang)}
+            value={habits.filter((h) => !h.deletedAt).length}
+            gradient="from-rose-500 to-pink-500"
+            bgGradient="from-rose-100 to-pink-100 dark:from-rose-900/40 dark:to-pink-900/40"
+          />
+        </motion.div>
+        <motion.div variants={staggerItem}>
+          <StatCard
+            label={t("completionRate", lang)}
+            value={`${completionRate}%`}
+            gradient="from-cyan-500 to-teal-500"
+            bgGradient="from-cyan-100 to-teal-100 dark:from-cyan-900/40 dark:to-teal-900/40"
+          />
+        </motion.div>
+      </motion.div>
 
       {/* Main content grid */}
       <div className="grid gap-6 lg:grid-cols-3">
@@ -87,17 +132,11 @@ function DashboardView() {
               {t("todos", lang)}
             </h3>
             {activeTodos.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="mb-3 flex size-14 items-center justify-center rounded-2xl bg-muted/50">
-                  <CheckSquare className="size-6 text-muted-foreground" />
-                </div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  {t("noTasks", lang)}
-                </p>
-                <p className="text-xs text-muted-foreground/70">
-                  {t("noTasksDesc", lang)}
-                </p>
-              </div>
+              <AnimatedEmptyState
+                icon={CheckSquare}
+                title={t("noTasks", lang)}
+                description={t("noTasksDesc", lang)}
+              />
             ) : (
               <div className="space-y-2">
                 {activeTodos.slice(0, 5).map((todo) => (
@@ -158,7 +197,7 @@ function StatCard({
       <div
         className={`mb-3 flex size-10 items-center justify-center rounded-xl bg-gradient-to-br ${bgGradient}`}
       >
-        <span className={`text-lg font-bold bg-gradient-to-r ${gradient} bg-clip-text text-transparent`}>
+        <span className="text-lg font-bold text-foreground">
           {value}
         </span>
       </div>
@@ -261,7 +300,9 @@ export function AppShell() {
               </div>
             </div>
           ) : (
-            renderView()
+            <PageTransition viewKey={currentView}>
+              {renderView()}
+            </PageTransition>
           )}
         </div>
       </main>
@@ -271,12 +312,8 @@ export function AppShell() {
       <NoteModal />
       <HabitModal />
       <FolderModal />
-      <ConfirmModal
-        open={false}
-        onOpenChange={() => {}}
-        onConfirm={() => {}}
-      />
       <InstallPrompt />
+      <CommandPalette />
     </div>
   )
 }
