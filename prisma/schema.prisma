@@ -106,6 +106,18 @@ model Settings {
   darkMode           Boolean @default(false)
   language           String @default("en")
   autoSync           Boolean @default(false)
+  colorTheme         String @default("emerald")
   gitHubToken        String @default("")
   gistId             String @default("")
+}
+
+model Achievement {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  title       String
+  description String
+  icon        String   @default("🏆")
+  tier        String   @default("bronze")
+  unlockedAt  String?
+  createdAt   DateTime @default(now())
 }

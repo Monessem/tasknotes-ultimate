@@ -16,13 +16,18 @@ import { SettingsView } from "@/components/views/settings-view"
 import { RecycleView } from "@/components/views/recycle-view"
 import { HistoryView } from "@/components/views/history-view"
 import { FolderDetailView } from "@/components/views/folder-detail-view"
+import { AchievementsView } from "@/components/views/achievements-view"
 import { TodoModal } from "@/components/modals/todo-modal"
 import { NoteModal } from "@/components/modals/note-modal"
 import { HabitModal } from "@/components/modals/habit-modal"
 import { FolderModal } from "@/components/modals/folder-modal"
 import { ConfirmModal } from "@/components/modals/confirm-modal"
+import { InstallPrompt } from "@/components/install-prompt"
 import { CheckSquare, Star, Flag } from "lucide-react"
+import { WeeklyTaskChart } from "@/components/weekly-task-chart"
+import { HabitCompletionChart } from "@/components/habit-completion-chart"
 import { t } from "@/lib/i18n"
+import { audioManager } from "@/lib/audio"
 
 // Dashboard view
 function DashboardView() {
@@ -122,6 +127,16 @@ function DashboardView() {
           </div>
         </div>
       </div>
+
+      {/* Weekly Activity Chart */}
+      <div className="mt-6">
+        <WeeklyTaskChart />
+      </div>
+
+      {/* Habit Completion */}
+      <div className="mt-6">
+        <HabitCompletionChart />
+      </div>
     </div>
   )
 }
@@ -167,12 +182,17 @@ function cn_absolute_bar(gradient: string) {
 }
 
 export function AppShell() {
-  const { currentView, fetchAllData, isLoading } = useAppStore()
+  const { currentView, fetchAllData, isLoading, settings } = useAppStore()
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null)
 
   useEffect(() => {
     fetchAllData()
   }, [fetchAllData])
+
+  // Sync soundEnabled setting with audio manager
+  useEffect(() => {
+    audioManager.setEnabled(settings.soundEnabled)
+  }, [settings.soundEnabled])
 
   const handleSelectFolder = useCallback((folderId: string) => {
     setSelectedFolderId(folderId)
@@ -213,6 +233,8 @@ export function AppShell() {
         return <FoldersView onSelectFolder={handleSelectFolder} />
       case "recycle":
         return <RecycleView />
+      case "achievements":
+        return <AchievementsView />
       case "settings":
         return <SettingsView />
       default:
@@ -254,6 +276,7 @@ export function AppShell() {
         onOpenChange={() => {}}
         onConfirm={() => {}}
       />
+      <InstallPrompt />
     </div>
   )
 }

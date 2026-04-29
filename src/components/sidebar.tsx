@@ -26,6 +26,7 @@ import {
   CheckCircle2,
   Timer,
   ClipboardList,
+  Trophy,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAppStore, type ViewType } from "@/store/app-store"
@@ -75,6 +76,7 @@ const navSections: NavSection[] = [
     titleKey: "navOther",
     items: [
       { id: "folders", labelKey: "folders", icon: FolderOpen },
+      { id: "achievements", labelKey: "achievements", icon: Trophy },
       { id: "recycle", labelKey: "recycle", icon: Trash2 },
       { id: "settings", labelKey: "settings", icon: Settings },
     ],

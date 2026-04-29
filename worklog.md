@@ -248,8 +248,149 @@ Stage Summary:
 - Todo modal: creating task from modal doesn't always refresh the list (need to verify fetchTodos is called after save)
 - Sidebar Settings button click via agent-browser sometimes doesn't trigger view change (works with JS eval click)
 - Need to add more visual polish: animations, transitions, empty state illustrations
-- Need to add achievements/badges system
-- Need to add statistics charts (weekly task completion chart)
-- Need to add GitHub sync (backup/restore)
+- ~~Need to add achievements/badges system~~ ✅ DONE
+- ~~Need to add statistics charts (weekly task completion chart)~~ ✅ DONE
+- Need to add GitHub sync (backup/restore) - infrastructure exists (gitHubToken, gistId fields in Settings), full OAuth flow pending
 - Need to test dark mode switching
 - Need to test Arabic RTL layout
+
+---
+
+Task ID: 1
+Agent: main
+Task: Write Trade-offs & Assumptions Documentation
+
+Work Log:
+- Created comprehensive TRADEOFFS.md documenting all 7 trade-offs with professional format
+- Each trade-off includes: What was done, Why, Impact, and Path Forward
+- Added 10 assumptions table covering single-user, SQLite, client-side state, etc.
+- Trade-offs covered: Color Scheme, GitHub Sync, PWA Config, PWA Install Prompt, Audio System, Achievements System, Statistics Charts
+
+Stage Summary:
+- Full TRADEOFFS.md document created with 7 trade-offs and 10 assumptions
+- Ready for README integration or sprint retrospective
+
+---
+Task ID: 2
+Agent: main
+Task: Implement Design Token System
+
+Work Log:
+- Created `/src/lib/tokens.ts` with ColorTokens interface and emeraldTheme implementation
+- Maps semantic names (primary, success, warning, danger, info, accent, priority colors, badge variants, icon backgrounds, chart colors) to concrete Tailwind class strings
+- Created `/src/hooks/use-tokens.ts` React hook for component access
+- Added `colorTheme` field to AppSettings in Zustand store (default: "emerald")
+- Added `colorTheme String @default("emerald")` to Settings Prisma model
+- Added color theme selector to Settings UI Appearance section with emerald option
+- Added i18n keys: colorTheme, emerald (en/ar)
+- Ran `bun run db:push` to update database schema
+
+Stage Summary:
+- Design token system with semantic color mapping created
+- ColorTheme setting persisted to database and configurable in Settings UI
+- Foundation for future theme additions (ocean, sunset, etc.)
+
+---
+Task ID: 3-4
+Agent: main
+Task: Implement PWA Configuration and Install Prompt
+
+Work Log:
+- Created `/public/manifest.json` with name, short_name, start_url, display, theme_color, icons (SVG), shortcuts
+- Created `/public/sw.js` service worker with:
+  - Install: precaches static assets (/, /manifest.json, /logo.svg)
+  - Activate: cleans old caches
+  - Fetch: network-first for API calls, cache-first for static assets, network-first for navigation
+- Created `/src/components/pwa-register.tsx` - client component that registers SW on mount
+- Created `/src/components/install-prompt.tsx` - custom install banner:
+  - Captures `beforeinstallprompt` event
+  - Stores deferred prompt for later use
+  - Shows dismissable banner with Install/Not now buttons
+  - Persists dismissal in localStorage
+  - Bilingual support (en/ar)
+- Updated `/src/app/layout.tsx` with manifest link, meta tags, PWARegister component
+- Updated `/src/components/app-shell.tsx` to include InstallPrompt in render tree
+
+Stage Summary:
+- Full PWA infrastructure: manifest, service worker, registration
+- Custom install prompt with localStorage persistence
+- All PWA meta tags in layout.tsx
+
+---
+Task ID: 5
+Agent: main
+Task: Implement Audio/Sound Effects System
+
+Work Log:
+- Created `/src/lib/audio.ts` with AudioManager class using Web Audio API
+- 6 synthesized sound effects: complete (ascending chime C5-E5-G5), achievement (arpeggio C5-E5-G5-C6), timer (gentle bell), click (short tap), delete (descending tone), flag (quick ping)
+- Singleton `audioManager` instance with `setEnabled()` and `play()` methods
+- Integrated audio into existing components:
+  - `/src/components/views/todos-view.tsx` - complete sound on task complete, click on uncomplete
+  - `/src/components/views/today-view.tsx` - complete sound on task/habit completion
+  - `/src/components/pomodoro-timer.tsx` - timer sound when countdown reaches 0
+  - `/src/components/views/habits-view.tsx` - complete sound on habit log toggle
+- Wired soundEnabled setting sync in AppShell via useEffect
+
+Stage Summary:
+- Audio system with 6 synthesized sounds, no external files needed
+- Audio integrated into 4 components (todos, today, pomodoro, habits)
+- soundEnabled toggle in Settings now controls audio playback globally
+
+---
+Task ID: 7
+Agent: general-purpose
+Task: Build Weekly Task Statistics Chart
+
+Work Log:
+- Created `/src/lib/stats.ts` - Stats utility with `getWeeklyStats()` and `getHabitWeeklyStats()` functions that compute per-day completed/created task counts and habit completion percentages over the last 7 days, supporting both English and Arabic day names
+- Created `/src/components/weekly-task-chart.tsx` - Weekly Activity bar chart using Recharts (BarChart with CartesianGrid, XAxis, YAxis, Tooltip, Legend, two Bar series for completed and created tasks), styled with emerald/teal colors matching app theme, glass card container
+- Created `/src/components/habit-completion-chart.tsx` - Donut/ring PieChart showing today's habit completion percentage with center percentage label, legend with completed/remaining counts, returns null when no active habits
+- Updated `/src/components/app-shell.tsx` - Added imports for WeeklyTaskChart and HabitCompletionChart, inserted both charts below the main content grid in DashboardView as full-width rows
+- Updated `/src/lib/i18n.ts` - Added `weeklyActivity` and `todayHabitsChart` translation keys for both English and Arabic
+- ESLint passes with no issues
+- Dev server compiling successfully
+
+Stage Summary:
+- 3 new files created: stats.ts, weekly-task-chart.tsx, habit-completion-chart.tsx
+- 2 existing files updated: app-shell.tsx (chart imports + dashboard integration), i18n.ts (2 new keys)
+- Weekly Activity bar chart shows completed vs created tasks over last 7 days with bilingual day labels
+- Habit Completion donut chart shows today's habit percentage with color-coded legend
+- Both charts use Recharts library with emerald/teal color scheme and glass card styling
+
+---
+Task ID: 6
+Agent: general-purpose
+Task: Build Achievements System
+
+Work Log:
+- Added `Achievement` model to Prisma schema with fields: id, key (unique), title, description, icon, tier, unlockedAt, createdAt
+- Ran `bun run db:push` to push the new model to the database and regenerated Prisma Client
+- Created `/src/lib/achievements.ts` with 12 achievement definitions (first_task, five_tasks, ten_tasks, fifty_tasks, first_note, habit_starter, week_streak, month_streak, focus_time, focus_master, organizer, note_collector) across 3 tiers (bronze/silver/gold), plus `computeAchievementState()` function and `calculateStreak()` helper
+- Created `/src/app/api/achievements/route.ts` - GET (fetch all, auto-seed if empty), POST (check and unlock based on achievementState)
+- Created `/src/app/api/achievements/[id]/route.ts` - PUT (unlock achievement by setting unlockedAt)
+- Updated `/src/store/app-store.ts`:
+  - Added `Achievement` interface with proper semicolons
+  - Added `achievements`, `setAchievements`, `fetchAchievements`, `checkAndUnlockAchievements` to AppState interface and implementation
+  - Added `fetchAchievements` to `fetchAllData` Promise.all array
+- Added `"achievements"` to `ViewType` union type (already present from prior work)
+- Created `/src/components/views/achievements-view.tsx` - Beautiful achievement grid with:
+  - Summary header: Trophy icon, progress percentage, unlock count, progress bar
+  - Tier summary badges (bronze/silver/gold with counts)
+  - Responsive grid (1/2/3 cols for mobile/tablet/desktop)
+  - Achievement cards: unlocked (full color, emoji icon, tier badge, unlock date, glow effect) vs locked (grayscale, lock icon, "???" title, dimmed description)
+  - Auto-checks for new achievements on first render via useEffect with ref guard
+  - Uses shadcn Badge, Lucide icons (Trophy, Lock), glass card styling
+- Updated `/src/components/sidebar.tsx` - Added Trophy icon import and achievements nav item in "navOther" section
+- Updated `/src/components/app-shell.tsx` - Added AchievementsView import and "achievements" case in renderView switch
+- Updated `/src/lib/i18n.ts` - Added 7 new translation keys for both en and ar: achievementsView, unlocked, locked, bronze, silver, gold
+- ESLint passes with no issues
+- API tested successfully: GET /api/achievements returns 12 seeded achievements
+
+Stage Summary:
+- 4 new files created: achievements.ts, achievements route.ts, achievements/[id] route.ts, achievements-view.tsx
+- 4 existing files updated: schema.prisma, app-store.ts, sidebar.tsx, app-shell.tsx, i18n.ts
+- Full Achievements system with Prisma model, API routes, evaluation logic, and beautiful UI
+- 12 achievements across 3 tiers with auto-seed and auto-unlock functionality
+- Responsive grid with tier-colored cards, lock/unlock states, progress tracking
+- Bilingual support (English/Arabic) for all achievement labels

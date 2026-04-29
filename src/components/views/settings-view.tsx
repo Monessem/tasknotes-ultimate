@@ -380,6 +380,31 @@ export function SettingsView() {
               </SelectContent>
             </Select>
           </div>
+          <Separator />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <Palette className="size-4 text-muted-foreground" />
+              <Label className="text-sm font-medium">
+                {lang === "ar" ? "نظام الألوان" : "Color Theme"}
+              </Label>
+            </div>
+            <Select
+              value={settings.colorTheme}
+              onValueChange={(value) => updateSettings({ colorTheme: value })}
+            >
+              <SelectTrigger className="w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="emerald">
+                  <span className="flex items-center gap-2">
+                    <span className="size-2 rounded-full bg-emerald-500" />
+                    Emerald
+                  </span>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
       </Card>
 

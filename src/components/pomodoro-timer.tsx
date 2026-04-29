@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { Play, Pause, RotateCcw, Timer, Flame, Zap } from "lucide-react"
 import { useAppStore } from "@/store/app-store"
 import { t } from "@/lib/i18n"
+import { audioManager } from "@/lib/audio"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -46,6 +47,7 @@ export function PomodoroTimer() {
     intervalRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
+          audioManager.play("timer")
           setIsRunning(false)
           // Record session if it was a work session
           if (mode === "work") {

@@ -14,6 +14,7 @@ import {
 import { useAppStore } from "@/store/app-store"
 import { t } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
+import { audioManager } from "@/lib/audio"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -53,7 +54,7 @@ export function TodayView() {
   const toggleComplete = useCallback(
     async (todoId: string, completed: boolean) => {
       try {
-        await fetch(`/api/todos/${todoId}`, {
+        const res = await fetch(`/api/todos/${todoId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -61,7 +62,14 @@ export function TodayView() {
             completedAt: !completed ? new Date().toISOString() : null,
           }),
         })
-        await fetchTodos()
+        if (res.ok) {
+          if (!completed) {
+            audioManager.play("complete")
+          } else {
+            audioManager.play("click")
+          }
+          await fetchTodos()
+        }
       } catch {
         // Silently fail
       }
@@ -72,11 +80,14 @@ export function TodayView() {
   const toggleHabitLog = useCallback(
     async (habitId: string) => {
       try {
-        await fetch("/api/habit-logs", {
+        const res = await fetch("/api/habit-logs", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ habitId, date: todayStr }),
         })
+        if (res.ok) {
+          audioManager.play("complete")
+        }
         await fetchHabitLogs()
       } catch {
         // Silently fail

@@ -11,6 +11,7 @@ import {
 import { useAppStore } from "@/store/app-store"
 import { t } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
+import { audioManager } from "@/lib/audio"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -38,6 +39,7 @@ export function HabitsView() {
           body: JSON.stringify({ habitId, date: todayStr }),
         })
         if (res.ok) {
+          audioManager.play("complete")
           await fetchHabitLogs()
         }
       } catch {

@@ -13,7 +13,8 @@ export type ViewType =
   | "history"
   | "folders"
   | "recycle"
-  | "settings";
+  | "settings"
+  | "achievements";
 
 // Todo type matching Prisma model
 export interface Todo {
@@ -92,6 +93,17 @@ export interface HistoryEntry {
   createdAt: string;
 }
 
+export interface Achievement {
+  id: string;
+  key: string;
+  title: string;
+  description: string;
+  icon: string;
+  tier: string;
+  unlockedAt: string | null;
+  createdAt: string;
+}
+
 export interface AppSettings {
   weatherEnabled: boolean;
   weatherCity: string;
@@ -103,6 +115,7 @@ export interface AppSettings {
   darkMode: boolean;
   language: Language;
   autoSync: boolean;
+  colorTheme: string; // "emerald" | "ocean" | "sunset" etc.
 }
 
 // Modal types
@@ -144,6 +157,12 @@ interface AppState {
   setHistoryEntries: (entries: HistoryEntry[]) => void;
   settings: AppSettings;
   setSettings: (settings: AppSettings) => void;
+
+  // Achievements
+  achievements: Achievement[];
+  setAchievements: (achievements: Achievement[]) => void;
+  fetchAchievements: () => Promise<void>;
+  checkAndUnlockAchievements: () => Promise<void>;
 
   // Loading
   isLoading: boolean;
@@ -210,8 +229,62 @@ export const useAppStore = create<AppState>((set, get) => ({
     darkMode: false,
     language: "en",
     autoSync: false,
+    colorTheme: "emerald",
   },
   setSettings: (settings) => set({ settings }),
+
+  // Achievements
+  achievements: [],
+  setAchievements: (achievements) => set({ achievements }),
+
+  fetchAchievements: async () => {
+    try {
+      const res = await fetch("/api/achievements");
+      if (res.ok) {
+        const data = await res.json();
+        set({ achievements: data });
+      }
+    } catch (e) {
+      console.error("Failed to fetch achievements:", e);
+    }
+  },
+
+  checkAndUnlockAchievements: async () => {
+    const state = get();
+    const { computeAchievementState, ACHIEVEMENT_DEFS } = await import("@/lib/achievements");
+    const achievementState = computeAchievementState({
+      todos: state.todos,
+      notes: state.notes,
+      habits: state.habits,
+      folders: state.folders,
+      habitLogs: state.habitLogs,
+      pomodoroSessions: state.pomodoroSessions,
+    });
+
+    const unlockedKeys = new Set(
+      state.achievements.filter((a) => a.unlockedAt).map((a) => a.key)
+    );
+
+    let hasNewUnlocks = false;
+
+    for (const def of ACHIEVEMENT_DEFS) {
+      if (!unlockedKeys.has(def.key) && def.condition(achievementState)) {
+        const existing = state.achievements.find((a) => a.key === def.key);
+        if (existing) {
+          await fetch(`/api/achievements/${existing.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ unlockedAt: new Date().toISOString() }),
+          });
+          hasNewUnlocks = true;
+        }
+      }
+    }
+
+    if (hasNewUnlocks) {
+      await state.fetchAchievements();
+    }
+  },
 
   // Loading
   isLoading: true,
@@ -333,6 +406,7 @@ export const useAppStore = create<AppState>((set, get) => ({
             darkMode: data.darkMode ?? false,
             language: (data.language as Language) ?? "en",
             autoSync: data.autoSync ?? false,
+            colorTheme: data.colorTheme ?? "emerald",
           },
         });
       }
@@ -353,6 +427,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       state.fetchPomodoroSessions(),
       state.fetchHistory(),
       state.fetchSettings(),
+      state.fetchAchievements(),
     ]);
     set({ isLoading: false });
   },

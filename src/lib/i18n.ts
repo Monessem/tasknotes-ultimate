@@ -148,6 +148,8 @@ const translations: Record<Language, Record<string, string>> = {
     language: "Language",
     taskReminders: "Task Reminders",
     soundEnabled: "Sound",
+    colorTheme: "Color Theme",
+    emerald: "Emerald",
 
     // Messages
     saved: "Saved",
@@ -157,9 +159,18 @@ const translations: Record<Language, Record<string, string>> = {
     confirmDelete: "Are you sure you want to delete?",
     cannotUndo: "This action cannot be undone",
 
+    // Charts
+    weeklyActivity: "Weekly Activity",
+    todayHabitsChart: "Today's Habits",
+
     // Achievements
     achievements: "Achievements",
+    achievementsView: "Achievements",
     unlocked: "Unlocked",
+    locked: "Locked",
+    bronze: "Bronze",
+    silver: "Silver",
+    gold: "Gold",
   },
 
   ar: {
@@ -308,6 +319,8 @@ const translations: Record<Language, Record<string, string>> = {
     language: "اللغة",
     taskReminders: "تذكير المهام",
     soundEnabled: "الصوت",
+    colorTheme: "نظام الألوان",
+    emerald: "زمردي",
 
     // Messages
     saved: "تم الحفظ",
@@ -317,9 +330,18 @@ const translations: Record<Language, Record<string, string>> = {
     confirmDelete: "هل أنت متأكد من الحذف؟",
     cannotUndo: "لا يمكن التراجع عن هذا الإجراء",
 
+    // Charts
+    weeklyActivity: "النشاط الأسبوعي",
+    todayHabitsChart: "عادات اليوم",
+
     // Achievements
     achievements: "الإنجازات",
+    achievementsView: "الإنجازات",
     unlocked: "مفتوحة",
+    locked: "مقفلة",
+    bronze: "برونزي",
+    silver: "فضي",
+    gold: "ذهبي",
   },
 };
 
