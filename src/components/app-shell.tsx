@@ -30,6 +30,7 @@ import { PageTransition } from "@/components/page-transition"
 import { CommandPalette } from "@/components/command-palette"
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog"
 import { NotificationManager } from "@/components/notification-manager"
+import { SmartFAB } from "@/components/smart-fab"
 import { WeeklyReport } from "@/components/weekly-report"
 import { AnimatedEmptyState } from "@/components/animated-empty-state"
 import { CheckSquare, Star, Flag, ListTodo, CircleCheckBig, Target, TrendingUp, Plus, Clock, AlertTriangle, Flame, CalendarCheck, CheckCircle2, Timer, ArrowUpRight, ArrowDownRight, Minus, BarChart3 } from "lucide-react"
@@ -37,6 +38,10 @@ import { WeeklyTaskChart } from "@/components/weekly-task-chart"
 import { PriorityPieChart } from "@/components/priority-pie-chart"
 import { HabitHeatmap } from "@/components/habit-heatmap"
 import { HabitCompletionChart } from "@/components/habit-completion-chart"
+import { ActivityHeatmap } from "@/components/activity-heatmap"
+import { WeeklyBarChart } from "@/components/weekly-bar-chart"
+import { StreakCards } from "@/components/streak-cards"
+import { CompletionRateCard } from "@/components/completion-rate-card"
 import { t } from "@/lib/i18n"
 import { audioManager } from "@/lib/audio"
 import { logHistory } from "@/lib/history-log"
@@ -654,6 +659,28 @@ function DashboardView() {
         <PriorityPieChart />
         <HabitHeatmap />
       </div>
+
+      {/* Analytics Section */}
+      <div className="mt-6">
+        <motion.h3
+          initial={{ opacity: 0, x: -8 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+          className="mb-4 text-lg font-bold text-foreground"
+        >
+          {t("analytics", lang)}
+        </motion.h3>
+
+        {/* 365-Day Activity Heatmap (full width) */}
+        <ActivityHeatmap />
+
+        {/* Grid: Weekly Bar Chart + Streak Cards + Completion Rate Card */}
+        <div className="mt-6 grid gap-6 lg:grid-cols-3">
+          <WeeklyBarChart />
+          <StreakCards />
+          <CompletionRateCard />
+        </div>
+      </div>
     </div>
   )
 }
@@ -804,6 +831,7 @@ export function AppShell() {
       <KeyboardShortcutsDialog />
       <NotificationManager />
       <WeeklyReport open={weeklyReportOpen} onOpenChange={setWeeklyReportOpen} />
+      <SmartFAB />
     </div>
   )
 }

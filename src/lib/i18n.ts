@@ -303,6 +303,9 @@ const translations: Record<Language, Record<string, string>> = {
     totalNotes: "Total Notes",
     pinnedNotes: "Pinned",
     weeklyRate: "Weekly",
+    weekdays: "Weekdays",
+    weeksStreak: "wk streak",
+    completeThisWeek: "Complete this week",
     habitSummary: "Habits Summary",
     notesSummary: "Notes Summary",
 
@@ -396,6 +399,16 @@ const translations: Record<Language, Record<string, string>> = {
     sortByDate: "Last Updated",
     sortByTitle: "Title",
     sortByColor: "Color",
+
+    // Analytics
+    activityThisYear: "Your Activity This Year",
+    thisWeeksProgress: "This Week's Progress",
+    currentStreak: "Current Streak",
+    longestStreak: "Longest Streak",
+    analytics: "Analytics",
+    completionRateWeek: "Weekly Completion Rate",
+    tasksCompletedWeekShort: "of tasks completed",
+    of: "of",
 
     // Settings Page - Profile
     profile: "Profile",
@@ -758,6 +771,9 @@ const translations: Record<Language, Record<string, string>> = {
     totalNotes: "إجمالي الملاحظات",
     pinnedNotes: "مثبتة",
     weeklyRate: "أسبوعي",
+    weekdays: "أيام العمل",
+    weeksStreak: "أسبوع متتالي",
+    completeThisWeek: "أكمل هذا الأسبوع",
     habitSummary: "ملخص العادات",
     notesSummary: "ملخص الملاحظات",
 
@@ -851,6 +867,16 @@ const translations: Record<Language, Record<string, string>> = {
     sortByDate: "آخر تحديث",
     sortByTitle: "العنوان",
     sortByColor: "اللون",
+
+    // Analytics
+    activityThisYear: "نشاطك هذا العام",
+    thisWeeksProgress: "تقدم هذا الأسبوع",
+    currentStreak: "السلسلة الحالية",
+    longestStreak: "أطول سلسلة",
+    analytics: "التحليلات",
+    completionRateWeek: "معدل الإنجاز الأسبوعي",
+    tasksCompletedWeekShort: "من المهام مكتملة",
+    of: "من",
 
     // Settings Page - Profile
     profile: "الملف الشخصي",

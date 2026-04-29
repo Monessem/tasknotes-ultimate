@@ -119,9 +119,9 @@ export function FolderModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="rounded-2xl border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl shadow-emerald-500/5 max-w-md">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-lg font-bold">
             {isEditing ? t("editFolder", lang) : t("newFolder", lang)}
           </DialogTitle>
         </DialogHeader>
@@ -129,20 +129,20 @@ export function FolderModal() {
         <div className="space-y-4">
           {/* Name */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">
+            <Label className="text-sm font-medium">
               {t("folderName", lang)}
             </Label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t("folderNamePlaceholder", lang)}
-              className="h-9"
+              className="h-9 rounded-xl border-border/50 focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20"
             />
           </div>
 
           {/* Icon selector */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">
+            <Label className="text-sm font-medium">
               {t("habitIcon", lang)}
             </Label>
             <div className="flex flex-wrap gap-1.5 rounded-lg border border-border/50 p-2">
@@ -166,7 +166,7 @@ export function FolderModal() {
 
           {/* Color picker */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">
+            <Label className="text-sm font-medium">
               {t("folderColor", lang)}
             </Label>
             <div className="flex flex-wrap gap-2">

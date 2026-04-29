@@ -250,9 +250,9 @@ export function TodoModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+      <DialogContent className="rounded-2xl border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl shadow-emerald-500/5 max-h-[90vh] overflow-y-auto max-w-lg">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-lg font-bold">
             {isEditing ? t("editTask", lang) : t("newTask", lang)}
           </DialogTitle>
           <DialogDescription className="sr-only">
@@ -263,7 +263,7 @@ export function TodoModal() {
         <div className="space-y-4">
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="todo-title">{t("taskTitle", lang)} *</Label>
+            <Label htmlFor="todo-title" className="text-sm font-medium">{t("taskTitle", lang)} *</Label>
             <Input
               id="todo-title"
               placeholder={t("taskTitlePlaceholder", lang)}
@@ -271,12 +271,13 @@ export function TodoModal() {
               onChange={(e) => setTitle(e.target.value)}
               maxLength={200}
               autoFocus
+              className="rounded-xl border-border/50 focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20"
             />
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="todo-desc">{t("description", lang)}</Label>
+            <Label htmlFor="todo-desc" className="text-sm font-medium">{t("description", lang)}</Label>
             <Textarea
               id="todo-desc"
               placeholder={t("descriptionPlaceholder", lang)}
@@ -284,13 +285,14 @@ export function TodoModal() {
               onChange={(e) => setDescription(e.target.value)}
               maxLength={2000}
               rows={3}
+              className="rounded-xl border-border/50 focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20"
             />
           </div>
 
           {/* Priority & Folder */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>{t("priority", lang)}</Label>
+              <Label className="text-sm font-medium">{t("priority", lang)}</Label>
               <Select
                 value={priority}
                 onValueChange={(v) => setPriority(v as typeof priority)}
@@ -322,7 +324,7 @@ export function TodoModal() {
             </div>
 
             <div className="space-y-2">
-              <Label>{t("folder", lang)}</Label>
+              <Label className="text-sm font-medium">{t("folder", lang)}</Label>
               <Select value={folderId} onValueChange={setFolderId}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder={t("selectFolder", lang)} />
@@ -345,13 +347,13 @@ export function TodoModal() {
           {/* Due Date & Recurring */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>{t("dueDate", lang)}</Label>
+              <Label className="text-sm font-medium">{t("dueDate", lang)}</Label>
               <div className="flex gap-2">
                 <Input
                   type="datetime-local"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="flex-1"
+                  className="flex-1 rounded-xl border-border/50 focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20"
                 />
                 <Button
                   type="button"
@@ -367,7 +369,7 @@ export function TodoModal() {
             </div>
 
             <div className="space-y-2">
-              <Label>{t("recurring", lang)}</Label>
+              <Label className="text-sm font-medium">{t("recurring", lang)}</Label>
               <Select value={recurring} onValueChange={setRecurring}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder={t("recurring", lang)} />
@@ -384,8 +386,8 @@ export function TodoModal() {
 
           {/* Tags */}
           <div className="space-y-2">
-            <Label>{t("tags", lang)}</Label>
-            <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-input bg-transparent px-3 py-2">
+            <Label className="text-sm font-medium">{t("tags", lang)}</Label>
+            <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-border/50 bg-transparent px-3 py-2 focus-within:border-emerald-500/50 focus-within:ring-2 focus-within:ring-emerald-500/20">
               {tags.map((tag, i) => (
                 <Badge
                   key={tag}
@@ -415,7 +417,7 @@ export function TodoModal() {
 
           {/* Subtasks */}
           <div className="space-y-2">
-            <Label className="flex items-center gap-2">
+            <Label className="flex items-center gap-2 text-sm font-medium">
               <ListChecks className="size-4" />
               {t("subtasks", lang)}
             </Label>
@@ -464,7 +466,7 @@ export function TodoModal() {
                 onChange={(e) => setSubtaskInput(e.target.value)}
                 onKeyDown={handleSubtaskKeyDown}
                 placeholder={t("subtaskPlaceholder", lang)}
-                className="flex-1"
+                className="flex-1 rounded-xl border-border/50 focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20"
               />
               <Button
                 type="button"
@@ -503,7 +505,7 @@ export function TodoModal() {
           <Button
             onClick={handleSave}
             disabled={!title.trim() || isSaving}
-            className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+            className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25 hover:from-emerald-600 hover:to-teal-700"
           >
             {isSaving ? (
               <div className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />

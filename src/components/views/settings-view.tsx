@@ -66,6 +66,18 @@ const CITIES = [
   { value: "kuwait", label: "Kuwait" },
   { value: "amman", label: "Amman" },
   { value: "casablanca", label: "Casablanca" },
+  { value: "london", label: "London" },
+  { value: "newyork", label: "New York" },
+  { value: "paris", label: "Paris" },
+  { value: "tokyo", label: "Tokyo" },
+  { value: "istanbul", label: "Istanbul" },
+  { value: "berlin", label: "Berlin" },
+  { value: "sydney", label: "Sydney" },
+  { value: "toronto", label: "Toronto" },
+  { value: "mumbai", label: "Mumbai" },
+  { value: "beijing", label: "Beijing" },
+  { value: "seoul", label: "Seoul" },
+  { value: "singapur", label: "Singapore" },
 ]
 
 const COLOR_THEMES = [
@@ -87,7 +99,7 @@ const SHORTCUTS = [
 const TECH_BADGES = [
   { name: "Next.js 16", color: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300" },
   { name: "TypeScript", color: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" },
-  { name: "Prisma", color: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300" },
+  { name: "Prisma", color: "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300" },
   { name: "Tailwind CSS", color: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300" },
   { name: "Zustand", color: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" },
   { name: "shadcn/ui", color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" },
@@ -411,8 +423,8 @@ export function SettingsView() {
       <Card className={sectionClass}>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-3 text-base">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40">
-              <User className="size-4.5 text-violet-600 dark:text-violet-400" />
+            <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40">
+              <User className="size-4.5 text-emerald-600 dark:text-emerald-400" />
             </div>
             {t("profile", lang)}
           </CardTitle>
@@ -958,8 +970,8 @@ export function SettingsView() {
       <Card className={sectionClass}>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-3 text-base">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900/40 dark:to-violet-900/40">
-              <Keyboard className="size-4.5 text-indigo-600 dark:text-indigo-400" />
+            <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900/40 dark:to-emerald-900/40">
+              <Keyboard className="size-4.5 text-teal-600 dark:text-teal-400" />
             </div>
             {t("shortcutsReference", lang)}
           </CardTitle>

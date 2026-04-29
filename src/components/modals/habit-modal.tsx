@@ -139,9 +139,9 @@ export function HabitModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+      <DialogContent className="rounded-2xl border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl shadow-emerald-500/5 max-h-[85vh] overflow-y-auto max-w-lg">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-lg font-bold">
             {isEditing ? t("editHabit", lang) : t("newHabit", lang)}
           </DialogTitle>
         </DialogHeader>
@@ -149,20 +149,20 @@ export function HabitModal() {
         <div className="space-y-4">
           {/* Name */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">
+            <Label className="text-sm font-medium">
               {t("habitName", lang)}
             </Label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t("habitNamePlaceholder", lang)}
-              className="h-9"
+              className="h-9 rounded-xl border-border/50 focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20"
             />
           </div>
 
           {/* Icon selector */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">
+            <Label className="text-sm font-medium">
               {t("habitIcon", lang)}
             </Label>
             <div className="flex flex-wrap gap-1.5 rounded-lg border border-border/50 p-2">
@@ -186,7 +186,7 @@ export function HabitModal() {
 
           {/* Color picker */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">
+            <Label className="text-sm font-medium">
               {t("habitColor", lang)}
             </Label>
             <div className="flex flex-wrap gap-2">
@@ -214,7 +214,7 @@ export function HabitModal() {
 
           {/* Frequency */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">
+            <Label className="text-sm font-medium">
               {t("recurring", lang)}
             </Label>
             <Select value={frequency} onValueChange={setFrequency}>
@@ -224,14 +224,14 @@ export function HabitModal() {
               <SelectContent>
                 <SelectItem value="daily">{t("daily", lang)}</SelectItem>
                 <SelectItem value="weekly">{t("weekly", lang)}</SelectItem>
-                <SelectItem value="weekdays">Weekdays</SelectItem>
+                <SelectItem value="weekdays">{t("weekdays", lang)}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Goal */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">
+            <Label className="text-sm font-medium">
               {t("workDuration", lang)} ({t("minutes", lang)})
             </Label>
             <Input
@@ -239,13 +239,13 @@ export function HabitModal() {
               value={goal}
               onChange={(e) => setGoal(Number(e.target.value) || 0)}
               min={0}
-              className="h-9"
+              className="h-9 rounded-xl border-border/50 focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20"
             />
           </div>
 
           {/* Notes */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">
+            <Label className="text-sm font-medium">
               {t("description", lang)}
             </Label>
             <Textarea
@@ -253,7 +253,7 @@ export function HabitModal() {
               onChange={(e) => setNotes(e.target.value)}
               placeholder={t("descriptionPlaceholder", lang)}
               rows={3}
-              className="resize-none"
+              className="resize-none rounded-xl border-border/50 focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20"
             />
           </div>
         </div>

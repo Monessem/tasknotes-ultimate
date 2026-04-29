@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useState, useMemo } from "react"
 import {
   Target,
   Plus,
@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   Pencil,
   Trash2,
+  RefreshCw,
 } from "lucide-react"
 import { useAppStore } from "@/store/app-store"
 import { t } from "@/lib/i18n"
@@ -21,6 +22,50 @@ import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { AnimatedEmptyState } from "@/components/animated-empty-state"
 
+/**
+ * Check if a habit should be shown today based on its frequency.
+ * - "daily": always shown
+ * - "weekly": always shown (user completes once per week)
+ * - "weekdays": only shown Mon-Fri
+ */
+function shouldShowToday(frequency: string): boolean {
+  if (frequency === "daily" || frequency === "weekly") return true
+  if (frequency === "weekdays") {
+    const day = new Date().getDay()
+    return day !== 0 && day !== 6 // Not Sunday or Saturday
+  }
+  return true
+}
+
+/**
+ * Get the start of the current week (Monday) as a date string.
+ */
+function getWeekStart(): string {
+  const d = new Date()
+  const day = d.getDay()
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1)
+  const monday = new Date(d)
+  monday.setDate(diff)
+  monday.setHours(0, 0, 0, 0)
+  return monday.toISOString().split("T")[0]
+}
+
+/**
+ * Check if a weekly habit has been completed this week.
+ */
+function isWeeklyHabitCompletedThisWeek(
+  habitId: string,
+  habitLogs: { habitId: string; date: string; completed: boolean }[]
+): boolean {
+  const weekStart = getWeekStart()
+  return habitLogs.some(
+    (log) =>
+      log.habitId === habitId &&
+      log.completed &&
+      log.date >= weekStart
+  )
+}
+
 export function HabitsView() {
   const { habits, habitLogs, setEditingItem, setActiveModal, fetchHabitLogs, fetchHabits } = useAppStore()
   const settings = useAppStore((s) => s.settings)
@@ -29,38 +74,61 @@ export function HabitsView() {
   // Track which habit just completed for bounce animation
   const [justCompleted, setJustCompleted] = useState<string | null>(null)
 
-  const activeHabits = habits.filter((h) => !h.deletedAt)
-  const todayStr = new Date().toISOString().split("T")[0]
+  const todayStr = useMemo(() => new Date().toISOString().split("T")[0], [])
 
-  const completedCount = activeHabits.filter((h) =>
-    habitLogs.some((log) => log.habitId === h.id && log.date === todayStr && log.completed)
-  ).length
+  // Filter habits based on frequency - only show relevant habits for today
+  const activeHabits = useMemo(
+    () => habits.filter((h) => !h.deletedAt && shouldShowToday(h.frequency)),
+    [habits]
+  )
+
+  const allActiveHabits = useMemo(() => habits.filter((h) => !h.deletedAt), [habits])
+
+  const completedCount = activeHabits.filter((h) => {
+    if (h.frequency === "weekly") {
+      return isWeeklyHabitCompletedThisWeek(h.id, habitLogs)
+    }
+    return habitLogs.some(
+      (log) => log.habitId === h.id && log.date === todayStr && log.completed
+    )
+  }).length
+
   const overallProgress = activeHabits.length > 0 ? Math.round((completedCount / activeHabits.length) * 100) : 0
 
   // Best streak across all habits
-  const bestStreak = activeHabits.reduce((max, habit) => {
-    const streak = getStreak(habit.id)
+  const bestStreak = allActiveHabits.reduce((max, habit) => {
+    const streak = getStreak(habit)
     return streak > max ? streak : max
   }, 0)
 
-  const isHabitCompletedToday = (habitId: string) => {
+  const isHabitCompletedToday = (habitId: string, frequency: string) => {
+    if (frequency === "weekly") {
+      return isWeeklyHabitCompletedThisWeek(habitId, habitLogs)
+    }
     return habitLogs.some(
       (log) => log.habitId === habitId && log.date === todayStr && log.completed
     )
   }
 
   const toggleHabitLog = useCallback(
-    async (habitId: string) => {
+    async (habitId: string, frequency: string) => {
       try {
+        // For weekly habits, if already completed this week, don't toggle off
+        if (frequency === "weekly" && isWeeklyHabitCompletedThisWeek(habitId, habitLogs)) {
+          return
+        }
+
         const res = await fetch("/api/habit-logs", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ habitId, date: todayStr }),
         })
         if (res.ok) {
-          const wasCompleted = habitLogs.some(
-            (log) => log.habitId === habitId && log.date === todayStr && log.completed
-          )
+          const wasCompleted = frequency === "weekly"
+            ? isWeeklyHabitCompletedThisWeek(habitId, habitLogs)
+            : habitLogs.some(
+                (log) => log.habitId === habitId && log.date === todayStr && log.completed
+              )
           audioManager.play(wasCompleted ? "click" : "complete")
           if (!wasCompleted) {
             const habit = habits.find((h) => h.id === habitId)
@@ -68,7 +136,6 @@ export function HabitsView() {
               logHistory("complete", "habit", habitId, habit.name)
               toast.success(t("habitCompleted", lang), { description: t("keepItUp", lang) })
             }
-            // Trigger bounce animation
             setJustCompleted(habitId)
             setTimeout(() => setJustCompleted(null), 600)
           }
@@ -77,8 +144,7 @@ export function HabitsView() {
       } catch {
         // Silently fail
       }
-    },
-    [fetchHabitLogs, todayStr, habits, habitLogs, lang]
+    }
   )
 
   const handleDeleteHabit = useCallback(
@@ -98,23 +164,73 @@ export function HabitsView() {
       } catch {
         // Silently fail
       }
-    },
-    [fetchHabits, lang]
+    }
   )
 
-  // Calculate streak for each habit
-  function getStreak(habitId: string) {
-    const habitLogsForHabit = habitLogs.filter(
-      (l) => l.habitId === habitId && l.completed
+  /**
+   * Calculate streak for a habit, respecting its frequency.
+   * - Daily/Weekday: count consecutive days with completions
+   * - Weekly: count consecutive weeks with at least one completion
+   */
+  function getStreak(habit: { id: string; frequency: string }) {
+    const logsForHabit = habitLogs.filter(
+      (l) => l.habitId === habit.id && l.completed
     )
-    const completedDates = new Set(habitLogsForHabit.map((l) => l.date))
 
+    if (habit.frequency === "weekly") {
+      // Count consecutive weeks with completions
+      const completedWeeks = new Set<string>()
+      for (const log of logsForHabit) {
+        const d = new Date(log.date)
+        const day = d.getDay()
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1)
+        const monday = new Date(d)
+        monday.setDate(diff)
+        completedWeeks.add(monday.toISOString().split("T")[0])
+      }
+
+      let streak = 0
+      const today = new Date()
+      const day = today.getDay()
+      const diff = today.getDate() - day + (day === 0 ? -6 : 1)
+      let checkMonday = new Date(today)
+      checkMonday.setDate(diff)
+
+      for (let i = 0; i < 52; i++) {
+        const weekKey = checkMonday.toISOString().split("T")[0]
+        if (completedWeeks.has(weekKey)) {
+          streak++
+          checkMonday.setDate(checkMonday.getDate() - 7)
+        } else if (i > 0) {
+          break
+        } else {
+          // Check if current week just started, allow grace
+          checkMonday.setDate(checkMonday.getDate() - 7)
+          const prevWeekKey = checkMonday.toISOString().split("T")[0]
+          if (completedWeeks.has(prevWeekKey)) {
+            streak++ // Count the previous week at least
+          }
+          break
+        }
+      }
+      return streak
+    }
+
+    // Daily / Weekday streak logic
+    const completedDates = new Set(logsForHabit.map((l) => l.date))
     let streak = 0
     const today = new Date()
     for (let i = 0; i < 365; i++) {
       const date = new Date(today)
       date.setDate(date.getDate() - i)
       const dateStr = date.toISOString().split("T")[0]
+
+      // For weekday habits, skip weekends
+      if (habit.frequency === "weekdays") {
+        const dayOfWeek = date.getDay()
+        if (dayOfWeek === 0 || dayOfWeek === 6) continue
+      }
+
       if (completedDates.has(dateStr)) {
         streak++
       } else if (i > 0) {
@@ -139,7 +255,7 @@ export function HabitsView() {
   }
 
   // Get last 7 days for mini calendar
-  function getLast7Days() {
+  const last7Days = useMemo(() => {
     const days: { dateStr: string; dayInitial: string }[] = []
     const dayInitials = ["S", "M", "T", "W", "T", "F", "S"]
     for (let i = 6; i >= 0; i--) {
@@ -150,9 +266,7 @@ export function HabitsView() {
       days.push({ dateStr, dayInitial: dayInitials[dayIdx] })
     }
     return days
-  }
-
-  const last7Days = getLast7Days()
+  }, [])
 
   // SVG progress ring calculations
   const radius = 32
@@ -166,7 +280,7 @@ export function HabitsView() {
         <div className="flex items-center gap-3">
           <Badge
             variant="secondary"
-            className="bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400"
+            className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
           >
             {completedCount}/{activeHabits.length} {t("done", lang)}
           </Badge>
@@ -174,7 +288,7 @@ export function HabitsView() {
         <Button
           size="sm"
           onClick={() => setActiveModal("addHabit")}
-          className="gap-1.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md shadow-rose-500/25 hover:from-rose-600 hover:to-pink-600"
+          className="gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25 hover:from-emerald-600 hover:to-teal-700"
         >
           <Plus className="size-3.5" />
           {t("newHabit", lang)}
@@ -185,7 +299,7 @@ export function HabitsView() {
       {activeHabits.length > 0 && (
         <div className={cn(
           "rounded-2xl border border-border/30 p-5 backdrop-blur-sm",
-          "bg-gradient-to-br from-rose-50 to-emerald-50 dark:from-rose-950/20 dark:to-emerald-950/20"
+          "bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20"
         )}>
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-5">
             {/* SVG Progress Ring */}
@@ -221,7 +335,7 @@ export function HabitsView() {
                   className="transition-all duration-700 ease-out"
                 />
               </svg>
-              {/* Center text overlay - properly positioned */}
+              {/* Center text overlay */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
                   {overallProgress}%
@@ -284,25 +398,21 @@ export function HabitsView() {
       ) : (
         <div className="space-y-3">
           {activeHabits.map((habit) => {
-            const completed = isHabitCompletedToday(habit.id)
-            const streak = getStreak(habit.id)
+            const completed = isHabitCompletedToday(habit.id, habit.frequency)
+            const streak = getStreak(habit)
             const rate7d = get7DayRate(habit.id)
             const habitColor = habit.color || "#10b981"
+            const isWeekly = habit.frequency === "weekly"
 
             return (
               <Card
                 key={habit.id}
                 className={cn(
-                  "group relative cursor-pointer overflow-hidden rounded-xl border bg-card/80 backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl",
+                  "group relative cursor-pointer overflow-hidden rounded-2xl border bg-card/80 backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl",
                   completed
                     ? "border-emerald-200/50 shadow-[0_0_20px_rgba(16,185,129,0.12)] dark:border-emerald-800/30"
                     : "border-border/30"
                 )}
-                style={{
-                  background: completed
-                    ? `radial-gradient(ellipse at top left, ${habitColor}08 0%, transparent 60%), rgba(var(--card), 0.8)`
-                    : `radial-gradient(ellipse at top left, ${habitColor}05 0%, transparent 60%), rgba(var(--card), 0.8)`,
-                }}
                 onClick={() => {
                   setEditingItem(habit)
                   setActiveModal("editHabit")
@@ -319,7 +429,7 @@ export function HabitsView() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        toggleHabitLog(habit.id)
+                        toggleHabitLog(habit.id, habit.frequency)
                       }}
                       className={cn(
                         "flex size-11 shrink-0 items-center justify-center rounded-xl text-lg transition-all",
@@ -339,29 +449,22 @@ export function HabitsView() {
 
                     {/* Info */}
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className={cn(
                           "text-sm font-semibold",
                           completed ? "text-muted-foreground line-through" : "text-foreground"
                         )}>
                           {habit.name}
                         </span>
-                        {habit.frequency === "daily" && (
-                          <Badge
-                            variant="outline"
-                            className="h-4 border-0 px-1 text-[9px]"
-                          >
-                            {t("daily", lang)}
-                          </Badge>
-                        )}
-                        {habit.frequency === "weekly" && (
-                          <Badge
-                            variant="outline"
-                            className="h-4 border-0 px-1 text-[9px]"
-                          >
-                            {t("weekly", lang)}
-                          </Badge>
-                        )}
+                        {/* Frequency badge */}
+                        <Badge
+                          variant="outline"
+                          className="h-4 border-0 px-1 text-[9px]"
+                        >
+                          {habit.frequency === "daily" && t("daily", lang)}
+                          {habit.frequency === "weekly" && t("weekly", lang)}
+                          {habit.frequency === "weekdays" && t("weekdays", lang)}
+                        </Badge>
                         {/* Weekly Rate mini badge */}
                         <Badge
                           className={cn(
@@ -377,14 +480,20 @@ export function HabitsView() {
                         </Badge>
                       </div>
 
-                      {/* Streak */}
+                      {/* Streak + weekly status */}
                       <div className="mt-1 flex items-center gap-3">
                         {streak > 0 && (
                           <div className="flex items-center gap-1 text-xs">
                             <Flame className="size-3 text-orange-500" />
                             <span className="font-medium text-orange-600 dark:text-orange-400">
-                              {streak} {t("daysStreak", lang)}
+                              {streak} {isWeekly ? t("weeksStreak", lang) || "wk streak" : t("daysStreak", lang)}
                             </span>
+                          </div>
+                        )}
+                        {isWeekly && !completed && (
+                          <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                            <RefreshCw className="size-3" />
+                            <span>{t("completeThisWeek", lang) || "Complete this week"}</span>
                           </div>
                         )}
                       </div>

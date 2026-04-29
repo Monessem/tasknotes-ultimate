@@ -179,9 +179,9 @@ export function NoteModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+      <DialogContent className="rounded-2xl border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl shadow-emerald-500/5 max-h-[85vh] overflow-y-auto max-w-lg">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-lg font-bold">
             {isEditing ? t("editNote", lang) : t("newNote", lang)}
           </DialogTitle>
         </DialogHeader>
@@ -189,20 +189,20 @@ export function NoteModal() {
         <div className="space-y-4">
           {/* Title */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">
+            <Label className="text-sm font-medium">
               {t("noteTitle", lang)}
             </Label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={t("noteTitle", lang)}
-              className="h-9"
+              className="h-9 rounded-xl border-border/50 focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20"
             />
           </div>
 
           {/* Content */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">
+            <Label className="text-sm font-medium">
               {t("description", lang)}
             </Label>
             <Textarea
@@ -210,13 +210,13 @@ export function NoteModal() {
               onChange={(e) => setContent(e.target.value)}
               placeholder={t("noteContentPlaceholder", lang)}
               rows={5}
-              className="resize-none"
+              className="resize-none rounded-xl border-border/50 focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20"
             />
           </div>
 
           {/* Color picker */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">
+            <Label className="text-sm font-medium">
               {t("habitColor", lang)}
             </Label>
             <div className="flex flex-wrap gap-2">
@@ -244,7 +244,7 @@ export function NoteModal() {
 
           {/* Folder select */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">
+            <Label className="text-sm font-medium">
               {t("folder", lang)}
             </Label>
             <Select value={folderId} onValueChange={setFolderId}>
@@ -264,7 +264,7 @@ export function NoteModal() {
 
           {/* Checklist section */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">
+            <Label className="text-sm font-medium">
               {t("checklist", lang)}
             </Label>
 
@@ -306,7 +306,7 @@ export function NoteModal() {
                 value={newChecklistText}
                 onChange={(e) => setNewChecklistText(e.target.value)}
                 placeholder={t("addChecklistItem", lang)}
-                className="h-8 text-xs"
+                className="h-8 rounded-xl border-border/50 text-xs focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault()
