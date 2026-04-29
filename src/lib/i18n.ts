@@ -261,6 +261,43 @@ const translations: Record<Language, Record<string, string>> = {
     focusMin5: "5m",
     focusMin15: "15m",
     focusMin25: "25m",
+
+    // Today View
+    dayProgress: "Day Progress",
+    keepGoing: "Keep going!",
+    greatProgress: "Great progress!",
+    almostThere: "Almost there!",
+    perfectDay: "Perfect day!",
+    todaysSummary: "Today's Summary",
+    importantItems: "Important items need your attention",
+    flaggedItems: "Flagged items require action",
+
+    // Keyboard Shortcuts
+    keyboardShortcuts: "Keyboard Shortcuts",
+    shortcutNavigation: "Navigation",
+    shortcutActions: "Actions",
+    shortcutGeneral: "General",
+    openCommandPalette: "Open Command Palette",
+    addNewTask: "Add New Task",
+    addNewNote: "Add New Note",
+    addNewHabit: "Add New Habit",
+    toggleDarkMode: "Toggle Dark Mode",
+    showShortcuts: "Show Shortcuts",
+    closeDialog: "Close Dialog",
+
+    // Weekly Insights
+    weeklyInsights: "Weekly Insights",
+    tasksCompletedWeek: "Tasks this week",
+    habitsCompletedWeek: "Habits this week",
+    focusSessionsWeek: "Focus sessions",
+    vsLastWeek: "vs last week",
+    moreTasks: "more tasks completed",
+    fewerTasks: "fewer tasks completed",
+    sameTasks: "Same as last week",
+    bestStreak: "Best Streak",
+    filterAction: "Filter action",
+    mostActiveDay: "Most active",
+    allActions: "All actions",
   },
 
   ar: {
@@ -522,6 +559,43 @@ const translations: Record<Language, Record<string, string>> = {
     focusMin5: "٥د",
     focusMin15: "١٥د",
     focusMin25: "٢٥د",
+
+    // Today View
+    dayProgress: "تقدم اليوم",
+    keepGoing: "استمر!",
+    greatProgress: "تقدم رائع!",
+    almostThere: "شارفت على الانتهاء!",
+    perfectDay: "يوم مثالي!",
+    todaysSummary: "ملخص اليوم",
+    importantItems: "العناصر المهمة تحتاج انتباهك",
+    flaggedItems: "العناصر المميزة تتطلب إجراء",
+
+    // Keyboard Shortcuts
+    keyboardShortcuts: "اختصارات لوحة المفاتيح",
+    shortcutNavigation: "التنقل",
+    shortcutActions: "الإجراءات",
+    shortcutGeneral: "عام",
+    openCommandPalette: "فتح لوحة الأوامر",
+    addNewTask: "إضافة مهمة جديدة",
+    addNewNote: "إضافة ملاحظة جديدة",
+    addNewHabit: "إضافة عادة جديدة",
+    toggleDarkMode: "تبديل الوضع الداكن",
+    showShortcuts: "عرض الاختصارات",
+    closeDialog: "إغلاق الحوار",
+
+    // Weekly Insights
+    weeklyInsights: "رؤى أسبوعية",
+    tasksCompletedWeek: "مهام هذا الأسبوع",
+    habitsCompletedWeek: "عادات هذا الأسبوع",
+    focusSessionsWeek: "جلسات تركيز",
+    vsLastWeek: "مقارنة بالأسبوع الماضي",
+    moreTasks: "مهام أكثر مكتملة",
+    fewerTasks: "مهام أقل مكتملة",
+    sameTasks: "نفس الأسبوع الماضي",
+    bestStreak: "أفضل سلسلة",
+    filterAction: "تصفية الإجراء",
+    mostActiveDay: "الأكثر نشاطاً",
+    allActions: "جميع الإجراءات",
   },
 };
 

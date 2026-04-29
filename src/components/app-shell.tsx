@@ -28,8 +28,9 @@ import { ConfirmModal } from "@/components/modals/confirm-modal"
 import { InstallPrompt } from "@/components/install-prompt"
 import { PageTransition } from "@/components/page-transition"
 import { CommandPalette } from "@/components/command-palette"
+import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog"
 import { AnimatedEmptyState } from "@/components/animated-empty-state"
-import { CheckSquare, Star, Flag, ListTodo, CircleCheckBig, Target, TrendingUp, Plus, Clock, AlertTriangle, Flame, CalendarCheck } from "lucide-react"
+import { CheckSquare, Star, Flag, ListTodo, CircleCheckBig, Target, TrendingUp, Plus, Clock, AlertTriangle, Flame, CalendarCheck, CheckCircle2, Timer, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react"
 import { WeeklyTaskChart } from "@/components/weekly-task-chart"
 import { HabitCompletionChart } from "@/components/habit-completion-chart"
 import { t } from "@/lib/i18n"
@@ -88,6 +89,116 @@ function DashboardView() {
     habitLogs.some((log) => log.habitId === h.id && log.date === todayStr && log.completed)
   ).length
   const habitsRemainingToday = activeHabits.length - habitsCompletedToday
+
+  // Weekly Insights calculations
+  const startOfWeek = (() => {
+    const d = new Date()
+    const day = d.getDay()
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1)
+    const start = new Date(d.setDate(diff))
+    start.setHours(0, 0, 0, 0)
+    return start
+  })()
+  const startOfLastWeek = new Date(startOfWeek)
+  startOfLastWeek.setDate(startOfLastWeek.getDate() - 7)
+  const endOfLastWeek = new Date(startOfWeek)
+
+  const isThisWeek = (dateStr: string) => {
+    const d = new Date(dateStr)
+    return d >= startOfWeek
+  }
+  const isLastWeek = (dateStr: string) => {
+    const d = new Date(dateStr)
+    return d >= startOfLastWeek && d < endOfLastWeek
+  }
+
+  const tasksCompletedThisWeek = todos.filter(
+    (t) => t.completed && !t.deletedAt && t.completedAt && isThisWeek(t.completedAt)
+  ).length
+  const tasksCompletedLastWeek = todos.filter(
+    (t) => t.completed && !t.deletedAt && t.completedAt && isLastWeek(t.completedAt)
+  ).length
+  const habitsCompletedThisWeek = habitLogs.filter(
+    (log) => log.completed && isThisWeek(log.date)
+  ).length
+  const focusSessionsThisWeek = pomodoroSessions.filter(
+    (s) => s.type === "work" && isThisWeek(s.date)
+  ).length
+
+  // Habit streak: longest consecutive days of habit completion
+  const getHabitStreak = () => {
+    const activeHabitList = habits.filter((h) => !h.deletedAt)
+    let bestStreak = 0
+    for (const habit of activeHabitList) {
+      const logs = habitLogs
+        .filter((l) => l.habitId === habit.id && l.completed)
+        .map((l) => l.date)
+        .sort()
+        .reverse()
+      let streak = 0
+      let checkDate = new Date().toISOString().split("T")[0]
+      for (const logDate of logs) {
+        if (logDate === checkDate) {
+          streak++
+          const d = new Date(checkDate)
+          d.setDate(d.getDate() - 1)
+          checkDate = d.toISOString().split("T")[0]
+        } else if (logDate < checkDate) {
+          break
+        }
+      }
+      if (streak > bestStreak) bestStreak = streak
+    }
+    return bestStreak
+  }
+
+  // Pomodoro streak: consecutive days with at least one work session
+  const getPomodoroStreak = () => {
+    const workDates = [
+      ...new Set(
+        pomodoroSessions
+          .filter((s) => s.type === "work")
+          .map((s) => s.date)
+      ),
+    ].sort()
+      .reverse()
+    if (workDates.length === 0) return 0
+    let streak = 0
+    let checkDate = new Date().toISOString().split("T")[0]
+    // If no session today, check from yesterday
+    if (!workDates.includes(checkDate)) {
+      const d = new Date(checkDate)
+      d.setDate(d.getDate() - 1)
+      checkDate = d.toISOString().split("T")[0]
+    }
+    for (const sessionDate of workDates) {
+      if (sessionDate === checkDate) {
+        streak++
+        const d = new Date(checkDate)
+        d.setDate(d.getDate() - 1)
+        checkDate = d.toISOString().split("T")[0]
+      } else if (sessionDate < checkDate) {
+        break
+      }
+    }
+    return streak
+  }
+
+  const habitStreak = getHabitStreak()
+  const pomodoroStreak = getPomodoroStreak()
+
+  // Week vs last week comparison
+  const getWeekComparison = () => {
+    if (tasksCompletedLastWeek === 0 && tasksCompletedThisWeek === 0) return { type: "same" as const }
+    if (tasksCompletedLastWeek === 0) return { type: "up" as const, pct: 100 }
+    const pct = Math.round(
+      ((tasksCompletedThisWeek - tasksCompletedLastWeek) / tasksCompletedLastWeek) * 100
+    )
+    if (pct > 0) return { type: "up" as const, pct }
+    if (pct < 0) return { type: "down" as const, pct: Math.abs(pct) }
+    return { type: "same" as const }
+  }
+  const weekComparison = getWeekComparison()
 
   // Productivity score: weighted combination of task completion, habits, and focus time
   const taskScore = completionRate * 0.4
@@ -328,6 +439,95 @@ function DashboardView() {
               <p className="text-lg font-extrabold text-foreground">{focusMinutes}m</p>
               <p className="text-[10px] font-medium text-muted-foreground">{t("focusTimeToday", lang)}</p>
             </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Weekly Insights */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.28 }}
+        className="rounded-2xl border border-border/50 bg-card/80 p-5 backdrop-blur-sm"
+      >
+        <h3 className="mb-4 text-sm font-bold text-foreground">
+          {t("weeklyInsights", lang)}
+        </h3>
+
+        {/* Category Breakdown Row */}
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          {/* Tasks completed this week */}
+          <div className="group relative overflow-hidden rounded-xl border border-border/30 bg-emerald-500/5 p-4 text-center transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/5">
+            <div className="mx-auto mb-2 flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-sm">
+              <CheckCircle2 className="size-4" />
+            </div>
+            <p className="text-2xl font-extrabold text-foreground">{tasksCompletedThisWeek}</p>
+            <p className="text-[10px] font-medium text-muted-foreground">{t("tasksCompletedWeek", lang)}</p>
+          </div>
+          {/* Habits completed this week */}
+          <div className="group relative overflow-hidden rounded-xl border border-border/30 bg-amber-500/5 p-4 text-center transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-500/5">
+            <div className="mx-auto mb-2 flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-sm">
+              <Target className="size-4" />
+            </div>
+            <p className="text-2xl font-extrabold text-foreground">{habitsCompletedThisWeek}</p>
+            <p className="text-[10px] font-medium text-muted-foreground">{t("habitsCompletedWeek", lang)}</p>
+          </div>
+          {/* Focus sessions this week */}
+          <div className="group relative overflow-hidden rounded-xl border border-border/30 bg-cyan-500/5 p-4 text-center transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-500/5">
+            <div className="mx-auto mb-2 flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 to-teal-500 text-white shadow-sm">
+              <Timer className="size-4" />
+            </div>
+            <p className="text-2xl font-extrabold text-foreground">{focusSessionsThisWeek}</p>
+            <p className="text-[10px] font-medium text-muted-foreground">{t("focusSessionsWeek", lang)}</p>
+          </div>
+        </div>
+
+        {/* Streak Status + Week Comparison */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {/* Streak badges */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 px-3 py-1.5 dark:from-amber-900/40 dark:to-orange-900/40">
+              <Flame className="size-3.5 text-amber-500" />
+              <span className="text-xs font-bold text-amber-700 dark:text-amber-400">
+                {habitStreak} {t("daysStreak", lang)}
+              </span>
+            </div>
+            <span className="text-[10px] text-muted-foreground">{t("bestStreak", lang)}</span>
+            <div className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-cyan-100 to-teal-100 px-3 py-1.5 dark:from-cyan-900/40 dark:to-teal-900/40">
+              <Flame className="size-3.5 text-cyan-500" />
+              <span className="text-xs font-bold text-cyan-700 dark:text-cyan-400">
+                {pomodoroStreak} {t("daysStreak", lang)}
+              </span>
+            </div>
+          </div>
+
+          {/* Week vs Last Week */}
+          <div className="flex items-center gap-1.5">
+            {weekComparison.type === "up" && (
+              <>
+                <ArrowUpRight className="size-3.5 text-emerald-500" />
+                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                  ↑ {weekComparison.pct}% {t("moreTasks", lang)}
+                </span>
+              </>
+            )}
+            {weekComparison.type === "down" && (
+              <>
+                <ArrowDownRight className="size-3.5 text-rose-500" />
+                <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">
+                  ↓ {weekComparison.pct}% {t("fewerTasks", lang)}
+                </span>
+              </>
+            )}
+            {weekComparison.type === "same" && (
+              <>
+                <Minus className="size-3.5 text-muted-foreground" />
+                <span className="text-xs font-semibold text-muted-foreground">
+                  {t("sameTasks", lang)}
+                </span>
+              </>
+            )}
+            <span className="text-[10px] text-muted-foreground">{t("vsLastWeek", lang)}</span>
           </div>
         </div>
       </motion.div>
@@ -581,6 +781,7 @@ export function AppShell() {
       <FolderModal />
       <InstallPrompt />
       <CommandPalette />
+      <KeyboardShortcutsDialog />
     </div>
   )
 }

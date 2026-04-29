@@ -27,6 +27,7 @@ import {
   Keyboard,
   Moon,
   Sun,
+  Zap,
 } from "lucide-react"
 import { useAppStore, type ViewType } from "@/store/app-store"
 import { t } from "@/lib/i18n"
@@ -40,6 +41,8 @@ const navItems: { id: ViewType; labelKey: string; icon: LucideIcon; group: strin
   { id: "habits", labelKey: "habits", icon: Target, group: "navigation" },
   { id: "important", labelKey: "important", icon: Star, group: "filters" },
   { id: "today", labelKey: "today", icon: CalendarDays, group: "filters" },
+  { id: "calendar", labelKey: "calendar", icon: CalendarDays, group: "filters" },
+  { id: "focus", labelKey: "focusView", icon: Zap, group: "filters" },
   { id: "flagged", labelKey: "flagged", icon: Flag, group: "filters" },
   { id: "history", labelKey: "history", icon: History, group: "filters" },
   { id: "folders", labelKey: "folders", icon: FolderOpen, group: "other" },
@@ -84,6 +87,10 @@ export function CommandPalette() {
       if (e.key === "d" && (e.metaKey || e.ctrlKey) && e.shiftKey) {
         e.preventDefault()
         setTheme(theme === "dark" ? "light" : "dark")
+      }
+      if (e.key === "h" && (e.metaKey || e.ctrlKey) && e.shiftKey) {
+        e.preventDefault()
+        setActiveModal("addHabit")
       }
     }
     document.addEventListener("keydown", down)
