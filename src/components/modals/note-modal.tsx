@@ -5,6 +5,8 @@ import { Pin, Plus, X, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { t } from "@/lib/i18n"
 import { useAppStore, type Note } from "@/store/app-store"
+import { toast } from "sonner"
+import { logHistory } from "@/lib/history-log"
 import {
   Dialog,
   DialogContent,
@@ -26,16 +28,16 @@ import {
 } from "@/components/ui/select"
 
 const NOTE_COLORS = [
-  "#6366f1",
   "#10b981",
+  "#14b8a6",
   "#f59e0b",
   "#ef4444",
-  "#8b5cf6",
   "#ec4899",
   "#06b6d4",
   "#f97316",
-  "#14b8a6",
   "#84cc16",
+  "#0ea5e9",
+  "#8b5cf6",
 ]
 
 interface ChecklistItem {
@@ -135,6 +137,13 @@ export function NoteModal() {
       }
 
       await fetchNotes()
+      // Toast and history
+      if (isEditing && existingNote) {
+        toast.success(t("noteUpdated", lang))
+        logHistory("update", "note", existingNote.id, title.trim())
+      } else {
+        toast.success(t("noteCreated", lang))
+      }
       handleClose()
     } catch (err) {
       console.error("Failed to save note:", err)

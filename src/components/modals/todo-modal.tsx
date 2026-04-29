@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react"
 import { useAppStore, type Todo } from "@/store/app-store"
 import { t } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
+import { logHistory } from "@/lib/history-log"
 import {
   Dialog,
   DialogContent,
@@ -223,7 +225,16 @@ export function TodoModal() {
       }
 
       if (res.ok) {
+        const result = await res.json()
         await fetchTodos()
+        // Toast and history
+        if (isEditing && editTodo) {
+          toast.success(t("taskUpdated", lang))
+          logHistory("update", "task", editTodo.id, title.trim())
+        } else {
+          toast.success(t("taskCreated", lang))
+          logHistory("create", "task", result.id, title.trim())
+        }
         setActiveModal(null)
       }
     } catch (e) {

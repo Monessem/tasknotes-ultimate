@@ -5,6 +5,8 @@ import { Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { t } from "@/lib/i18n"
 import { useAppStore, type Folder } from "@/store/app-store"
+import { toast } from "sonner"
+import { logHistory } from "@/lib/history-log"
 import {
   Dialog,
   DialogContent,
@@ -24,15 +26,15 @@ const FOLDER_ICONS = [
 
 const FOLDER_COLORS = [
   "#10b981",
+  "#14b8a6",
   "#f59e0b",
   "#ef4444",
-  "#8b5cf6",
   "#ec4899",
   "#06b6d4",
   "#f97316",
   "#84cc16",
-  "#6366f1",
-  "#14b8a6",
+  "#0ea5e9",
+  "#8b5cf6",
 ]
 
 export function FolderModal() {
@@ -100,6 +102,13 @@ export function FolderModal() {
       }
 
       await fetchFolders()
+      // Toast and history
+      if (isEditing && existingFolder) {
+        toast.success(t("folderUpdated", lang))
+        logHistory("update", "folder", existingFolder.id, name.trim())
+      } else {
+        toast.success(t("folderCreated", lang))
+      }
       handleClose()
     } catch (err) {
       console.error("Failed to save folder:", err)

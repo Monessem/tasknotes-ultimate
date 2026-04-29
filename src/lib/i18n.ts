@@ -180,6 +180,36 @@ const translations: Record<Language, Record<string, string>> = {
     goodMorning: "Good morning",
     goodAfternoon: "Good afternoon",
     goodEvening: "Good evening",
+
+    // Toast Notifications
+    taskCreated: "Task created",
+    taskUpdated: "Task updated",
+    taskDeleted: "Task deleted",
+    taskCompleted: "Task completed!",
+    noteCreated: "Note created",
+    noteUpdated: "Note updated",
+    noteDeleted: "Note deleted",
+    habitCreated: "Habit created",
+    habitUpdated: "Habit updated",
+    habitDeleted: "Habit deleted",
+    habitCompleted: "Habit completed!",
+    folderCreated: "Folder created",
+    folderUpdated: "Folder updated",
+    folderDeleted: "Folder deleted",
+    itemRestored: "Item restored",
+    itemPermanentlyDeleted: "Item permanently deleted",
+    keepItUp: "Keep it up!",
+    dataExported: "Data exported successfully",
+    dataImported: "Data imported successfully",
+    importFailed: "Import failed",
+    historyCleared: "History cleared",
+    binEmptied: "Recycle bin emptied",
+
+    // Dashboard extras
+    focusTime: "Focus Time",
+    recentTasks: "Recent Tasks",
+    todayProgress: "Today's Progress",
+    quickAddPlaceholder: "Quick add task... press Enter",
   },
 
   ar: {
@@ -360,6 +390,36 @@ const translations: Record<Language, Record<string, string>> = {
     goodMorning: "صباح الخير",
     goodAfternoon: "مساء الخير",
     goodEvening: "مساء الخير",
+
+    // Toast Notifications
+    taskCreated: "تم إنشاء المهمة",
+    taskUpdated: "تم تحديث المهمة",
+    taskDeleted: "تم حذف المهمة",
+    taskCompleted: "تم إنجاز المهمة!",
+    noteCreated: "تم إنشاء الملاحظة",
+    noteUpdated: "تم تحديث الملاحظة",
+    noteDeleted: "تم حذف الملاحظة",
+    habitCreated: "تم إنشاء العادة",
+    habitUpdated: "تم تحديث العادة",
+    habitDeleted: "تم حذف العادة",
+    habitCompleted: "تم إكمال العادة!",
+    folderCreated: "تم إنشاء المجلد",
+    folderUpdated: "تم تحديث المجلد",
+    folderDeleted: "تم حذف المجلد",
+    itemRestored: "تم استعادة العنصر",
+    itemPermanentlyDeleted: "تم حذف العنصر نهائياً",
+    keepItUp: "استمر!",
+    dataExported: "تم تصدير البيانات بنجاح",
+    dataImported: "تم استيراد البيانات بنجاح",
+    importFailed: "فشل الاستيراد",
+    historyCleared: "تم مسح السجل",
+    binEmptied: "تم إفراغ سلة المهملات",
+
+    // Dashboard extras
+    focusTime: "وقت التركيز",
+    recentTasks: "المهام الأخيرة",
+    todayProgress: "تقدم اليوم",
+    quickAddPlaceholder: "إضافة سريعة... اضغط Enter",
   },
 };
 

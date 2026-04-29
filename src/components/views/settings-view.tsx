@@ -332,8 +332,8 @@ export function SettingsView() {
       <Card className={sectionClass}>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-3 text-base">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40">
-              <Palette className="size-4.5 text-violet-600 dark:text-violet-400" />
+            <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900/40 dark:to-emerald-900/40">
+              <Palette className="size-4.5 text-teal-600 dark:text-teal-400" />
             </div>
             {t("appearance", lang)}
           </CardTitle>

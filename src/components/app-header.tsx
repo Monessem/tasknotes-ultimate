@@ -18,6 +18,7 @@ import {
   FolderOpen,
   Trash2,
   Settings,
+  Trophy,
 } from "lucide-react"
 import { useAppStore, type ViewType, type ModalType } from "@/store/app-store"
 import { t } from "@/lib/i18n"
@@ -34,6 +35,7 @@ const viewIcons: Record<ViewType, React.ElementType> = {
   flagged: Flag,
   history: History,
   folders: FolderOpen,
+  achievements: Trophy,
   recycle: Trash2,
   settings: Settings,
 }
@@ -48,6 +50,7 @@ const viewTitleKeys: Record<ViewType, string> = {
   flagged: "flagged",
   history: "history",
   folders: "folders",
+  achievements: "achievementsView",
   recycle: "recycle",
   settings: "settings",
 }
@@ -71,6 +74,7 @@ export function AppHeader() {
     flagged: "addTodo",
     history: null,
     folders: "addFolder",
+    achievements: null,
     recycle: null,
     settings: null,
   }
@@ -108,8 +112,11 @@ export function AppHeader() {
           placeholder={t("search", lang)}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="h-9 rounded-full border-border/50 bg-muted/40 pl-9 pr-4 text-sm shadow-none focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20"
+          className="h-9 rounded-full border-border/50 bg-muted/40 pl-9 pr-12 text-sm shadow-none focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20"
         />
+        <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded border border-border/50 bg-muted/60 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+          ⌘K
+        </kbd>
       </div>
 
       {/* Add button */}

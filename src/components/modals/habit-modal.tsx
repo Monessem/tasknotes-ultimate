@@ -5,6 +5,8 @@ import { Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { t } from "@/lib/i18n"
 import { useAppStore, type Habit } from "@/store/app-store"
+import { toast } from "sonner"
+import { logHistory } from "@/lib/history-log"
 import {
   Dialog,
   DialogContent,
@@ -32,15 +34,15 @@ const HABIT_ICONS = [
 
 const HABIT_COLORS = [
   "#10b981",
+  "#14b8a6",
   "#f59e0b",
   "#ef4444",
-  "#8b5cf6",
   "#ec4899",
   "#06b6d4",
   "#f97316",
   "#84cc16",
-  "#6366f1",
-  "#14b8a6",
+  "#0ea5e9",
+  "#8b5cf6",
 ]
 
 export function HabitModal() {
@@ -120,6 +122,13 @@ export function HabitModal() {
       }
 
       await fetchHabits()
+      // Toast and history
+      if (isEditing && existingHabit) {
+        toast.success(t("habitUpdated", lang))
+        logHistory("update", "habit", existingHabit.id, name.trim())
+      } else {
+        toast.success(t("habitCreated", lang))
+      }
       handleClose()
     } catch (err) {
       console.error("Failed to save habit:", err)
