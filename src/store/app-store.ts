@@ -118,6 +118,11 @@ export interface AppSettings {
   language: Language;
   autoSync: boolean;
   colorTheme: string; // "emerald" | "ocean" | "sunset" etc.
+  fontSize: string; // "small" | "medium" | "large"
+  autoStartPomodoro: boolean;
+  longBreakInterval: number;
+  reminderTime: string; // "morning" | "evening" | "both"
+  displayName: string;
 }
 
 // Modal types
@@ -231,9 +236,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     taskReminders: true,
     soundEnabled: true,
     darkMode: false,
-    language: "en",
+    language: "en" as Language,
     autoSync: false,
     colorTheme: "emerald",
+    fontSize: "medium",
+    autoStartPomodoro: false,
+    longBreakInterval: 4,
+    reminderTime: "morning",
+    displayName: "",
   },
   setSettings: (settings) => set({ settings }),
 
@@ -413,6 +423,11 @@ export const useAppStore = create<AppState>((set, get) => ({
             language: (data.language as Language) ?? "en",
             autoSync: data.autoSync ?? false,
             colorTheme: data.colorTheme ?? "emerald",
+            fontSize: data.fontSize ?? "medium",
+            autoStartPomodoro: data.autoStartPomodoro ?? false,
+            longBreakInterval: data.longBreakInterval ?? 4,
+            reminderTime: data.reminderTime ?? "morning",
+            displayName: data.displayName ?? "",
           },
         });
       }

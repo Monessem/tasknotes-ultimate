@@ -333,21 +333,25 @@ export function CalendarView() {
                 >
                   {dayInfo.day}
                 </span>
-                {/* Priority dots */}
-                {incompleteTodos.length > 0 && (
-                  <div className="flex items-center gap-0.5">
-                    {hasHigh && <span className="size-1.5 rounded-full bg-rose-500" />}
-                    {hasMedium && <span className="size-1.5 rounded-full bg-amber-500" />}
-                    {hasLow && <span className="size-1.5 rounded-full bg-emerald-500" />}
+                {/* Priority dots — show for all tasks (completed + incomplete) */}
+                {dayTodos.length > 0 && (
+                  <div className="flex flex-wrap items-center justify-center gap-0.5">
+                    {hasHigh && <span className="size-2 rounded-full bg-rose-500 shadow-sm shadow-rose-500/40" />}
+                    {hasMedium && <span className="size-2 rounded-full bg-amber-500 shadow-sm shadow-amber-500/40" />}
+                    {hasLow && <span className="size-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/40" />}
+                    {/* Completed task dot */}
+                    {dayTodos.some((t) => t.completed) && !hasHigh && !hasMedium && !hasLow && (
+                      <span className="size-2 rounded-full bg-muted-foreground/30" />
+                    )}
                   </div>
                 )}
                 {/* Task count badge if >2 */}
-                {incompleteTodos.length > 2 && (
+                {dayTodos.length > 2 && (
                   <Badge
                     variant="secondary"
                     className="h-4 min-w-[18px] px-1 text-[9px] font-bold"
                   >
-                    {incompleteTodos.length}
+                    {dayTodos.length}
                   </Badge>
                 )}
               </button>

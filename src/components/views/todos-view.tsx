@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState, useMemo, useEffect } from "react"
+import { useCallback, useState, useMemo, useEffect, useRef } from "react"
 import {
   DndContext,
   closestCenter,
@@ -52,6 +52,7 @@ import {
 import { Progress } from "@/components/ui/progress"
 import { toast } from "sonner"
 import { TaskTemplates } from "@/components/task-templates"
+import { AnimatedEmptyState } from "@/components/animated-empty-state"
 
 type PriorityFilter = "all" | "high" | "medium" | "low"
 type SortBy = "dateCreated" | "dueDate" | "priority" | "name"
@@ -160,18 +161,25 @@ function SortableTodoItem({
           }}
           className="shrink-0"
         >
-          <Circle
-            className={cn(
-              "size-5 transition-colors hover:text-emerald-500",
-              todo.priority === "high" && "text-rose-400",
-              todo.priority === "medium" && "text-amber-400",
-              todo.priority === "low" && "text-emerald-400"
-            )}
-          />
+          {todo.completed ? (
+            <CheckCircle2 className="size-5 text-emerald-500" />
+          ) : (
+            <Circle
+              className={cn(
+                "size-5 transition-colors hover:text-emerald-500",
+                todo.priority === "high" && "text-rose-400",
+                todo.priority === "medium" && "text-amber-400",
+                todo.priority === "low" && "text-emerald-400"
+              )}
+            />
+          )}
         </button>
-        <div className="min-w-0 flex-1">
+        <div className={cn("min-w-0 flex-1", todo.completed && "opacity-50")}>
           <div className="flex items-center gap-2">
-            <span className="truncate text-sm font-medium text-foreground">
+            <span className={cn(
+              "truncate text-sm font-medium",
+              todo.completed ? "text-muted-foreground line-through" : "text-foreground"
+            )}>
               {todo.title}
             </span>
             {todo.important && (
@@ -265,6 +273,8 @@ export function TodosView() {
   const [viewMode, setViewMode] = useState<ViewMode>("list")
   const [todoOrder, setTodoOrder] = useState<Record<string, number>>({})
   const [templatesOpen, setTemplatesOpen] = useState(false)
+  const [completingId, setCompletingId] = useState<string | null>(null)
+  const completeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Load order from localStorage on mount
   useEffect(() => {
@@ -351,6 +361,12 @@ export function TodosView() {
 
   const toggleComplete = useCallback(
     async (todoId: string, completed: boolean) => {
+      // Trigger celebration animation when completing a task
+      if (!completed) {
+        setCompletingId(todoId)
+        if (completeTimeoutRef.current) clearTimeout(completeTimeoutRef.current)
+        completeTimeoutRef.current = setTimeout(() => setCompletingId(null), 600)
+      }
       try {
         const res = await fetch(`/api/todos/${todoId}`, {
           method: "PUT",
@@ -546,18 +562,28 @@ export function TodosView() {
             }}
             className="shrink-0"
           >
-            <Circle
-              className={cn(
-                "size-5 transition-colors hover:text-emerald-500",
-                todo.priority === "high" && "text-rose-400",
-                todo.priority === "medium" && "text-amber-400",
-                todo.priority === "low" && "text-emerald-400"
-              )}
-            />
+            {todo.completed ? (
+              <CheckCircle2 className={cn(
+                "size-5 text-emerald-500 transition-all",
+                completingId === todo.id && "scale-125"
+              )} />
+            ) : (
+              <Circle
+                className={cn(
+                  "size-5 transition-colors hover:text-emerald-500",
+                  todo.priority === "high" && "text-rose-400",
+                  todo.priority === "medium" && "text-amber-400",
+                  todo.priority === "low" && "text-emerald-400"
+                )}
+              />
+            )}
           </button>
-          <div className="min-w-0 flex-1">
+          <div className={cn("min-w-0 flex-1", todo.completed && "opacity-50")}>
             <div className="flex items-center gap-2">
-              <span className="truncate text-sm font-medium text-foreground">
+              <span className={cn(
+                "truncate text-sm font-medium",
+                todo.completed ? "text-muted-foreground line-through" : "text-foreground"
+              )}>
                 {todo.title}
               </span>
               {todo.important && (
@@ -569,7 +595,10 @@ export function TodosView() {
             </div>
             {/* Description preview */}
             {todo.description && (
-              <p className="mt-0.5 truncate text-xs text-muted-foreground/70">
+              <p className={cn(
+                "mt-0.5 truncate text-xs",
+                todo.completed ? "text-muted-foreground/40" : "text-muted-foreground/70"
+              )}>
                 {todo.description.length > 100
                   ? todo.description.slice(0, 100) + "..."
                   : todo.description}
@@ -677,18 +706,28 @@ export function TodosView() {
               }}
               className="mt-0.5 shrink-0"
             >
-              <Circle
-                className={cn(
-                  "size-4.5 transition-colors hover:text-emerald-500",
-                  todo.priority === "high" && "text-rose-400",
-                  todo.priority === "medium" && "text-amber-400",
-                  todo.priority === "low" && "text-emerald-400"
-                )}
-              />
+              {todo.completed ? (
+                <CheckCircle2 className={cn(
+                  "size-4.5 text-emerald-500 transition-all",
+                  completingId === todo.id && "scale-125"
+                )} />
+              ) : (
+                <Circle
+                  className={cn(
+                    "size-4.5 transition-colors hover:text-emerald-500",
+                    todo.priority === "high" && "text-rose-400",
+                    todo.priority === "medium" && "text-amber-400",
+                    todo.priority === "low" && "text-emerald-400"
+                  )}
+                />
+              )}
             </button>
-            <div className="min-w-0 flex-1">
+            <div className={cn("min-w-0 flex-1", todo.completed && "opacity-50")}>
               <div className="flex items-start justify-between gap-1">
-                <span className="truncate text-sm font-medium text-foreground">
+                <span className={cn(
+                  "truncate text-sm font-medium",
+                  todo.completed ? "text-muted-foreground line-through" : "text-foreground"
+                )}>
                   {todo.title}
                 </span>
                 <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
@@ -1008,17 +1047,11 @@ export function TodosView() {
 
       {/* Empty state */}
       {sortedTodos.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/30">
-            <CheckSquare className="size-7 text-emerald-500" />
-          </div>
-          <p className="text-lg font-semibold text-foreground">
-            {t("noTasks", lang)}
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("noTasksDesc", lang)}
-          </p>
-        </div>
+        <AnimatedEmptyState
+          icon={CheckSquare}
+          title={t("noTasks", lang)}
+          description={t("noTasksDesc", lang)}
+        />
       )}
     </div>
   )

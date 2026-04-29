@@ -1,11 +1,12 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
-import { Play, Pause, RotateCcw, Timer, Flame, Zap } from "lucide-react"
+import { Play, Pause, RotateCcw, Timer, Flame, Zap, Coffee, Brain } from "lucide-react"
 import { useAppStore } from "@/store/app-store"
 import { t } from "@/lib/i18n"
 import { audioManager } from "@/lib/audio"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 type PomodoroMode = "work" | "shortBreak" | "longBreak"
@@ -24,6 +25,7 @@ export function PomodoroTimer() {
   const [timeLeft, setTimeLeft] = useState(settings.pomodoroWork * 60)
   const [isRunning, setIsRunning] = useState(false)
   const [endTime, setEndTime] = useState<number | null>(null)
+  const [completedWorkSessions, setCompletedWorkSessions] = useState(0)
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -51,6 +53,7 @@ export function PomodoroTimer() {
           setIsRunning(false)
           // Record session if it was a work session
           if (mode === "work") {
+            setCompletedWorkSessions((prev) => prev + 1)
             const todayStr = new Date().toISOString().split("T")[0]
             const newSession = {
               id: crypto.randomUUID(),
@@ -161,13 +164,25 @@ export function PomodoroTimer() {
     longBreak: "#f59e0b",
   }
 
+  // Mode-specific icon and background style
+  const modeIcons = {
+    work: Brain,
+    shortBreak: Coffee,
+    longBreak: Coffee,
+  }
+
+  const ModeIcon = modeIcons[mode]
+
   return (
     <div className={cn(
       "relative overflow-hidden rounded-2xl border border-border/50 bg-card/80 p-5 backdrop-blur-sm transition-all duration-500",
       isRunning && "shadow-xl",
       isRunning && mode === "work" && "shadow-emerald-500/15 border-emerald-500/20",
       isRunning && mode === "shortBreak" && "shadow-cyan-500/15 border-cyan-500/20",
-      isRunning && mode === "longBreak" && "shadow-amber-500/15 border-amber-500/20"
+      isRunning && mode === "longBreak" && "shadow-amber-500/15 border-amber-500/20",
+      // Better visual distinction between modes
+      mode === "shortBreak" && !isRunning && "border-cyan-500/10",
+      mode === "longBreak" && !isRunning && "border-amber-500/10"
     )}>
       {/* Animated gradient border when running */}
       {isRunning && (
@@ -176,9 +191,32 @@ export function PomodoroTimer() {
           gradientColors[mode]
         )} />
       )}
-      <h3 className="mb-4 text-base font-bold text-foreground">
-        {t("pomodoroTimer", lang)}
-      </h3>
+
+      {/* Mode badge + session counter */}
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <h3 className="text-base font-bold text-foreground">
+            {t("pomodoroTimer", lang)}
+          </h3>
+          <Badge className={cn(
+            "border-0 px-2 py-0.5 text-[10px] font-semibold",
+            mode === "work" && "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400",
+            mode === "shortBreak" && "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-400",
+            mode === "longBreak" && "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
+          )}>
+            <ModeIcon className="mr-1 size-3" />
+            {mode === "work" ? t("work", lang) : mode === "shortBreak" ? t("shortBreak", lang) : t("longBreak", lang)}
+          </Badge>
+        </div>
+        {/* Session counter */}
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-muted-foreground">{t("session", lang)}</span>
+          <Badge variant="outline" className="h-5 min-w-[24px] justify-center border-emerald-200 bg-emerald-50/50 px-1.5 text-[10px] font-bold text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
+            {completedWorkSessions + 1}
+          </Badge>
+          <span className="text-[10px] text-muted-foreground">/4</span>
+        </div>
+      </div>
 
       <div className="flex flex-col items-center">
         {/* Circular timer */}
@@ -207,7 +245,11 @@ export function PomodoroTimer() {
               fill="none"
               stroke="currentColor"
               strokeWidth="8"
-              className="text-muted/30"
+              className={cn(
+                mode === "work" && "text-emerald-100 dark:text-emerald-900/30",
+                mode === "shortBreak" && "text-cyan-100 dark:text-cyan-900/30",
+                mode === "longBreak" && "text-amber-100 dark:text-amber-900/30"
+              )}
             />
             {/* Progress circle */}
             <circle
@@ -240,11 +282,19 @@ export function PomodoroTimer() {
               />
             )}
           </svg>
-          {/* Inner circle background */}
+          {/* Inner circle background with mode-specific tinting */}
           <div className={cn(
             "absolute inset-[10px] flex flex-col items-center justify-center rounded-full shadow-inner transition-all duration-300",
-            isRunning ? "bg-card" : "bg-card"
+            mode === "work" && "bg-card",
+            mode === "shortBreak" && "bg-cyan-50/50 dark:bg-cyan-950/20",
+            mode === "longBreak" && "bg-amber-50/50 dark:bg-amber-950/20"
           )}>
+            <ModeIcon className={cn(
+              "mb-1 size-4",
+              mode === "work" && "text-emerald-500",
+              mode === "shortBreak" && "text-cyan-500",
+              mode === "longBreak" && "text-amber-500"
+            )} />
             <span
               className={cn(
                 "font-mono text-3xl font-extrabold tabular-nums bg-gradient-to-br bg-clip-text text-transparent",
@@ -278,9 +328,10 @@ export function PomodoroTimer() {
             size="icon"
             className={cn(
               "size-14 rounded-full shadow-lg transition-all",
-              isRunning
-                ? "bg-gradient-to-r from-amber-500 to-orange-500 shadow-amber-500/30 hover:from-amber-600 hover:to-orange-600"
-                : "bg-gradient-to-r from-emerald-500 to-teal-600 shadow-emerald-500/30 hover:from-emerald-600 hover:to-teal-700"
+              mode === "work" && !isRunning && "bg-gradient-to-r from-emerald-500 to-teal-600 shadow-emerald-500/30 hover:from-emerald-600 hover:to-teal-700",
+              mode === "shortBreak" && !isRunning && "bg-gradient-to-r from-cyan-400 to-teal-500 shadow-cyan-500/30 hover:from-cyan-500 hover:to-teal-600",
+              mode === "longBreak" && !isRunning && "bg-gradient-to-r from-amber-400 to-orange-500 shadow-amber-500/30 hover:from-amber-500 hover:to-orange-600",
+              isRunning && "bg-gradient-to-r from-rose-500 to-pink-500 shadow-rose-500/30 hover:from-rose-600 hover:to-pink-600"
             )}
             onClick={handlePlayPause}
             aria-label={isRunning ? "Pause timer" : "Start timer"}

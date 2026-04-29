@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import {
   StickyNote,
   Plus,
@@ -13,6 +13,8 @@ import {
   Clock,
   LayoutGrid,
   LayoutList,
+  Search,
+  ArrowUpDown,
 } from "lucide-react"
 import { useAppStore } from "@/store/app-store"
 import { t, type Language } from "@/lib/i18n"
@@ -24,6 +26,13 @@ import { toast } from "sonner"
 import { logHistory } from "@/lib/history-log"
 import { audioManager } from "@/lib/audio"
 import { AnimatedEmptyState } from "@/components/animated-empty-state"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 // Helper: format time ago
 function formatTimeAgo(dateStr: string, lang: Language): string {
@@ -54,6 +63,7 @@ function getColorShadow(color: string) {
 }
 
 type ViewMode = "grid" | "list"
+type SortBy = "dateUpdated" | "dateCreated" | "title" | "color"
 
 export function NotesView() {
   const { notes, setEditingItem, setActiveModal, fetchNotes } = useAppStore()
@@ -61,23 +71,44 @@ export function NotesView() {
   const lang = settings.language
   const searchQuery = useAppStore((s) => s.searchQuery)
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
+  const [localSearch, setLocalSearch] = useState("")
+  const [sortBy, setSortBy] = useState<SortBy>("dateUpdated")
 
   const activeNotes = notes.filter((note) => !note.deletedAt)
 
-  // Filter by search
-  const filteredNotes = searchQuery
-    ? activeNotes.filter(
-        (note) =>
-          note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          note.content.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : activeNotes
+  // Filter by search (both global and local)
+  const filteredNotes = useMemo(() => {
+    const query = localSearch || searchQuery
+    if (!query) return activeNotes
+    return activeNotes.filter(
+      (note) =>
+        note.title.toLowerCase().includes(query.toLowerCase()) ||
+        note.content.toLowerCase().includes(query.toLowerCase())
+    )
+  }, [activeNotes, localSearch, searchQuery])
 
-  // Sort: pinned first, then by date
-  const sortedNotes = [...filteredNotes].sort((a, b) => {
-    if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1
-    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-  })
+  // Sort notes
+  const sortedNotes = useMemo(() => {
+    const pinned = filteredNotes.filter((n) => n.isPinned)
+    const other = filteredNotes.filter((n) => !n.isPinned)
+
+    const sortFn = (a: typeof notes[0], b: typeof notes[0]) => {
+      switch (sortBy) {
+        case "dateCreated":
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        case "title":
+          return a.title.localeCompare(b.title, lang === "ar" ? "ar" : "en")
+        case "color":
+          return (a.color || "").localeCompare(b.color || "")
+        case "dateUpdated":
+        default:
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      }
+    }
+
+    // Pinned notes always first, then sorted within their group
+    return [...pinned.sort(sortFn), ...other.sort(sortFn)]
+  }, [filteredNotes, sortBy, lang])
 
   const pinnedNotes = sortedNotes.filter((n) => n.isPinned)
   const otherNotes = sortedNotes.filter((n) => !n.isPinned)
@@ -85,14 +116,14 @@ export function NotesView() {
 
   return (
     <div className="space-y-6">
-      {/* Header with view mode toggle */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      {/* Header with view mode toggle + sort + search */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm text-muted-foreground">
             {filteredNotes.length} {t("notes", lang).toLowerCase()}
           </span>
           {/* View mode toggle */}
-          <div className="ml-2 flex items-center rounded-lg border border-border/50 bg-muted/30 p-0.5">
+          <div className="flex items-center rounded-lg border border-border/50 bg-muted/30 p-0.5">
             <button
               onClick={() => setViewMode("grid")}
               className={cn(
@@ -118,6 +149,22 @@ export function NotesView() {
               {t("listView", lang)}
             </button>
           </div>
+          {/* Sort by */}
+          <Select
+            value={sortBy}
+            onValueChange={(val) => setSortBy(val as SortBy)}
+          >
+            <SelectTrigger size="sm" className="h-8 w-auto gap-1.5 rounded-lg border-amber-200 bg-amber-50/50 text-xs dark:border-amber-800 dark:bg-amber-950/30">
+              <ArrowUpDown className="size-3" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="dateUpdated">{t("sortByDate", lang)}</SelectItem>
+              <SelectItem value="dateCreated">{t("dateCreated", lang)}</SelectItem>
+              <SelectItem value="title">{t("sortByTitle", lang)}</SelectItem>
+              <SelectItem value="color">{t("sortByColor", lang)}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <Button
           size="sm"
@@ -127,6 +174,26 @@ export function NotesView() {
           <Plus className="size-3.5" />
           {t("newNote", lang)}
         </Button>
+      </div>
+
+      {/* Search/filter bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <input
+          type="search"
+          placeholder={t("searchNotes", lang)}
+          value={localSearch}
+          onChange={(e) => setLocalSearch(e.target.value)}
+          className="h-9 w-full rounded-xl border border-border/50 bg-muted/30 pl-9 pr-3 text-sm shadow-none transition-colors placeholder:text-muted-foreground/50 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+        />
+        {localSearch && (
+          <button
+            onClick={() => setLocalSearch("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            <PinOff className="size-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Summary Header Card */}

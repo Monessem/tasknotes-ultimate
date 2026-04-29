@@ -385,6 +385,76 @@ const translations: Record<Language, Record<string, string>> = {
     copied: "Copied!",
     copyReport: "Copy Report",
     collapse: "Collapse",
+
+    // Pomodoro Enhancements
+    session: "Session",
+    workMode: "Work Mode",
+    breakMode: "Break Mode",
+
+    // Notes Enhancements
+    searchNotes: "Search notes...",
+    sortByDate: "Last Updated",
+    sortByTitle: "Title",
+    sortByColor: "Color",
+
+    // Settings Page - Profile
+    profile: "Profile",
+    displayName: "Display Name",
+    displayNamePlaceholder: "Enter your name...",
+    memberSince: "Member since",
+    tasksCompletedStat: "Tasks Done",
+    habitsStreakStat: "Best Streak",
+    focusHoursStat: "Focus Hrs",
+
+    // Settings Page - Appearance
+    fontSize: "Font Size",
+    fontSmall: "Small",
+    fontMedium: "Medium",
+    fontLarge: "Large",
+
+    // Settings Page - Pomodoro
+    autoStartNext: "Auto-start next session",
+    longBreakAfter: "Long break after",
+    sessions: "sessions",
+
+    // Settings Page - Notifications
+    reminderTimePref: "Reminder Digest",
+    morningDigest: "Morning",
+    eveningDigest: "Evening",
+    bothDigest: "Morning & Evening",
+    browserNotifications: "Browser Notifications",
+    enableBrowserNotif: "Enable Notifications",
+    browserNotifGranted: "Permission granted",
+    browserNotifDenied: "Permission denied",
+    browserNotifRequest: "Click to enable",
+
+    // Settings Page - Data Management
+    dataManagement: "Data Management",
+    dataStatistics: "Data Statistics",
+    totalNotesCount: "Total Notes",
+    totalHabitsCount: "Total Habits",
+    totalSessions: "Sessions",
+    resetToDefaults: "Reset to Defaults",
+    resetToDefaultsDesc: "Reset all settings to their default values",
+    clearAllData: "Clear All Data",
+    clearAllDataDesc: "Permanently delete all tasks, notes, habits and history",
+    confirmResetDefaults: "Are you sure you want to reset all settings to defaults?",
+    confirmClearData: "Are you sure you want to delete ALL data? This cannot be undone!",
+    settingsReset: "Settings reset to defaults",
+    dataCleared: "All data cleared",
+
+    // Settings Page - Keyboard Shortcuts
+    shortcutsReference: "Keyboard Shortcuts",
+    shortcutsReferenceDesc: "Quick reference of available shortcuts",
+    openShortcuts: "Open full shortcuts list",
+    switchView: "Switch view",
+    searchTasks: "Search tasks",
+
+    // Settings Page - About
+    aboutApp: "About",
+    techStack: "Tech Stack",
+    credits: "Credits",
+    builtWith: "Built with Next.js, TypeScript & Prisma",
   },
 
   ar: {
@@ -770,6 +840,76 @@ const translations: Record<Language, Record<string, string>> = {
     copied: "تم النسخ!",
     copyReport: "نسخ التقرير",
     collapse: "طي",
+
+    // Pomodoro Enhancements
+    session: "الجلسة",
+    workMode: "وضع العمل",
+    breakMode: "وضع الاستراحة",
+
+    // Notes Enhancements
+    searchNotes: "بحث في الملاحظات...",
+    sortByDate: "آخر تحديث",
+    sortByTitle: "العنوان",
+    sortByColor: "اللون",
+
+    // Settings Page - Profile
+    profile: "الملف الشخصي",
+    displayName: "الاسم",
+    displayNamePlaceholder: "أدخل اسمك...",
+    memberSince: "عضو منذ",
+    tasksCompletedStat: "مهام مكتملة",
+    habitsStreakStat: "أفضل سلسلة",
+    focusHoursStat: "ساعات تركيز",
+
+    // Settings Page - Appearance
+    fontSize: "حجم الخط",
+    fontSmall: "صغير",
+    fontMedium: "متوسط",
+    fontLarge: "كبير",
+
+    // Settings Page - Pomodoro
+    autoStartNext: "بدء تلقائي للجلسة التالية",
+    longBreakAfter: "استراحة طويلة بعد",
+    sessions: "جلسات",
+
+    // Settings Page - Notifications
+    reminderTimePref: "وقت التذكير",
+    morningDigest: "صباحي",
+    eveningDigest: "مسائي",
+    bothDigest: "صباحي ومسائي",
+    browserNotifications: "تنبيهات المتصفح",
+    enableBrowserNotif: "تفعيل التنبيهات",
+    browserNotifGranted: "تم منح الإذن",
+    browserNotifDenied: "تم رفض الإذن",
+    browserNotifRequest: "انقر للتفعيل",
+
+    // Settings Page - Data Management
+    dataManagement: "إدارة البيانات",
+    dataStatistics: "إحصائيات البيانات",
+    totalNotesCount: "إجمالي الملاحظات",
+    totalHabitsCount: "إجمالي العادات",
+    totalSessions: "الجلسات",
+    resetToDefaults: "استعادة الافتراضي",
+    resetToDefaultsDesc: "استعادة جميع الإعدادات لقيمها الافتراضية",
+    clearAllData: "مسح جميع البيانات",
+    clearAllDataDesc: "حذف جميع المهام والملاحظات والعادات والسجل نهائياً",
+    confirmResetDefaults: "هل أنت متأكد من استعادة الإعدادات الافتراضية؟",
+    confirmClearData: "هل أنت متأكد من حذف جميع البيانات؟ لا يمكن التراجع!",
+    settingsReset: "تم استعادة الإعدادات الافتراضية",
+    dataCleared: "تم مسح جميع البيانات",
+
+    // Settings Page - Keyboard Shortcuts
+    shortcutsReference: "اختصارات لوحة المفاتيح",
+    shortcutsReferenceDesc: "مرجع سريع للاختصارات المتاحة",
+    openShortcuts: "فتح قائمة الاختصارات الكاملة",
+    switchView: "تبديل العرض",
+    searchTasks: "بحث المهام",
+
+    // Settings Page - About
+    aboutApp: "حول التطبيق",
+    techStack: "التقنيات المستخدمة",
+    credits: "الاعتمادات",
+    builtWith: "مبني بـ Next.js و TypeScript و Prisma",
   },
 };
 

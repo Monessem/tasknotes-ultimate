@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useRef, useEffect } from "react"
 import { useTheme } from "next-themes"
 import {
   Menu,
@@ -20,11 +21,13 @@ import {
   Settings,
   Trophy,
   Zap,
+  X,
 } from "lucide-react"
 import { useAppStore, type ViewType, type ModalType } from "@/store/app-store"
 import { t } from "@/lib/i18n"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
 
 const viewIcons: Record<ViewType, React.ElementType> = {
   dashboard: LayoutDashboard,
@@ -66,6 +69,9 @@ export function AppHeader() {
   const settings = useAppStore((s) => s.settings)
   const lang = settings.language
 
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const mobileSearchRef = useRef<HTMLInputElement>(null)
+
   const Icon = viewIcons[currentView]
   const title = t(viewTitleKeys[currentView], lang)
 
@@ -87,6 +93,13 @@ export function AppHeader() {
   }
   const activeAddModal = viewAddModal[currentView]
 
+  // Auto-focus mobile search input when opened
+  useEffect(() => {
+    if (mobileSearchOpen && mobileSearchRef.current) {
+      mobileSearchRef.current.focus()
+    }
+  }, [mobileSearchOpen])
+
   return (
     <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-border/50 bg-card/90 px-4 py-3 backdrop-blur-xl sm:gap-4 sm:px-6">
       {/* Mobile menu button */}
@@ -100,8 +113,11 @@ export function AppHeader() {
         <Menu className="size-5" />
       </Button>
 
-      {/* View title with icon */}
-      <div className="flex items-center gap-2.5">
+      {/* View title with icon - hidden on mobile when search is open */}
+      <div className={cn(
+        "flex items-center gap-2.5 transition-all",
+        mobileSearchOpen && "hidden sm:flex"
+      )}>
         <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 shadow-sm ring-1 ring-emerald-500/10 transition-transform hover:scale-105 dark:from-emerald-900/40 dark:to-teal-900/40 dark:ring-emerald-400/10">
           <Icon className="size-4 text-emerald-600 dark:text-emerald-400" />
         </div>
@@ -113,7 +129,7 @@ export function AppHeader() {
       {/* Spacer */}
       <div className="flex-1" />
 
-      {/* Search */}
+      {/* Desktop Search */}
       <div className="relative hidden max-w-[280px] flex-1 sm:block">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -127,6 +143,45 @@ export function AppHeader() {
           ⌘K
         </kbd>
       </div>
+
+      {/* Mobile search - expandable */}
+      {mobileSearchOpen ? (
+        <div className="flex flex-1 items-center gap-2 sm:hidden">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              ref={mobileSearchRef}
+              type="search"
+              placeholder={t("search", lang)}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-9 rounded-full border-border/50 bg-muted/40 pl-9 pr-3 text-sm shadow-none focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20"
+            />
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="shrink-0 rounded-xl"
+            onClick={() => {
+              setMobileSearchOpen(false)
+              setSearchQuery("")
+            }}
+            aria-label="Close search"
+          >
+            <X className="size-4" />
+          </Button>
+        </div>
+      ) : (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="shrink-0 rounded-xl sm:hidden"
+          onClick={() => setMobileSearchOpen(true)}
+          aria-label="Search"
+        >
+          <Search className="size-4" />
+        </Button>
+      )}
 
       {/* Add button */}
       {activeAddModal && (

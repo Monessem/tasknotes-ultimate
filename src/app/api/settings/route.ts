@@ -52,6 +52,12 @@ export async function PUT(request: NextRequest) {
         ...(body.autoSync !== undefined && { autoSync: body.autoSync }),
         ...(body.gitHubToken !== undefined && { gitHubToken: body.gitHubToken }),
         ...(body.gistId !== undefined && { gistId: body.gistId }),
+        ...(body.colorTheme !== undefined && { colorTheme: body.colorTheme }),
+        ...(body.fontSize !== undefined && { fontSize: body.fontSize }),
+        ...(body.autoStartPomodoro !== undefined && { autoStartPomodoro: body.autoStartPomodoro }),
+        ...(body.longBreakInterval !== undefined && { longBreakInterval: body.longBreakInterval }),
+        ...(body.reminderTime !== undefined && { reminderTime: body.reminderTime }),
+        ...(body.displayName !== undefined && { displayName: body.displayName }),
       },
       create: {
         id: 'app-settings',
@@ -67,6 +73,12 @@ export async function PUT(request: NextRequest) {
         autoSync: body.autoSync ?? false,
         gitHubToken: body.gitHubToken ?? '',
         gistId: body.gistId ?? '',
+        colorTheme: body.colorTheme ?? 'emerald',
+        fontSize: body.fontSize ?? 'medium',
+        autoStartPomodoro: body.autoStartPomodoro ?? false,
+        longBreakInterval: body.longBreakInterval ?? 4,
+        reminderTime: body.reminderTime ?? 'morning',
+        displayName: body.displayName ?? '',
       },
     });
 

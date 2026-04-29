@@ -187,9 +187,9 @@ export function HabitsView() {
           "rounded-2xl border border-border/30 p-5 backdrop-blur-sm",
           "bg-gradient-to-br from-rose-50 to-emerald-50 dark:from-rose-950/20 dark:to-emerald-950/20"
         )}>
-          <div className="flex items-center gap-5">
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-5">
             {/* SVG Progress Ring */}
-            <div className="shrink-0">
+            <div className="relative shrink-0" style={{ width: 80, height: 80 }}>
               <svg width="80" height="80" viewBox="0 0 80 80" className="-rotate-90">
                 <defs>
                   <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -221,8 +221,8 @@ export function HabitsView() {
                   className="transition-all duration-700 ease-out"
                 />
               </svg>
-              {/* Center text overlay */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ width: 80, height: 80, position: "relative", marginTop: -80 }}>
+              {/* Center text overlay - properly positioned */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
                   {overallProgress}%
                 </span>
@@ -233,39 +233,39 @@ export function HabitsView() {
             </div>
 
             {/* Stats section */}
-            <div className="flex-1">
+            <div className="flex-1 w-full">
               <h3 className="mb-3 text-sm font-semibold text-foreground">
                 {t("habitSummary", lang)}
               </h3>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {/* Total active */}
-                <div className="flex items-center gap-2">
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
-                    <Target className="size-4 text-emerald-600 dark:text-emerald-400" />
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/40 sm:size-8">
+                    <Target className="size-3.5 text-emerald-600 dark:text-emerald-400 sm:size-4" />
                   </div>
                   <div>
                     <p className="text-sm font-bold text-foreground">{activeHabits.length}</p>
-                    <p className="text-[10px] text-muted-foreground">{t("dailyHabits", lang)}</p>
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground">{t("dailyHabits", lang)}</p>
                   </div>
                 </div>
                 {/* Completed today */}
-                <div className="flex items-center gap-2">
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-teal-100 dark:bg-teal-900/40">
-                    <CheckCircle2 className="size-4 text-teal-600 dark:text-teal-400" />
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-teal-100 dark:bg-teal-900/40 sm:size-8">
+                    <CheckCircle2 className="size-3.5 text-teal-600 dark:text-teal-400 sm:size-4" />
                   </div>
                   <div>
                     <p className="text-sm font-bold text-foreground">{completedCount}</p>
-                    <p className="text-[10px] text-muted-foreground">{t("completed", lang)}</p>
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground">{t("completed", lang)}</p>
                   </div>
                 </div>
                 {/* Best streak */}
-                <div className="flex items-center gap-2">
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/40">
-                    <Flame className="size-4 text-orange-600 dark:text-orange-400" />
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/40 sm:size-8">
+                    <Flame className="size-3.5 text-orange-600 dark:text-orange-400 sm:size-4" />
                   </div>
                   <div>
                     <p className="text-sm font-bold text-foreground">{bestStreak}</p>
-                    <p className="text-[10px] text-muted-foreground">{t("daysStreak", lang)}</p>
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground">{t("daysStreak", lang)}</p>
                   </div>
                 </div>
               </div>
