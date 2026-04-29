@@ -393,6 +393,7 @@ const translations: Record<Language, Record<string, string>> = {
     session: "Session",
     workMode: "Work Mode",
     breakMode: "Break Mode",
+    startPomodoro: "Start Pomodoro",
 
     // Notes Enhancements
     searchNotes: "Search notes...",
@@ -906,6 +907,7 @@ const translations: Record<Language, Record<string, string>> = {
     session: "الجلسة",
     workMode: "وضع العمل",
     breakMode: "وضع الاستراحة",
+    startPomodoro: "بدء بومودورو",
 
     // Notes Enhancements
     searchNotes: "بحث في الملاحظات...",

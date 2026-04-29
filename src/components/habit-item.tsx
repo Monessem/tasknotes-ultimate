@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { t } from "@/lib/i18n"
 import { useAppStore, type Habit } from "@/store/app-store"
 import { Button } from "@/components/ui/button"
+import { calculateHabitStreak } from "@/lib/stats"
 
 interface HabitItemProps {
   habit: Habit
@@ -32,27 +33,7 @@ function getWeekDates(): string[] {
   return dates
 }
 
-function getStreak(habitId: string, habitLogs: { habitId: string; date: string; completed: boolean }[]): number {
-  const logs = habitLogs
-    .filter((l) => l.habitId === habitId && l.completed)
-    .map((l) => l.date)
-    .sort()
-    .reverse()
 
-  let streak = 0
-  const today = new Date()
-  for (let i = 0; i < 365; i++) {
-    const checkDate = new Date(today)
-    checkDate.setDate(today.getDate() - i)
-    const dateStr = checkDate.toISOString().split("T")[0]
-    if (logs.includes(dateStr)) {
-      streak++
-    } else if (i > 0) {
-      break
-    }
-  }
-  return streak
-}
 
 export function HabitItem({ habit }: HabitItemProps) {
   const { habitLogs, settings, fetchHabitLogs, setActiveModal, setEditingItem } = useAppStore()
@@ -64,7 +45,7 @@ export function HabitItem({ habit }: HabitItemProps) {
   const todayStr = useMemo(() => new Date().toISOString().split("T")[0], [])
   const dayLabels = lang === "ar" ? DAY_LABELS_AR : DAY_LABELS_EN
 
-  const streak = useMemo(() => getStreak(habit.id, habitLogs), [habit.id, habitLogs])
+  const streak = useMemo(() => calculateHabitStreak(habit, habitLogs), [habit, habitLogs])
 
   const isDayCompleted = (date: string) =>
     habitLogs.some((l) => l.habitId === habit.id && l.date === date && l.completed)

@@ -20,8 +20,8 @@ import { logHistory } from "@/lib/history-log"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
 import { AnimatedEmptyState } from "@/components/animated-empty-state"
+import { calculateHabitStreak } from "@/lib/stats"
 
 export function TodayView() {
   const { todos, habits, habitLogs, setEditingItem, setActiveModal, fetchTodos, fetchHabitLogs } = useAppStore()
@@ -98,8 +98,8 @@ export function TodayView() {
           }
           await fetchTodos()
         }
-      } catch {
-        // Silently fail
+      } catch (err) {
+        console.error("Failed to toggle todo completion:", err)
       }
     },
     [fetchTodos]
@@ -118,8 +118,8 @@ export function TodayView() {
           await logHistory("delete", "task", todoId, todoTitle)
           await fetchTodos()
         }
-      } catch {
-        // Silently fail
+      } catch (err) {
+        console.error("Failed to delete todo:", err)
       }
     },
     [fetchTodos]
@@ -138,8 +138,8 @@ export function TodayView() {
           await logHistory("complete", "habit", habitId, habitName)
         }
         await fetchHabitLogs()
-      } catch {
-        // Silently fail
+      } catch (err) {
+        console.error("Failed to toggle habit log:", err)
       }
     },
     [fetchHabitLogs, todayStr]
@@ -162,29 +162,7 @@ export function TodayView() {
     low: "bg-emerald-500",
   }
 
-  // Compute habit streak
-  const getHabitStreak = (habitId: string) => {
-    const logs = habitLogs
-      .filter((l) => l.habitId === habitId && l.completed)
-      .map((l) => l.date)
-      .sort()
-      .reverse()
 
-    if (logs.length === 0) return 0
-
-    let streak = 0
-    let checkDate = new Date(todayStr)
-    for (let i = 0; i < 365; i++) {
-      const dateStr = checkDate.toISOString().split("T")[0]
-      if (logs.includes(dateStr)) {
-        streak++
-        checkDate.setDate(checkDate.getDate() - 1)
-      } else {
-        break
-      }
-    }
-    return streak
-  }
 
   return (
     <div className="space-y-5">
@@ -441,13 +419,13 @@ export function TodayView() {
               const completed = habitLogs.some(
                 (l) => l.habitId === habit.id && l.date === todayStr && l.completed
               )
-              const streak = getHabitStreak(habit.id)
+              const streak = calculateHabitStreak(habit, habitLogs)
 
               return (
                 <Card
                   key={habit.id}
                   className={cn(
-                    "group cursor-pointer rounded-2xl bg-card/80 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg overflow-hidden",
+                    "group cursor-pointer rounded-2xl bg-card/80 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/5 overflow-hidden",
                     completed
                       ? "border border-emerald-200/60 shadow-[0_0_12px_rgba(16,185,129,0.15)] dark:border-emerald-800/40 dark:shadow-[0_0_12px_rgba(16,185,129,0.08)]"
                       : "border-2 border-dashed border-muted-foreground/20 hover:border-emerald-300/50"
@@ -469,7 +447,7 @@ export function TodayView() {
                         toggleHabitLog(habit.id, habit.name)
                       }}
                       className={cn(
-                        "flex size-9 shrink-0 items-center justify-center rounded-lg transition-all text-base",
+                        "flex size-9 shrink-0 items-center justify-center rounded-xl transition-all text-base",
                         completed
                           ? "bg-emerald-500 text-white shadow-sm"
                           : "border-2 border-dashed border-muted-foreground/30 text-muted-foreground/50 hover:border-emerald-500/50"

@@ -5,50 +5,45 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useAppStore } from "@/store/app-store"
 import { Plus, ListTodo, Repeat, StickyNote, FolderOpen, Timer } from "lucide-react"
 import { audioManager } from "@/lib/audio"
+import { t } from "@/lib/i18n"
 
 const FAB_ITEMS = [
   {
     id: "addTodo",
     icon: ListTodo,
-    label: "New Task",
-    emoji: "➕",
+    labelKey: "quickAddTask",
     action: "addTodo" as const,
   },
   {
     id: "addHabit",
     icon: Repeat,
-    label: "New Habit",
-    emoji: "🔁",
+    labelKey: "quickAddHabit",
     action: "addHabit" as const,
   },
   {
     id: "addNote",
     icon: StickyNote,
-    label: "New Note",
-    emoji: "📝",
+    labelKey: "quickAddNote",
     action: "addNote" as const,
   },
   {
     id: "addFolder",
     icon: FolderOpen,
-    label: "New Folder",
-    emoji: "📁",
+    labelKey: "quickAddFolder",
     action: "addFolder" as const,
   },
   {
     id: "focus",
     icon: Timer,
-    label: "Start Pomodoro",
-    emoji: "⏱",
+    labelKey: "startPomodoro",
     action: "focus" as const,
   },
 ]
 
 export function SmartFAB() {
-  const { currentView, setActiveModal, setCurrentView } = useAppStore()
+  const { currentView, setActiveModal, setCurrentView, settings } = useAppStore()
+  const lang = settings.language
   const [isOpen, setIsOpen] = useState(false)
-
-  const isDashboard = currentView === "dashboard"
 
   const toggleFAB = useCallback(() => {
     setIsOpen((prev) => !prev)
@@ -71,8 +66,6 @@ export function SmartFAB() {
   const closeFAB = useCallback(() => {
     setIsOpen(false)
   }, [])
-
-  if (!isDashboard) return null
 
   return (
     <>
@@ -110,7 +103,7 @@ export function SmartFAB() {
                 className="group flex items-center gap-3 rounded-full bg-card/95 px-4 py-2.5 shadow-lg shadow-emerald-500/10 backdrop-blur-xl border border-border/50 transition-all duration-200 hover:shadow-xl hover:shadow-emerald-500/15 hover:-translate-x-1"
               >
                 <span className="text-sm font-medium text-foreground whitespace-nowrap">
-                  {item.label}
+                  {t(item.labelKey, lang)}
                 </span>
                 <div className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25 transition-transform duration-200 group-hover:scale-110">
                   <item.icon className="size-4" />

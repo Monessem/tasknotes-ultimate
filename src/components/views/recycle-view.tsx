@@ -92,8 +92,8 @@ export function RecycleView() {
           toast.success(t("itemRestored", lang))
           await Promise.all([fetchTodos(), fetchNotes()])
         }
-      } catch {
-        // Silently fail
+      } catch (err) {
+        console.error("Failed to restore item:", err)
       } finally {
         setRestoring(null)
       }
@@ -115,8 +115,8 @@ export function RecycleView() {
           toast.success(t("itemPermanentlyDeleted", lang))
           await Promise.all([fetchTodos(), fetchNotes()])
         }
-      } catch {
-        // Silently fail
+      } catch (err) {
+        console.error("Failed to permanently delete item:", err)
       } finally {
         setDeleting(null)
       }
@@ -136,8 +136,8 @@ export function RecycleView() {
       audioManager.play("delete")
       toast.success(t("binEmptied", lang))
       await Promise.all([fetchTodos(), fetchNotes()])
-    } catch {
-      // Silently fail
+    } catch (err) {
+      console.error("Failed to empty recycle bin:", err)
     }
   }, [deletedItems, fetchTodos, fetchNotes, lang])
 

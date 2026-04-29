@@ -75,8 +75,8 @@ export function ImportantView() {
           }
           await fetchTodos()
         }
-      } catch {
-        // Silently fail
+      } catch (err) {
+        console.error("Failed to toggle todo completion:", err)
       }
     },
     [fetchTodos]
@@ -95,8 +95,8 @@ export function ImportantView() {
           await logHistory("delete", "task", todoId, todoTitle)
           await fetchTodos()
         }
-      } catch {
-        // Silently fail
+      } catch (err) {
+        console.error("Failed to delete todo:", err)
       }
     },
     [fetchTodos]
@@ -115,8 +115,8 @@ export function ImportantView() {
           await logHistory("delete", "note", noteId, noteTitle)
           await fetchNotes()
         }
-      } catch {
-        // Silently fail
+      } catch (err) {
+        console.error("Failed to delete note:", err)
       }
     },
     [fetchNotes]

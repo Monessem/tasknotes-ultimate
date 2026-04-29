@@ -187,7 +187,7 @@ export function PomodoroTimer() {
       {/* Animated gradient border when running */}
       {isRunning && (
         <div className={cn(
-          "absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r transition-all duration-500",
+          "absolute inset-x-0 top-0 h-0.5 animate-pulse bg-gradient-to-r transition-all duration-500",
           gradientColors[mode]
         )} />
       )}
@@ -199,7 +199,7 @@ export function PomodoroTimer() {
             {t("pomodoroTimer", lang)}
           </h3>
           <Badge className={cn(
-            "border-0 px-2 py-0.5 text-[10px] font-semibold",
+            "border-0 rounded-full px-2 py-0.5 text-[10px] font-semibold",
             mode === "work" && "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400",
             mode === "shortBreak" && "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-400",
             mode === "longBreak" && "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
@@ -211,7 +211,7 @@ export function PomodoroTimer() {
         {/* Session counter */}
         <div className="flex items-center gap-1.5">
           <span className="text-xs text-muted-foreground">{t("session", lang)}</span>
-          <Badge variant="outline" className="h-5 min-w-[24px] justify-center border-emerald-200 bg-emerald-50/50 px-1.5 text-[10px] font-bold text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
+          <Badge variant="outline" className="h-5 min-w-[24px] justify-center rounded-full border-emerald-200 bg-emerald-50/50 px-1.5 text-[10px] font-bold text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
             {completedWorkSessions + 1}
           </Badge>
           <span className="text-[10px] text-muted-foreground">/4</span>
@@ -287,7 +287,8 @@ export function PomodoroTimer() {
             "absolute inset-[10px] flex flex-col items-center justify-center rounded-full shadow-inner transition-all duration-300",
             mode === "work" && "bg-card",
             mode === "shortBreak" && "bg-cyan-50/50 dark:bg-cyan-950/20",
-            mode === "longBreak" && "bg-amber-50/50 dark:bg-amber-950/20"
+            mode === "longBreak" && "bg-amber-50/50 dark:bg-amber-950/20",
+            isRunning && mode === "work" && "animate-pulse"
           )}>
             <ModeIcon className={cn(
               "mb-1 size-4",
@@ -366,7 +367,9 @@ export function PomodoroTimer() {
         <div className="mt-5 grid w-full grid-cols-3 gap-3 border-t border-border/30 pt-4">
           <div className="text-center">
             <div className="flex items-center justify-center gap-1">
-              <Timer className="size-3 text-emerald-500" />
+              <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
+                <Timer className="size-3 text-emerald-500" />
+              </div>
               <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
                 {todaySessions}
               </span>
@@ -377,7 +380,9 @@ export function PomodoroTimer() {
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-1">
-              <Zap className="size-3 text-teal-500" />
+              <div className="flex size-7 items-center justify-center rounded-lg bg-teal-100 dark:bg-teal-900/40">
+                <Zap className="size-3 text-teal-500" />
+              </div>
               <span className="text-lg font-bold text-teal-600 dark:text-teal-400">
                 {focusMinutes}
               </span>
@@ -388,7 +393,9 @@ export function PomodoroTimer() {
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-1">
-              <Flame className="size-3 text-amber-500" />
+              <div className="flex size-7 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/40">
+                <Flame className="size-3 text-amber-500" />
+              </div>
               <span className="text-lg font-bold text-amber-600 dark:text-amber-400">
                 {streakDays}
               </span>

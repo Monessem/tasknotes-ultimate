@@ -123,13 +123,13 @@ export function NotesView() {
             {filteredNotes.length} {t("notes", lang).toLowerCase()}
           </span>
           {/* View mode toggle */}
-          <div className="flex items-center rounded-lg border border-border/50 bg-muted/30 p-0.5">
+          <div className="flex items-center rounded-lg border border-emerald-200 bg-emerald-50/50 p-0.5 dark:border-emerald-800 dark:bg-emerald-950/30">
             <button
               onClick={() => setViewMode("grid")}
               className={cn(
                 "flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors",
                 viewMode === "grid"
-                  ? "bg-amber-500 text-white shadow-sm"
+                  ? "bg-emerald-500 text-white shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -141,7 +141,7 @@ export function NotesView() {
               className={cn(
                 "flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors",
                 viewMode === "list"
-                  ? "bg-amber-500 text-white shadow-sm"
+                  ? "bg-emerald-500 text-white shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -154,7 +154,7 @@ export function NotesView() {
             value={sortBy}
             onValueChange={(val) => setSortBy(val as SortBy)}
           >
-            <SelectTrigger size="sm" className="h-8 w-auto gap-1.5 rounded-lg border-amber-200 bg-amber-50/50 text-xs dark:border-amber-800 dark:bg-amber-950/30">
+            <SelectTrigger size="sm" className="h-8 w-auto gap-1.5 rounded-lg border-emerald-200 bg-emerald-50/50 text-xs dark:border-emerald-800 dark:bg-emerald-950/30">
               <ArrowUpDown className="size-3" />
               <SelectValue />
             </SelectTrigger>
@@ -169,7 +169,7 @@ export function NotesView() {
         <Button
           size="sm"
           onClick={() => setActiveModal("addNote")}
-          className="gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/25 hover:from-amber-600 hover:to-orange-600"
+          className="gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25 hover:from-emerald-600 hover:to-teal-700"
         >
           <Plus className="size-3.5" />
           {t("newNote", lang)}
@@ -184,7 +184,7 @@ export function NotesView() {
           placeholder={t("searchNotes", lang)}
           value={localSearch}
           onChange={(e) => setLocalSearch(e.target.value)}
-          className="h-9 w-full rounded-xl border border-border/50 bg-muted/30 pl-9 pr-3 text-sm shadow-none transition-colors placeholder:text-muted-foreground/50 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+          className="h-9 w-full rounded-xl border border-border/50 bg-muted/30 pl-9 pr-3 text-sm shadow-none transition-colors placeholder:text-muted-foreground/50 focus:border-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
         />
         {localSearch && (
           <button
@@ -199,11 +199,11 @@ export function NotesView() {
       {/* Summary Header Card */}
       {activeNotes.length > 0 && (
         <div className={cn(
-          "rounded-2xl border border-border/30 p-5 backdrop-blur-sm",
-          "bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20"
+          "rounded-2xl border border-border/50 p-5 backdrop-blur-sm",
+          "bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20"
         )}>
           <div className="flex items-center gap-5">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg shadow-amber-500/20">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/20">
               <StickyNote className="size-6 text-white" />
             </div>
             <div className="flex-1">
@@ -213,7 +213,7 @@ export function NotesView() {
               <div className="flex items-center gap-4">
                 {/* Total notes */}
                 <div className="flex items-center gap-2">
-                  <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/40">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40">
                     <StickyNote className="size-3.5 text-amber-600 dark:text-amber-400" />
                   </div>
                   <div>
@@ -223,7 +223,7 @@ export function NotesView() {
                 </div>
                 {/* Pinned count */}
                 <div className="flex items-center gap-2">
-                  <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/40">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900/40 dark:to-cyan-900/40">
                     <Pin className="size-3.5 text-orange-600 dark:text-orange-400" />
                   </div>
                   <div>
@@ -245,7 +245,7 @@ export function NotesView() {
             <span className="text-xs font-semibold text-muted-foreground">
               {t("pinned", lang)}
             </span>
-            <Badge className="h-4 border-0 bg-amber-100 px-1.5 text-[9px] font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
+            <Badge className="rounded-full border-0 bg-emerald-100 px-1.5 text-[9px] font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
               {pinnedNotes.length}
             </Badge>
           </div>
@@ -436,10 +436,10 @@ function NoteCard({
   return (
     <Card
       className={cn(
-        "group cursor-pointer break-inside-avoid overflow-hidden rounded-xl border transition-all duration-200 animate-fade-in-up",
+        "group cursor-pointer break-inside-avoid overflow-hidden rounded-2xl border transition-all duration-200 animate-fade-in-up backdrop-blur-sm",
         isPinned
-          ? "border-amber-200/50 bg-card/90 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-500/10 dark:border-amber-700/30"
-          : "border-border/30 bg-card/80 hover:-translate-y-1 hover:shadow-lg",
+          ? "border-amber-200/50 bg-card/90 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-500/5 dark:border-amber-700/30"
+          : "border-border/50 bg-card/80 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/5",
         viewMode === "list" && "break-inside-auto"
       )}
       style={{
@@ -450,13 +450,13 @@ function NoteCard({
     >
       <CardContent className="relative p-0">
         {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 rounded-xl" style={getGradientStyle(noteColor)} />
+        <div className="absolute inset-0 rounded-2xl" style={getGradientStyle(noteColor)} />
 
         <div className="relative flex-1 p-4">
           {/* Pinned badge for pinned notes */}
           {isPinned && (
             <div className="absolute right-2 top-2">
-              <Badge className="border-0 bg-amber-100 px-1.5 py-0.5 text-[9px] font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
+              <Badge className="rounded-full border-0 bg-emerald-100 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
                 📌 {t("pinnedNotes", lang)}
               </Badge>
             </div>
@@ -501,9 +501,9 @@ function NoteCard({
                 </span>
               </div>
               {/* Thin progress bar */}
-              <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted/50">
                 <div
-                  className="h-full rounded-full transition-all duration-300"
+                  className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300"
                   style={{
                     width: `${checklistProgress}%`,
                     backgroundColor: noteColor,

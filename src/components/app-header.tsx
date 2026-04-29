@@ -101,7 +101,7 @@ export function AppHeader() {
   }, [mobileSearchOpen])
 
   return (
-    <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-border/50 bg-card/90 px-4 py-3 backdrop-blur-xl sm:gap-4 sm:px-6">
+    <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-border/50 bg-card/90 px-4 py-3 backdrop-blur-xl sm:gap-4 sm:px-6 overflow-x-hidden">
       {/* Mobile menu button */}
       <Button
         variant="ghost"
@@ -118,7 +118,7 @@ export function AppHeader() {
         "flex items-center gap-2.5 transition-all",
         mobileSearchOpen && "hidden sm:flex"
       )}>
-        <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 shadow-sm ring-1 ring-emerald-500/10 transition-transform hover:scale-105 dark:from-emerald-900/40 dark:to-teal-900/40 dark:ring-emerald-400/10">
+        <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 shadow-sm transition-transform hover:scale-105 dark:from-emerald-900/40 dark:to-teal-900/40">
           <Icon className="size-4 text-emerald-600 dark:text-emerald-400" />
         </div>
         <div>

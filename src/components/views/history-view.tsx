@@ -23,6 +23,7 @@ import {
 import { useAppStore, type HistoryEntry } from "@/store/app-store"
 import { t } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
+import { getWeekStartDate } from "@/lib/stats"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -130,8 +131,8 @@ export function HistoryView() {
       if (res.ok) {
         await fetchHistory()
       }
-    } catch {
-      // Silently fail
+    } catch (err) {
+      console.error("Failed to clear history:", err)
     }
   }, [fetchHistory])
 
@@ -190,12 +191,7 @@ export function HistoryView() {
     const total = historyEntries.length
 
     // Most active day this week
-    const now = new Date()
-    const startOfWeek = new Date(now)
-    const day = startOfWeek.getDay()
-    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1)
-    startOfWeek.setDate(diff)
-    startOfWeek.setHours(0, 0, 0, 0)
+    const startOfWeek = getWeekStartDate()
 
     const thisWeekEntries = historyEntries.filter(
       (e) => new Date(e.createdAt) >= startOfWeek

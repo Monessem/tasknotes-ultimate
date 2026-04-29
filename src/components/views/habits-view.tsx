@@ -21,50 +21,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { AnimatedEmptyState } from "@/components/animated-empty-state"
+import { shouldShowHabitToday, isWeeklyHabitCompletedThisWeek, calculateHabitStreak } from "@/lib/stats"
 
-/**
- * Check if a habit should be shown today based on its frequency.
- * - "daily": always shown
- * - "weekly": always shown (user completes once per week)
- * - "weekdays": only shown Mon-Fri
- */
-function shouldShowToday(frequency: string): boolean {
-  if (frequency === "daily" || frequency === "weekly") return true
-  if (frequency === "weekdays") {
-    const day = new Date().getDay()
-    return day !== 0 && day !== 6 // Not Sunday or Saturday
-  }
-  return true
-}
-
-/**
- * Get the start of the current week (Monday) as a date string.
- */
-function getWeekStart(): string {
-  const d = new Date()
-  const day = d.getDay()
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1)
-  const monday = new Date(d)
-  monday.setDate(diff)
-  monday.setHours(0, 0, 0, 0)
-  return monday.toISOString().split("T")[0]
-}
-
-/**
- * Check if a weekly habit has been completed this week.
- */
-function isWeeklyHabitCompletedThisWeek(
-  habitId: string,
-  habitLogs: { habitId: string; date: string; completed: boolean }[]
-): boolean {
-  const weekStart = getWeekStart()
-  return habitLogs.some(
-    (log) =>
-      log.habitId === habitId &&
-      log.completed &&
-      log.date >= weekStart
-  )
-}
 
 export function HabitsView() {
   const { habits, habitLogs, setEditingItem, setActiveModal, fetchHabitLogs, fetchHabits } = useAppStore()
@@ -78,7 +36,7 @@ export function HabitsView() {
 
   // Filter habits based on frequency - only show relevant habits for today
   const activeHabits = useMemo(
-    () => habits.filter((h) => !h.deletedAt && shouldShowToday(h.frequency)),
+    () => habits.filter((h) => !h.deletedAt && shouldShowHabitToday(h.frequency)),
     [habits]
   )
 
@@ -97,7 +55,7 @@ export function HabitsView() {
 
   // Best streak across all habits
   const bestStreak = allActiveHabits.reduce((max, habit) => {
-    const streak = getStreak(habit)
+    const streak = calculateHabitStreak(habit, habitLogs)
     return streak > max ? streak : max
   }, 0)
 
@@ -141,8 +99,8 @@ export function HabitsView() {
           }
           await fetchHabitLogs()
         }
-      } catch {
-        // Silently fail
+      } catch (err) {
+        console.error("Failed to toggle habit log:", err)
       }
     }
   )
@@ -161,84 +119,13 @@ export function HabitsView() {
           toast.success(t("habitDeleted", lang))
           await fetchHabits()
         }
-      } catch {
-        // Silently fail
+      } catch (err) {
+        console.error("Failed to delete habit:", err)
       }
     }
   )
 
-  /**
-   * Calculate streak for a habit, respecting its frequency.
-   * - Daily/Weekday: count consecutive days with completions
-   * - Weekly: count consecutive weeks with at least one completion
-   */
-  function getStreak(habit: { id: string; frequency: string }) {
-    const logsForHabit = habitLogs.filter(
-      (l) => l.habitId === habit.id && l.completed
-    )
 
-    if (habit.frequency === "weekly") {
-      // Count consecutive weeks with completions
-      const completedWeeks = new Set<string>()
-      for (const log of logsForHabit) {
-        const d = new Date(log.date)
-        const day = d.getDay()
-        const diff = d.getDate() - day + (day === 0 ? -6 : 1)
-        const monday = new Date(d)
-        monday.setDate(diff)
-        completedWeeks.add(monday.toISOString().split("T")[0])
-      }
-
-      let streak = 0
-      const today = new Date()
-      const day = today.getDay()
-      const diff = today.getDate() - day + (day === 0 ? -6 : 1)
-      let checkMonday = new Date(today)
-      checkMonday.setDate(diff)
-
-      for (let i = 0; i < 52; i++) {
-        const weekKey = checkMonday.toISOString().split("T")[0]
-        if (completedWeeks.has(weekKey)) {
-          streak++
-          checkMonday.setDate(checkMonday.getDate() - 7)
-        } else if (i > 0) {
-          break
-        } else {
-          // Check if current week just started, allow grace
-          checkMonday.setDate(checkMonday.getDate() - 7)
-          const prevWeekKey = checkMonday.toISOString().split("T")[0]
-          if (completedWeeks.has(prevWeekKey)) {
-            streak++ // Count the previous week at least
-          }
-          break
-        }
-      }
-      return streak
-    }
-
-    // Daily / Weekday streak logic
-    const completedDates = new Set(logsForHabit.map((l) => l.date))
-    let streak = 0
-    const today = new Date()
-    for (let i = 0; i < 365; i++) {
-      const date = new Date(today)
-      date.setDate(date.getDate() - i)
-      const dateStr = date.toISOString().split("T")[0]
-
-      // For weekday habits, skip weekends
-      if (habit.frequency === "weekdays") {
-        const dayOfWeek = date.getDay()
-        if (dayOfWeek === 0 || dayOfWeek === 6) continue
-      }
-
-      if (completedDates.has(dateStr)) {
-        streak++
-      } else if (i > 0) {
-        break
-      }
-    }
-    return streak
-  }
 
   // Get completion rate for last 7 days
   function get7DayRate(habitId: string) {
@@ -298,7 +185,7 @@ export function HabitsView() {
       {/* Summary Header Card with SVG Progress Ring */}
       {activeHabits.length > 0 && (
         <div className={cn(
-          "rounded-2xl border border-border/30 p-5 backdrop-blur-sm",
+          "rounded-2xl border border-border/50 p-5 backdrop-blur-sm",
           "bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20"
         )}>
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-5">
@@ -354,7 +241,7 @@ export function HabitsView() {
               <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {/* Total active */}
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                  <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/40 sm:size-8">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40">
                     <Target className="size-3.5 text-emerald-600 dark:text-emerald-400 sm:size-4" />
                   </div>
                   <div>
@@ -364,7 +251,7 @@ export function HabitsView() {
                 </div>
                 {/* Completed today */}
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                  <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-teal-100 dark:bg-teal-900/40 sm:size-8">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900/40 dark:to-cyan-900/40">
                     <CheckCircle2 className="size-3.5 text-teal-600 dark:text-teal-400 sm:size-4" />
                   </div>
                   <div>
@@ -374,7 +261,7 @@ export function HabitsView() {
                 </div>
                 {/* Best streak */}
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                  <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/40 sm:size-8">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40">
                     <Flame className="size-3.5 text-orange-600 dark:text-orange-400 sm:size-4" />
                   </div>
                   <div>
@@ -399,7 +286,7 @@ export function HabitsView() {
         <div className="space-y-3">
           {activeHabits.map((habit) => {
             const completed = isHabitCompletedToday(habit.id, habit.frequency)
-            const streak = getStreak(habit)
+            const streak = calculateHabitStreak(habit, habitLogs)
             const rate7d = get7DayRate(habit.id)
             const habitColor = habit.color || "#10b981"
             const isWeekly = habit.frequency === "weekly"
@@ -408,10 +295,10 @@ export function HabitsView() {
               <Card
                 key={habit.id}
                 className={cn(
-                  "group relative cursor-pointer overflow-hidden rounded-2xl border bg-card/80 backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl",
+                  "group relative cursor-pointer overflow-hidden rounded-2xl border bg-card/80 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/5",
                   completed
                     ? "border-emerald-200/50 shadow-[0_0_20px_rgba(16,185,129,0.12)] dark:border-emerald-800/30"
-                    : "border-border/30"
+                    : "border-border/50"
                 )}
                 onClick={() => {
                   setEditingItem(habit)

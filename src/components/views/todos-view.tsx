@@ -136,7 +136,7 @@ function SortableTodoItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group relative cursor-pointer rounded-xl border border-border/30 bg-card/80 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg",
+        "group relative cursor-pointer rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/5",
         priorityBorderColors[todo.priority],
         isDragging && "z-50 shadow-xl opacity-80 ring-2 ring-emerald-400/30"
       )}
@@ -202,7 +202,7 @@ function SortableTodoItem({
             <div className="mt-1.5 flex items-center gap-2">
               <Progress
                 value={subtaskProgress.percent}
-                className="h-1.5 flex-1 bg-emerald-100 dark:bg-emerald-900/30 [&>[data-slot=progress-indicator]]:bg-emerald-500"
+                className="h-1.5 flex-1 rounded-full bg-muted/50 [&>[data-slot=progress-indicator]]:bg-gradient-to-r [&>[data-slot=progress-indicator]]:from-emerald-500 [&>[data-slot=progress-indicator]]:to-teal-500"
               />
               <span className="shrink-0 text-[10px] tabular-nums text-muted-foreground">
                 {subtaskProgress.completed}/{subtaskProgress.total}
@@ -546,7 +546,7 @@ export function TodosView() {
       <Card
         key={todo.id}
         className={cn(
-          "group relative cursor-pointer rounded-xl border border-border/30 bg-card/80 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg",
+          "group relative cursor-pointer rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/5",
           priorityBorderColors[todo.priority]
         )}
         onClick={() => {
@@ -609,7 +609,7 @@ export function TodosView() {
               <div className="mt-1.5 flex items-center gap-2">
                 <Progress
                   value={subtaskProgress.percent}
-                  className="h-1.5 flex-1 bg-emerald-100 dark:bg-emerald-900/30 [&>[data-slot=progress-indicator]]:bg-emerald-500"
+                  className="h-1.5 flex-1 rounded-full bg-muted/50 [&>[data-slot=progress-indicator]]:bg-gradient-to-r [&>[data-slot=progress-indicator]]:from-emerald-500 [&>[data-slot=progress-indicator]]:to-teal-500"
                 />
                 <span className="shrink-0 text-[10px] tabular-nums text-muted-foreground">
                   {subtaskProgress.completed}/{subtaskProgress.total}
@@ -687,7 +687,7 @@ export function TodosView() {
       <Card
         key={todo.id}
         className={cn(
-          "group relative cursor-pointer overflow-hidden rounded-xl border border-border/30 bg-card/80 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+          "group relative cursor-pointer overflow-hidden rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/5"
         )}
         onClick={() => {
           setEditingItem(todo)
@@ -784,7 +784,7 @@ export function TodosView() {
             <div className="mt-2.5 flex items-center gap-2">
               <Progress
                 value={subtaskProgress.percent}
-                className="h-1.5 flex-1 bg-emerald-100 dark:bg-emerald-900/30 [&>[data-slot=progress-indicator]]:bg-emerald-500"
+                className="h-1.5 flex-1 rounded-full bg-muted/50 [&>[data-slot=progress-indicator]]:bg-gradient-to-r [&>[data-slot=progress-indicator]]:from-emerald-500 [&>[data-slot=progress-indicator]]:to-teal-500"
               />
               <span className="shrink-0 text-[10px] tabular-nums text-muted-foreground">
                 {subtaskProgress.completed}/{subtaskProgress.total}
@@ -813,7 +813,7 @@ export function TodosView() {
               <Badge
                 key={tag}
                 variant="secondary"
-                className="h-4 px-1.5 text-[9px] font-normal bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                className="rounded-full h-4 px-1.5 text-[9px] font-normal bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
               >
                 {tag}
               </Badge>
@@ -992,7 +992,7 @@ export function TodosView() {
             {completedTodos.map((todo) => (
               <Card
                 key={todo.id}
-                className="group relative cursor-pointer rounded-xl border border-border/20 bg-muted/30 transition-all hover:bg-muted/50"
+                className="group relative cursor-pointer rounded-2xl border border-border/30 bg-muted/20 backdrop-blur-sm transition-all hover:bg-muted/40"
                 onClick={() => {
                   setEditingItem(todo)
                   setActiveModal("editTodo")

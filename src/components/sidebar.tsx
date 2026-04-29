@@ -35,6 +35,7 @@ import { useAppStore, type ViewType } from "@/store/app-store"
 import { t } from "@/lib/i18n"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import { calculateHabitStreak } from "@/lib/stats"
 import {
   Sheet,
   SheetContent,
@@ -123,8 +124,8 @@ function WeatherWidget() {
           const data = await res.json()
           setWeather(data)
         }
-      } catch {
-        // Silently fail
+      } catch (err) {
+        console.error("Failed to fetch weather data:", err)
       } finally {
         setLoading(false)
       }
@@ -150,7 +151,7 @@ function WeatherWidget() {
           {(() => {
             const IconComp = weatherIconMap[weather.icon] || Sun
             return (
-              <div className="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400/20 to-orange-400/20 shadow-sm dark:from-amber-400/15 dark:to-orange-400/15">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400/20 to-orange-400/20 shadow-sm dark:from-amber-400/15 dark:to-orange-400/15">
                 <IconComp className="size-5 text-amber-600 dark:text-amber-400" />
               </div>
             )
@@ -172,27 +173,14 @@ function WeatherWidget() {
   )
 }
 
-function calculateStreak(habitLogs: { date: string; completed: boolean }[]): number {
-  if (habitLogs.length === 0) return 0
-
-  const completedDates = new Set(
-    habitLogs.filter((l) => l.completed).map((l) => l.date)
-  )
-
-  let streak = 0
-  const today = new Date()
-  for (let i = 0; i < 365; i++) {
-    const date = new Date(today)
-    date.setDate(date.getDate() - i)
-    const dateStr = date.toISOString().split("T")[0]
-    if (completedDates.has(dateStr)) {
-      streak++
-    } else if (i > 0) {
-      break
-    }
+function calculateSidebarStreak(habits: { id: string; frequency: string }[], habitLogs: { habitId: string; date: string; completed: boolean }[]): number {
+  if (habits.length === 0) return 0
+  let bestStreak = 0
+  for (const habit of habits) {
+    const streak = calculateHabitStreak(habit, habitLogs)
+    if (streak > bestStreak) bestStreak = streak
   }
-
-  return streak
+  return bestStreak
 }
 
 function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; collapsed?: boolean }) {
@@ -219,8 +207,9 @@ function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; co
   const completedTodos = todos.filter((t) => t.completed && !t.deletedAt).length
   const todaySessions = pomodoroSessions.filter((s) => s.date === todayStr && s.type === "work").length
 
-  // Calculate streak
-  const streakDays = calculateStreak(habitLogs)
+  // Calculate streak (best streak across all active habits)
+  const activeHabitsForStreak = habits.filter((h) => !h.deletedAt)
+  const streakDays = calculateSidebarStreak(activeHabitsForStreak, habitLogs)
 
   function handleNav(view: ViewType) {
     setCurrentView(view)
@@ -293,7 +282,7 @@ function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; co
 
                       <div
                         className={cn(
-                          "flex size-7 items-center justify-center rounded-lg transition-all duration-200",
+                          "flex size-7 items-center justify-center rounded-xl transition-all duration-200",
                           isActive
                             ? "bg-white/20 shadow-sm"
                             : "group-hover:bg-emerald-500/10 group-hover:scale-105"
@@ -332,7 +321,7 @@ function SidebarContent({ onNavigate, collapsed }: { onNavigate?: () => void; co
 
       {/* Quick Stats Footer - hidden when collapsed */}
       {!collapsed && (
-        <div className="border-t border-border/50 bg-muted/20 p-4">
+        <div className="border-t border-border/50 bg-muted/20 p-4 overflow-x-hidden">
           <div className="flex items-center justify-around text-center">
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center justify-center gap-1">

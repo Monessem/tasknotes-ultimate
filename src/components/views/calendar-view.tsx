@@ -200,8 +200,8 @@ export function CalendarView() {
       if (res.ok) {
         await fetchTodos()
       }
-    } catch {
-      // Silently fail
+    } catch (err) {
+      console.error("Failed to toggle task completion:", err)
     }
   }
 

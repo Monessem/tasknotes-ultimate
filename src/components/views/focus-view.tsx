@@ -165,8 +165,8 @@ export function FocusView() {
           setRawIndex(0)
         }
       }
-    } catch {
-      // Silently fail
+    } catch (err) {
+      console.error("Failed to complete task in focus view:", err)
     }
   }
 
@@ -267,7 +267,7 @@ export function FocusView() {
 
           {/* Session stats summary */}
           {(sessionCompleted > 0 || sessionTimeSeconds > 0) && (
-            <Card className="w-full max-w-sm border-border/50 bg-card/80 backdrop-blur-sm">
+            <Card className="w-full max-w-sm rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm">
               <CardContent className="flex items-center justify-around p-6">
                 <div className="flex flex-col items-center gap-1">
                   <CheckCircle2 className="size-5 text-emerald-500" />
@@ -314,7 +314,7 @@ export function FocusView() {
           transition={{ duration: 0.3 }}
         >
           <Card
-            className={`overflow-hidden border-2 ${getPriorityBorderColor(currentTask?.priority || "medium")} bg-card/80 backdrop-blur-sm`}
+            className={`overflow-hidden rounded-2xl border-2 border-border/50 ${getPriorityBorderColor(currentTask?.priority || "medium")} bg-card/80 backdrop-blur-sm transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/5`}
           >
             <CardContent className="p-6 sm:p-8">
               {/* Navigation + position indicator */}
@@ -470,7 +470,7 @@ export function FocusView() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.1 }}
               >
-                <Card className="border-border/30 bg-card/50 backdrop-blur-sm transition-colors hover:bg-card/70">
+                <Card className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/5">
                   <CardContent className="flex items-center gap-3 p-4">
                     <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-[10px] font-bold text-muted-foreground">
                       {currentIndex + idx + 2}
@@ -498,7 +498,7 @@ export function FocusView() {
       )}
 
       {/* Mini Timer Section */}
-      <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+      <Card className="rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm">
         <CardContent className="p-5">
           <div className="flex items-center gap-5">
             {/* Progress Ring */}
@@ -600,7 +600,7 @@ export function FocusView() {
       <div className="sticky bottom-0 z-10 -mx-2 border-t border-border/50 bg-background/80 px-2 py-3 backdrop-blur-xl sm:-mx-4 sm:px-4">
         <div className="flex items-center justify-around">
           <div className="flex items-center gap-2">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-500/10">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-500/10">
               <CheckCircle2 className="size-4 text-emerald-500" />
             </div>
             <div>
@@ -614,7 +614,7 @@ export function FocusView() {
           <div className="h-8 w-px bg-border/50" />
 
           <div className="flex items-center gap-2">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-teal-500/10">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-teal-500/10">
               <Clock className="size-4 text-teal-500" />
             </div>
             <div>
@@ -630,7 +630,7 @@ export function FocusView() {
           <div className="h-8 w-px bg-border/50" />
 
           <div className="flex items-center gap-2">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-amber-500/10">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-amber-500/10">
               <Flame className="size-4 text-amber-500" />
             </div>
             <div>
