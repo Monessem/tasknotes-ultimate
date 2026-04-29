@@ -463,3 +463,34 @@ Stage Summary:
 - Total: ~145 lines of duplicated code removed, 14 silently-fail catch blocks fixed
 - 1 date mutation bug fixed (dashboard-view startOfWeek)
 - No visual behavior changes
+
+---
+Task ID: 1
+Agent: full-stack-developer
+Task: Prepare project for Vercel deployment (PostgreSQL migration, config updates)
+
+Work Log:
+- Read worklog.md and all key config files (schema.prisma, next.config.ts, package.json, .env, .gitignore) to assess current state
+- Updated prisma/schema.prisma: changed datasource provider from `sqlite` to `postgresql` (kept all models unchanged)
+- Created .env.example with documentation for both SQLite (local dev) and PostgreSQL (Vercel/production) connection strings
+- Updated .env to `DATABASE_URL="file:./dev.db"` for local development reference
+- Updated next.config.ts: removed `output: "standalone"` (Vercel handles this automatically)
+- Added `postinstall` script to package.json: `"postinstall": "prisma generate"` (auto-generates Prisma client on Vercel)
+- Updated `build` script in package.json: `"build": "prisma migrate deploy && next build"` (applies migrations before build)
+- Ran `prisma generate` successfully with postgresql provider (generates client regardless of DATABASE_URL)
+- Ran `bun run db:push` — failed as expected (no local PostgreSQL database available; will work on Vercel with proper DATABASE_URL)
+- Used `prisma migrate diff` to generate PostgreSQL migration SQL from schema
+- Created migration file at prisma/migrations/20240101000000_init_postgresql/migration.sql with full CREATE TABLE statements
+- Created prisma/migrations/migration_lock.toml with provider = "postgresql"
+- Created .vercelignore with: node_modules, .next, .git, db/*.db, agent-ctx, download, examples, screenshot-*, TRADEOFFS.md
+- Updated .gitignore with: db/*.db, agent-ctx/, download/ entries
+- Ran `bun run lint` — zero errors
+
+Stage Summary:
+- 6 files modified: schema.prisma (sqlite→postgresql), next.config.ts (removed standalone), package.json (postinstall + build scripts), .env (SQLite URL), .gitignore (db/agent-ctx/download entries)
+- 4 files created: .env.example, .vercelignore, prisma/migrations/20240101000000_init_postgresql/migration.sql, prisma/migrations/migration_lock.toml
+- All models preserved exactly as-is in schema
+- prisma generate works (key for Vercel postinstall)
+- prisma migrate deploy will work on Vercel with proper PostgreSQL DATABASE_URL
+- ESLint: zero errors
+- NOTE: Local dev currently uses old Prisma client in memory; server restart will require PostgreSQL connection. For local SQLite development, provider would need to be temporarily switched back, or a cloud PostgreSQL instance (e.g., Neon) should be used.

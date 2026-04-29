@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+db/*.db
+agent-ctx
+download
+examples
+screenshot-*
+TRADEOFFS.md

@@ -52,3 +52,10 @@ prompt
 server.log
 # Skills directory
 /skills/
+
+# database
+db/*.db
+
+# agent context (not needed in production)
+agent-ctx/
+download/
